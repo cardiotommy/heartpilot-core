@@ -345,6 +345,20 @@ test('All rules have required fields: id, domain, priority, logic, active, actio
     `Rules missing required fields: ${missing.map(r => r.id || '(no id)').join(', ')}`);
 });
 
+test('No rules contain deprecated rationale or detail fields', () => {
+  const deprecated = ALL_RULES.filter(r => 'rationale' in r || 'detail' in r);
+  assert.strictEqual(deprecated.length, 0,
+    `Rules with deprecated fields: ${deprecated.map(r => r.id).join(', ')}`);
+});
+
+test('Caution field is string or null on all rules', () => {
+  const invalid = ALL_RULES.filter(r =>
+    'caution' in r && r.caution !== null && typeof r.caution !== 'string'
+  );
+  assert.strictEqual(invalid.length, 0,
+    `Rules with invalid caution type: ${invalid.map(r => r.id).join(', ')}`);
+});
+
 test('All rule ids are unique', () => {
   const ids = ALL_RULES.map(r => r.id);
   const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);

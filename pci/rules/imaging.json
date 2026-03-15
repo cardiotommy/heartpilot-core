@@ -1,10 +1,9 @@
 {
   "domain": "imaging",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "last_reviewed": "2025-01",
   "sources": ["ESC 2024", "EBC 2022", "SCAI 2020", "RENOVATE-COMPLEX-PCI", "OCTOBER"],
   "rules": [
-
     {
       "id": "img-complex-lesion",
       "domain": "imaging",
@@ -15,14 +14,11 @@
         { "field": "lesion_long", "op": "is_true" },
         { "field": "bifurcation.present", "op": "is_true" }
       ],
-      "action": "Intravascular imaging (IVUS or OCT) recommended for complex PCI.",
-      "rationale": "Class IA recommendation supported by RENOVATE-COMPLEX-PCI and OCTOBER — upgraded from prior IIa. Imaging-guided PCI reduces MACE in anatomically complex lesions.",
-      "detail": "Pre-stent imaging guides sizing and preparation. Post-stent imaging confirms expansion, apposition, and identifies edge dissection before completing.",
+      "action": "Intravascular imaging (IVUS or OCT) recommended. Pre-stent imaging guides sizing and preparation; post-stent imaging confirms expansion and identifies edge dissection.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
     },
-
     {
       "id": "img-lm-mandatory",
       "domain": "imaging",
@@ -31,14 +27,11 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LM" }
       ],
-      "action": "IVUS mandatory for LM PCI. MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm².",
-      "rationale": "IVUS-guided LM PCI reduces MACE. MSA targets are the minimum acceptable — do not complete without achieving them.",
-      "detail": "If MSA target is not met, post-dilate with an appropriately sized NC balloon before completing.",
+      "action": "IVUS mandatory. MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm². Post-dilate with NC balloon if any target unmet.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "img-lm-bif-targets",
       "domain": "imaging",
@@ -47,14 +40,11 @@
       "conditions": [
         { "field": "lm_bif", "op": "is_true" }
       ],
-      "action": "IVUS mandatory at multiple time points: pre-stenting for sizing, post-stenting for MSA confirmation.",
-      "rationale": "LM bifurcation has the highest risk of inadequate stent result — MSA optimisation is directly associated with outcomes.",
-      "detail": "MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm². Post-dilate if any target is unmet.",
+      "action": "IVUS mandatory pre- and post-stenting. MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm².",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "img-prox-lad",
       "domain": "imaging",
@@ -63,14 +53,11 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LAD" }
       ],
-      "action": "IVUS strongly recommended for proximal LAD PCI.",
-      "rationale": "Large territory at risk makes stent underexpansion and edge dissection particularly consequential. MSA optimisation reduces MACE.",
-      "detail": "OCT is an acceptable alternative where detailed plaque characterisation is needed.",
+      "action": "IVUS strongly recommended for proximal LAD. OCT acceptable where detailed plaque characterisation is needed.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
       "active": true
     },
-
     {
       "id": "img-ostial",
       "domain": "imaging",
@@ -79,14 +66,11 @@
       "conditions": [
         { "field": "morphology", "op": "eq", "value": "Ostial" }
       ],
-      "action": "IVUS recommended for ostial lesions — angiographic positioning at the ostium is unreliable.",
-      "rationale": "IVUS confirms accurate landing zone, prevents stent protrusion into the parent vessel, and guides post-dilatation with balloon flaring.",
-      "detail": null,
+      "action": "IVUS recommended — confirms accurate landing zone, prevents stent protrusion into parent vessel, guides post-dilatation with ostial balloon flaring.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "img-bif-post-stent",
       "domain": "imaging",
@@ -95,14 +79,11 @@
       "conditions": [
         { "field": "bifurcation.present", "op": "is_true" }
       ],
-      "action": "Post-stent intravascular imaging recommended to confirm SB ostial coverage, MV expansion, and absence of proximal edge dissection.",
-      "rationale": "Post-stent imaging changes management in a significant proportion of bifurcation cases.",
-      "detail": "IVUS preferred for LM bifurcations. OCT acceptable for non-LM bifurcations.",
+      "action": "Post-stent imaging recommended to confirm SB ostial coverage, MV expansion, and absence of proximal edge dissection. IVUS preferred for LM; OCT acceptable elsewhere.",
       "caution": null,
       "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "img-graft",
       "domain": "imaging",
@@ -111,13 +92,10 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Intravascular imaging most useful for confirming stent expansion in large grafts and identifying significant under-expansion.",
-      "rationale": "Large graft diameter and eccentric degenerated plaque can make angiographic sizing unreliable.",
-      "detail": "Routine imaging is not mandated for all SVG PCI but should be considered when stent sizing is uncertain. IVUS interpretation can be challenging in very degenerated grafts.",
+      "action": "Imaging most useful for confirming stent expansion in large grafts. Not mandated for all SVG PCI but consider when stent sizing is uncertain.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     }
-
   ]
 }

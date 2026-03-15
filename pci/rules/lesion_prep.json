@@ -1,10 +1,9 @@
 {
   "domain": "lesion_prep",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "last_reviewed": "2025-01",
   "sources": ["ESC 2024", "EAPCI 2023", "SCAI 2020", "DUAL-PREP registry"],
   "rules": [
-
     {
       "id": "prep-modcalc",
       "domain": "lesion_prep",
@@ -13,14 +12,11 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "moderate" }
       ],
-      "action": "Scoring balloon first-line for moderate calcium.",
-      "rationale": "Scoring balloon disrupts calcium before stenting to improve expansion.",
-      "detail": "Escalate to IVL if a residual waist persists after scoring balloon inflation.",
+      "action": "Scoring balloon first-line. Escalate to IVL if residual waist persists after scoring.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-modcalc-long",
       "domain": "lesion_prep",
@@ -30,14 +26,11 @@
         { "field": "calcification", "op": "eq", "value": "moderate" },
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Scoring or cutting balloon as first step; escalate to IVL before stenting if waist persists.",
-      "rationale": "Long moderately calcified lesions have higher risk of incomplete expansion across the stented segment.",
-      "detail": "Do not proceed to stenting with a persistent non-compliant balloon waist — escalate to IVL before definitive stenting.",
+      "action": "Scoring or cutting balloon first; escalate to IVL before stenting if waist persists — do not proceed with persistent non-compliance.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-sevcalc",
       "domain": "lesion_prep",
@@ -46,14 +39,11 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Plan calcium modification before the case. Confirm full balloon compliance before stenting.",
-      "rationale": "Severe calcium prevents adequate stent expansion and predicts stent underexpansion if not modified.",
-      "detail": "Short atherectomy bursts (<30s). Full balloon compliance (no residual waist) is required before stent deployment.",
+      "action": "Plan calcium modification before the case. Short atherectomy bursts (<30s). Confirm full balloon compliance before stenting.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-sevcalc-ivl-vs-ra",
       "domain": "lesion_prep",
@@ -62,14 +52,11 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Use intravascular imaging to assess calcium depth and distribution before selecting modification device.",
-      "rationale": "Calcium morphology determines efficacy of IVL vs RA — selecting without imaging risks inadequate preparation.",
-      "detail": "IVL preferred for deep/medial calcium, calcified nodules, large vessels (>3.5mm), aorto-ostial lesions where crossing is achievable. RA preferred for superficial calcium, diffuse long segments, balloon-uncrossable or undilatable lesions.",
+      "action": "Assess calcium depth and distribution with intravascular imaging before selecting modification device. IVL for deep/medial calcium and nodules; RA for superficial calcium and balloon-uncrossable lesions.",
       "caution": null,
       "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-sevcalc-dual-prep",
       "domain": "lesion_prep",
@@ -79,13 +66,10 @@
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
       "action": "RA followed by IVL (Dual-Prep) is a reasonable escalation when post-atherectomy imaging reveals persistent heavy calcification.",
-      "rationale": "DUAL-PREP registry demonstrated acceptable procedural success and complication rates with sequential RA+IVL. Previously considered contraindicated.",
-      "detail": "Indicated when single-device preparation is insufficient per intravascular imaging. Sequence: RA first → intravascular imaging → IVL if persistent heavy calcium.",
       "caution": null,
       "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-sevcalc-long",
       "domain": "lesion_prep",
@@ -95,14 +79,11 @@
         { "field": "calcification", "op": "eq", "value": "severe" },
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Plan calcium modification before the case. Short RA bursts (<30s) in long segments; consider staged debulking for diffuse disease.",
-      "rationale": "Long severely calcified lesions have compounding modification and deliverability challenges.",
-      "detail": "For RA in long segments: short bursts with low-speed technique and adequate flushing. Stage debulking if the segment is very diffuse — calcium modification at first sitting, stenting at second.",
+      "action": "Plan calcium modification before the case. Short RA bursts (<30s) with adequate flushing. Consider staged debulking if diffuse.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-sevcalc-ostial",
       "domain": "lesion_prep",
@@ -112,14 +93,11 @@
         { "field": "calcification", "op": "eq", "value": "severe" },
         { "field": "morphology", "op": "eq", "value": "Ostial" }
       ],
-      "action": "IVL preferred over RA for ostial severe calcium.",
-      "rationale": "RA at the ostium risks guide catheter trauma during burr movement.",
-      "detail": "Disengage the guide during IVL pulses to avoid transmitting energy to the aortic root.",
+      "action": "IVL preferred over RA at the ostium. Disengage guide during IVL pulses to avoid aortic root energy transmission.",
       "caution": "Do not inflate IVL balloon with guide deeply engaged at the ostium.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-ostial",
       "domain": "lesion_prep",
@@ -128,14 +106,11 @@
       "conditions": [
         { "field": "morphology", "op": "eq", "value": "Ostial" }
       ],
-      "action": "Precise stent positioning is critical — use a short marker-to-marker stent where possible.",
-      "rationale": "Even a few millimetres of stent protrusion into the parent vessel causes significant flow disturbance.",
-      "detail": "Disengage the guide 1–2mm before final deployment to avoid crushing the proximal stent edge. Post-dilate with a non-compliant balloon flared at the ostium.",
+      "action": "Use short marker-to-marker stent. Disengage guide 1–2mm before final deployment. Post-dilate with NC balloon flared at the ostium.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-diffuse",
       "domain": "lesion_prep",
@@ -144,14 +119,11 @@
       "conditions": [
         { "field": "morphology", "op": "eq", "value": "Diffuse" }
       ],
-      "action": "Plan stent overlap zones carefully before deploying. Deploy distal stent first, work proximally.",
-      "rationale": "Unplanned overlap zones create unpredictable stent edges and geographic miss risk.",
-      "detail": "Post-dilate each segment with a non-compliant balloon before deploying the next stent. Intravascular imaging especially valuable here.",
-      "caution": "Avoid geographic miss at the proximal or distal edges — the risk of edge restenosis is high.",
+      "action": "Plan stent overlap zones before deploying. Deploy distal stent first, work proximally. Post-dilate each segment before deploying the next.",
+      "caution": "Avoid geographic miss at proximal or distal edges — high risk of edge restenosis.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-vlong-lesion",
       "domain": "lesion_prep",
@@ -160,14 +132,11 @@
       "conditions": [
         { "field": "lesion_vlong", "op": "is_true" }
       ],
-      "action": "Intravascular imaging mandatory before stenting to define true lesion extent and reference vessel diameter along the full length.",
-      "rationale": "Long segments (>30mm) frequently have variation in vessel size — single-point sizing underestimates or overestimates.",
-      "detail": "Deploy stents sequentially distal to proximal; plan overlap zones at ≥3mm. Post-dilate each segment before deploying the next. Geographic miss at either edge carries high restenosis risk.",
+      "action": "Intravascular imaging mandatory before stenting. Deploy stents distal to proximal with ≥3mm overlap zones. Post-dilate each segment before deploying the next.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-timi-impaired",
       "domain": "lesion_prep",
@@ -176,14 +145,11 @@
       "conditions": [
         { "field": "timi_impaired", "op": "is_true" }
       ],
-      "action": "Restore antegrade flow before stenting where possible.",
-      "rationale": "Stenting without restoring flow risks undersizing (due to vessel collapse) and no-reflow on reperfusion.",
-      "detail": "Ensure full anticoagulation before wire manipulation. Staged approach (aspiration → reassess morphology → definitive stenting) reduces no-reflow risk in thrombus/acute occlusion.",
+      "action": "Restore antegrade flow before stenting where possible. Staged approach (aspiration → reassess → definitive stenting) reduces no-reflow risk.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-thrombus-timi0-native",
       "domain": "lesion_prep",
@@ -194,14 +160,11 @@
         { "field": "timi_zero", "op": "is_true" },
         { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Staged approach: aspiration thrombectomy first to restore flow; reassess morphology before stenting.",
-      "rationale": "High thrombus burden overestimates lesion length and underestimates reference diameter — stenting without flow restoration leads to sizing errors and no-reflow.",
-      "detail": "If TIMI flow improves after aspiration, reassess true lesion before committing to stent sizing. If TIMI 0 persists after aspiration, consider pharmacoinvasive strategy (GPI infusion, deferred PCI at 24–48h).",
+      "action": "Aspiration thrombectomy first to restore flow; reassess true lesion before stenting. If TIMI 0 persists after aspiration, consider pharmacoinvasive strategy (GPI, deferred PCI 24–48h).",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-thrombus-preserved-native",
       "domain": "lesion_prep",
@@ -212,14 +175,11 @@
         { "field": "timi_zero", "op": "is_false" },
         { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Aspiration thrombectomy recommended before balloon or stent delivery.",
-      "rationale": "Manual aspiration reduces distal embolisation and thrombus burden, improving TIMI flow and reducing no-reflow risk.",
-      "detail": "Most effective when thrombus is proximal and large; less effective in distal or small-vessel locations. If high residual thrombus burden persists after aspiration, consider deferred stenting (24–48h with anticoagulation and GPI) to allow resolution.",
+      "action": "Aspiration thrombectomy recommended before balloon or stent delivery. If high residual burden persists, consider deferred stenting (24–48h with anticoagulation and GPI).",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-thrombus-timi0-graft",
       "domain": "lesion_prep",
@@ -230,14 +190,11 @@
         { "field": "timi_zero", "op": "is_true" },
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Avoid aspiration thrombectomy. EPD mandatory. Consider pharmacoinvasive approach before definitive stenting.",
-      "rationale": "SVG occlusion with thrombus: friable degenerated plaque causes catastrophic embolisation with aspiration. EPD and GP IIb/IIIa before stenting reduces distal embolisation.",
-      "detail": "If proceeding, direct stenting preferable to pre-dilation to minimise embolisation from uncontrolled plaque displacement.",
-      "caution": "Aspiration thrombectomy in a thrombosed degenerated SVG carries high no-reflow risk — avoid unless the graft is clearly non-degenerated.",
+      "action": "Avoid aspiration thrombectomy. EPD mandatory. Consider pharmacoinvasive approach (GP IIb/IIIa) before definitive stenting. Direct stenting preferred over pre-dilation.",
+      "caution": "Aspiration in a thrombosed degenerated SVG carries high no-reflow risk.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-thrombus-preserved-graft",
       "domain": "lesion_prep",
@@ -248,14 +205,11 @@
         { "field": "timi_zero", "op": "is_false" },
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Avoid aspiration thrombectomy. Use EPD as standard. Pre-treat with GP IIb/IIIa inhibitor.",
-      "rationale": "Degenerated vein grafts carry high friable plaque burden — aspiration significantly increases distal embolisation and no-reflow risk.",
-      "detail": "Consider direct stenting to trap thrombus rather than pre-dilation where anatomy permits. Slow, prolonged inflations at nominal pressures.",
+      "action": "Avoid aspiration thrombectomy. EPD as standard. Pre-treat with GP IIb/IIIa. Direct stenting preferred over pre-dilation where anatomy permits.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-graft-strategy",
       "domain": "lesion_prep",
@@ -264,14 +218,11 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Avoid balloon pre-dilatation unless the lesion is severely stenotic or EPD delivery requires it.",
-      "rationale": "Pre-dilation in degenerated grafts increases distal embolisation risk from uncontrolled plaque fracture.",
-      "detail": "Prefer direct stenting to trap friable plaque beneath stent struts. Slow, prolonged inflations at nominal pressures. Avoid post-dilatation where possible — if required, size 1:1 with the graft and never oversize.",
+      "action": "Avoid pre-dilation unless lesion is severely stenotic or EPD delivery requires it. Direct stenting preferred. Slow nominal-pressure inflations. Avoid post-dilatation; if required, size 1:1 — never oversize.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-graft-epd-vasodilators",
       "domain": "lesion_prep",
@@ -280,14 +231,11 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Consider EPD whenever technically feasible. Administer intracoronary vasodilators liberally — even before balloon or stenting.",
-      "rationale": "EPD reduces distal embolisation. Pre-emptive vasodilators (verapamil, adenosine, nitroprusside, nicardipine) prevent and treat no-reflow most effectively when delivered distally.",
-      "detail": "Most effective vasodilator delivery: via microcatheter or over-the-wire balloon positioned distally. When no-reflow occurs with EPD in situ, aspirate before filter retrieval.",
+      "action": "EPD whenever technically feasible. Intracoronary vasodilators (verapamil, adenosine, nitroprusside) liberally — even before balloon or stenting, delivered distally via microcatheter or OTW balloon.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2018, "class": "IIa", "level": "B" },
       "active": true
     },
-
     {
       "id": "prep-graft-thrombus-burden",
       "domain": "lesion_prep",
@@ -297,14 +245,11 @@
         { "field": "vessel", "op": "eq", "value": "Graft" },
         { "field": "thrombus", "op": "is_true" }
       ],
-      "action": "Heavy SVG thrombus burden: dedicated aspiration catheters, guide extension aspiration, or mechanical thrombectomy for very large thrombus.",
-      "rationale": "Significant intragreft thrombus increases no-reflow risk proportionally — reducing bulk before stenting improves outcomes.",
-      "detail": "Dedicated catheters (Pronto, Export) or guide extension (GuideLiner, Guidezilla) for moderate burden. Mechanical thrombectomy (AngioJet, Penumbra) for very large thrombus. Intragraft fibrinolytics (tPA) described anecdotally. Maintain high ACT throughout.",
-      "caution": "Limited RCT evidence — no large randomised trial data for SVG thrombectomy devices.",
+      "action": "Dedicated aspiration catheters or guide extension aspiration for moderate burden; mechanical thrombectomy (AngioJet, Penumbra) for very large thrombus. Maintain high ACT throughout.",
+      "caution": "Limited RCT evidence for SVG thrombectomy devices.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-reduced-ef-sevcalc",
       "domain": "lesion_prep",
@@ -314,14 +259,11 @@
         { "field": "lvef_reduced", "op": "is_true" },
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Keep individual atherectomy bursts and balloon inflation times short (<30s). Have vasopressors immediately available.",
-      "rationale": "Prolonged balloon inflations in reduced EF may cause haemodynamic instability — the myocardium has minimal reserve.",
-      "detail": "Brief the team before starting. Consider staged procedure: calcium modification at first sitting, stenting at second, if haemodynamic reserve is borderline.",
+      "action": "Keep atherectomy bursts and balloon inflations short (<30s). Vasopressors immediately available. Consider staged procedure if haemodynamic reserve is borderline.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-reduced-ef-long",
       "domain": "lesion_prep",
@@ -331,14 +273,11 @@
         { "field": "lvef_reduced", "op": "is_true" },
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Keep inflation times short; deflate promptly if haemodynamics deteriorate. Consider staged procedure.",
-      "rationale": "Large territory at risk during balloon inflations in reduced EF — limited haemodynamic tolerance for extended ischaemia.",
-      "detail": "Staged strategy: lesion modification at first sitting, definitive stenting at second.",
+      "action": "Keep inflation times short; deflate promptly if haemodynamics deteriorate. Staged procedure is a reasonable strategy for high-complexity lesions.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-last-vessel-sevcalc",
       "domain": "lesion_prep",
@@ -348,14 +287,11 @@
         { "field": "last_remaining_vessel", "op": "is_true" },
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Calcium modification must achieve full lesion compliance before stenting. Accept a longer procedure.",
-      "rationale": "A stent that fails to expand fully in the only remaining coronary is a catastrophic result. Do not rush lesion preparation.",
-      "detail": null,
-      "caution": "Do not stent until full balloon compliance is confirmed — there is no bailout if the result is inadequate.",
+      "action": "Calcium modification must achieve full lesion compliance before stenting. Accept a longer procedure — do not rush preparation.",
+      "caution": "Do not stent until full balloon compliance is confirmed — no bailout exists if the result is inadequate.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-lm",
       "domain": "lesion_prep",
@@ -364,13 +300,10 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LM" }
       ],
-      "action": "Pre-dilate cautiously with vasopressors immediately available. For LM shaft or ostial disease without bifurcation, a single stent is preferred.",
-      "rationale": "LM pre-dilation can cause acute haemodynamic instability — partial occlusion during inflation compromises total cardiac output.",
-      "detail": "IVUS-guided stent sizing mandatory. For LM bifurcation, provisional strategy preferred unless large SB (>2.5mm) with true ostial disease. Ensure continuous haemodynamic monitoring throughout.",
+      "action": "IVUS-guided sizing mandatory. Pre-dilate cautiously with vasopressors available. For LM shaft/ostial disease without bifurcation, single stent preferred. Ensure continuous haemodynamic monitoring.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     }
-
   ]
 }

@@ -1149,12 +1149,9 @@ function cardEquip(d) {
       .map(r => {
         const cls = r.evidence?.class || null;
         const src = r.evidence?.source || null;
-        // Compose full tip: action is the headline; rationale and detail provide context
-        let tipText = r.action;
-        if (r.rationale) tipText += ' — ' + r.rationale;
-        if (r.detail)    tipText += ' ' + r.detail;
-        if (r.caution)   tipText += ' ⚠ ' + r.caution;
-        return badgedTip('gl', tipText, src, cls, src);
+        const rows = [badgedTip('gl', r.action, src, cls, src)];
+        if (r.caution) rows.push(cautionTip(r.caution));
+        return rows.join('');
       })
       .join('');
   }
@@ -1182,6 +1179,12 @@ function cardEquip(d) {
     }
     return '<div class="sd-tip sd-tip-badged">'
       +'<span class="tip-body">'+h(txt)+badge+'</span>'
+      +'</div>';
+  }
+  function cautionTip(txt) {
+    if (!txt) return '';
+    return '<div class="sd-tip sd-tip-warn" style="color:var(--red);border-left-color:rgba(192,57,43,.3)">'
+      +'⚠ '+h(txt)
       +'</div>';
   }
 
