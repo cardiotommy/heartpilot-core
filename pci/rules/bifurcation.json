@@ -1,0 +1,163 @@
+{
+  "domain": "bifurcation",
+  "version": "1.0.0",
+  "last_reviewed": "2025-01",
+  "sources": ["EBC 2022", "ESC 2024", "DKCRUSH-V"],
+  "rules": [
+
+    {
+      "id": "bif-wire-jailing",
+      "domain": "bifurcation",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "Wire both branches before stenting. Use jailed SB wire technique for the provisional approach.",
+      "rationale": "Jailed SB wire protects against abrupt SB closure and facilitates re-access without significantly increasing complexity.",
+      "detail": "For SB <2mm, jailing is optional. Confirm SB wire position in the distal SB with contrast before MV stenting.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "bif-provisional-default",
+      "domain": "bifurcation",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "Provisional single-stent strategy is the default for all bifurcation lesions.",
+      "rationale": "Provisional is non-inferior to upfront 2-stent for most anatomies with lower contrast load, radiation, and stent burden per EBC/ESC consensus.",
+      "detail": "Upfront 2-stent is indicated only when SB >2.5mm AND Medina SB segment = 1 (true ostial SB disease). Do not default to 2-stent for large SB without ostial disease.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "bif-pot-mandatory",
+      "domain": "bifurcation",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "POT is mandatory immediately after MV stent deployment.",
+      "rationale": "POT opens the struts, reduces SB pinching, and facilitates SB rewiring through the proximal cell. rePOT after any SB balloon inflation restores MV stent geometry.",
+      "detail": "Short NC balloon sized to the proximal MV reference diameter, inflated at the proximal stent edge with the carina as the distal marker. rePOT mandatory after any SB balloon inflation.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "bif-sb-rewire-proximal-cell",
+      "domain": "bifurcation",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "Re-wire SB through the proximal stent cell after MV stent deployment.",
+      "rationale": "Proximal cell rewiring ensures optimal strut configuration and reduces strut distortion on KBI.",
+      "detail": "Confirm wire position in the distal SB with contrast before balloon inflation. Inadvertent distal cell entry compromises strut reconstruction.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "bif-kbi-threshold",
+      "domain": "bifurcation",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "KBI indicated only if: SB TIMI <3, residual SB ostial stenosis >75%, or significant SB ostial dissection.",
+      "rationale": "Routine KBI in provisional PCI does not improve outcomes in unselected cases and increases complexity.",
+      "detail": "KBI for these specific rescue indications remains appropriate. Routine KBI without these indications should be avoided.",
+      "caution": "Do not perform routine KBI — reserved for the indications above only.",
+      "evidence": { "source": "EBC", "year": 2022, "class": "III", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "bif-2stent-indication",
+      "domain": "bifurcation",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" },
+        { "field": "sb_large", "op": "is_true" },
+        { "field": "sb_ostial", "op": "is_true" }
+      ],
+      "action": "Upfront 2-stent technique is indicated. FKBI is mandatory after all 2-stent techniques.",
+      "rationale": "Large SB (>2.5mm) with true ostial SB disease (Medina SB=1) is an established upfront 2-stent indication per EBC/ESC consensus.",
+      "detail": "DK-Crush preferred for most anatomies based on DKCRUSH-V data. Culotte preferred when both branches are of similar calibre and angle is non-acute. FKBI failure is associated with significantly higher MACE.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "IIa", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "bif-fkbi-mandatory",
+      "domain": "bifurcation",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" },
+        { "field": "sb_large", "op": "is_true" },
+        { "field": "sb_ostial", "op": "is_true" }
+      ],
+      "action": "FKBI (final kissing balloon inflation) is mandatory after all 2-stent techniques.",
+      "rationale": "Failure to perform FKBI after 2-stent techniques is associated with significantly higher MACE.",
+      "detail": "Both balloons must be inflated simultaneously. Ensure simultaneous marker alignment at the carina.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "bif-dkcrush-acute-angle",
+      "domain": "bifurcation",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" },
+        { "field": "sb_large", "op": "is_true" },
+        { "field": "sb_ostial", "op": "is_true" },
+        { "field": "bifurcation.sb_angle", "op": "eq", "value": "acute" }
+      ],
+      "action": "DK-Crush strongly favoured over Culotte for acute SB take-off angle (<45°).",
+      "rationale": "T-shaped anatomy makes rewiring through crushed struts more predictable with DK-Crush. Culotte is technically challenging with acute-angle bifurcations due to difficult wire manipulation.",
+      "detail": "After crushing, re-wiring through the proximal cell is critical. Inadvertent distal cell entry compromises the first kissing balloon and SB ostial reconstruction.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": "IIa", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "bif-culotte-obtuse-angle",
+      "domain": "bifurcation",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" },
+        { "field": "sb_large", "op": "is_true" },
+        { "field": "sb_ostial", "op": "is_true" },
+        { "field": "bifurcation.sb_angle", "op": "eq", "value": "obtuse" }
+      ],
+      "action": "Culotte is a favourable technique for obtuse/wide SB take-off angle (>70°), particularly when both branches are of similar calibre.",
+      "rationale": "Wide angle facilitates rewiring and full strut coverage of both ostia in Culotte. DK-Crush remains an acceptable alternative with comparable long-term outcomes.",
+      "detail": "FKBI is mandatory regardless of technique.",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": null, "level": null },
+      "active": true
+    }
+
+  ]
+}

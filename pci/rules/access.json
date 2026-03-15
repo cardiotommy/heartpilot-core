@@ -1,0 +1,136 @@
+{
+  "domain": "access",
+  "version": "1.0.0",
+  "last_reviewed": "2025-01",
+  "sources": ["ESC 2018", "ESC 2024", "SCAI", "SCAI 2020"],
+  "rules": [
+
+    {
+      "id": "acc-radial-preference",
+      "domain": "access",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [],
+      "action": "Radial access preferred over femoral for all PCI.",
+      "rationale": "Radial access reduces access-site bleeding, vascular complications, and all-cause mortality.",
+      "detail": "Femoral access reserved for cases requiring large-bore sheath (MCS device), complex anatomy precluding radial, or operator preference with anatomical indication.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "acc-lm-guide-size",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "Use large-lumen guide (≥7Fr); 8Fr preferred when DK-Crush is planned.",
+      "rationale": "Bilateral kissing balloon inflation requires simultaneous large-bore access. Guide damping causes ostial occlusion.",
+      "detail": "Confirm non-dampened pressure waveform before wiring. Partially disengage guide if waveform is dampened.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2018, "class": "I", "level": "C" },
+      "active": true
+    },
+
+    {
+      "id": "acc-lm-surgical-backup",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "Confirm cardiac surgical backup availability before proceeding with unprotected LM PCI.",
+      "rationale": "Complex anatomy, reduced EF, or technical failure may require emergent CABG.",
+      "detail": "Pre-procedural Heart Team discussion recommended for elective cases. Size arterial access for potential MCS device insertion.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "C" },
+      "active": true
+    },
+
+    {
+      "id": "acc-tort-ang-guide-extension",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "morphology", "op": "in", "value": ["Tortuous", "Angulated"] }
+      ],
+      "action": "Consider guide extension catheter (GEC) to improve device deliverability.",
+      "rationale": "GEC provides distal support without the ostial trauma risk of a stiffer guide.",
+      "detail": "Deploy GEC only after confirming co-axial alignment. Prefer GEC over escalating guide stiffness.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "acc-rca-tort-ang-guide",
+      "domain": "access",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "RCA" },
+        { "field": "morphology", "op": "in", "value": ["Tortuous", "Angulated"] }
+      ],
+      "action": "Judkins Right as first choice; escalate to Amplatz only if support is inadequate.",
+      "rationale": "Amplatz guides carry higher risk of ostial trauma in tortuous/angulated RCA. Deep-seating or GEC are preferable escalation steps.",
+      "detail": null,
+      "caution": "Avoid aggressive Amplatz engagement — ostial injury risk is significant in tortuous RCA.",
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "acc-graft-guide-selection",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" }
+      ],
+      "action": "Prioritise coaxial alignment over backup force. Select guide shape by graft origin and approach.",
+      "rationale": "Aggressive backup support risks ostial graft injury. Coaxial engagement is the primary goal.",
+      "detail": "Transfemoral: JR4 or Hockey Stick (right-sided grafts); AL1 or left coronary bypass (left-sided grafts). Right transradial: AL1 for left-sided grafts; right-sided engagement challenging. Left transradial: AL or MP. GEC useful when ostial engagement is inadequate. Use shorter guides for very distal or sequential graft lesions.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "acc-graft-native-preference",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" }
+      ],
+      "action": "Strongly prefer PCI of the native coronary over the graft if technically feasible.",
+      "rationale": "Native vessel PCI avoids the embolic and no-reflow risks inherent to degenerated graft intervention.",
+      "detail": "Applicable particularly when the SVG is degenerated. Discuss feasibility of native vessel approach at case planning.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2018, "class": "IIa", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "acc-haem-compromised-guide",
+      "domain": "access",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" }
+      ],
+      "action": "Establish MCS before wiring if at all possible. Plan access site for large-bore device insertion.",
+      "rationale": "MCS support before coronary instrumentation reduces risk of haemodynamic collapse at the critical step.",
+      "detail": "Femoral access may be required for MCS device. Minimise contrast volume. Treat culprit only if multivessel disease present.",
+      "caution": "Do not delay treatment of the culprit to place MCS if the patient is actively deteriorating — MCS and culprit PCI can proceed in parallel in extremis.",
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    }
+
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "domain": "haemodynamics",
+  "version": "1.0.0",
+  "last_reviewed": "2025-01",
+  "sources": ["ESC 2024", "ACC/AHA/SCAI 2021", "CULPRIT-SHOCK"],
+  "rules": [
+
+    {
+      "id": "haem-culprit-only-shock",
+      "domain": "haemodynamics",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" },
+        { "field": "multivessel", "op": "is_true" }
+      ],
+      "action": "Treat the culprit lesion only in the acute setting. Stage non-culprit vessels after haemodynamic stabilisation.",
+      "rationale": "Routine complete revascularisation in cardiogenic shock does not improve outcomes (CULPRIT-SHOCK) and prolongs a high-risk procedure.",
+      "detail": "Minimise contrast load. Avoid lengthy balloon inflations. Delegate non-culprit PCI to a staged elective procedure.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "III", "level": "A" },
+      "active": true
+    },
+
+    {
+      "id": "haem-mcs-last-vessel-seveef",
+      "domain": "haemodynamics",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "last_remaining_vessel", "op": "is_true" },
+        { "field": "lvef_severe", "op": "is_true" }
+      ],
+      "action": "Prophylactic MCS strongly recommended before wiring. Microaxial pump preferred over IABP.",
+      "rationale": "Last remaining vessel + EF <30% represents the highest risk combination — any haemodynamic deterioration during PCI is immediately catastrophic.",
+      "detail": "Confirm cardiac surgical backup availability before proceeding. Microaxial pump preferred given severely impaired reserve.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "haem-mcs-last-vessel-compromised",
+      "domain": "haemodynamics",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "last_remaining_vessel", "op": "is_true" },
+        { "field": "haem_status", "op": "eq", "value": "compromised" }
+      ],
+      "action": "Prophylactic MCS strongly recommended. Establish support before wiring.",
+      "rationale": "Pre-procedural haemodynamic compromise in a last-remaining vessel case — minimal margin for intra-procedural deterioration.",
+      "detail": "Microaxial pump preferred. Escalate if haemodynamics deteriorate.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "haem-mcs-last-vessel",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "last_remaining_vessel", "op": "is_true" }
+      ],
+      "action": "Prophylactic MCS strongly recommended before wiring. Microaxial pump or IABP depending on EF and anatomy.",
+      "rationale": "No haemodynamic reserve exists if the only remaining vessel is compromised during PCI.",
+      "detail": "Cardiac surgical backup should be available and confirmed before the case.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "haem-mcs-severe-ef-high-risk-vessel",
+      "domain": "haemodynamics",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "lvef_severe", "op": "is_true" },
+        { "field": "vessel", "op": "in", "value": ["LM", "LAD"] }
+      ],
+      "action": "Prophylactic MCS should be strongly considered. Microaxial pump preferred given large territory at risk and poor haemodynamic reserve.",
+      "rationale": "EF <30% combined with LM or proximal LAD PCI creates high haemodynamic jeopardy — brief flow interruption during balloon inflation or stenting may not be tolerated.",
+      "detail": null,
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "haem-mcs-consider",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "any",
+      "conditions": [
+        { "field": "lvef_severe", "op": "is_true" },
+        { "field": "haem_status", "op": "eq", "value": "compromised" }
+      ],
+      "action": "MCS should be considered. Discuss with team before proceeding.",
+      "rationale": "Severely impaired EF or pre-procedural haemodynamic compromise individually represent high-risk PCI features.",
+      "detail": "IABP minimum threshold. Microaxial pump if EF <35% or large jeopardy territory. Brief the team on MCS indication and access plan before starting.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
+      "active": true
+    }
+
+  ]
+}

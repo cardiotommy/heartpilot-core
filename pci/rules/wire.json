@@ -1,0 +1,75 @@
+{
+  "domain": "wire",
+  "version": "1.0.0",
+  "last_reviewed": "2025-01",
+  "sources": ["ESC 2024", "SCAI"],
+  "rules": [
+
+    {
+      "id": "wire-sevcalc",
+      "domain": "wire",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Standard workhorse wire for crossing; exchange to extra-support wire before device delivery through heavily calcified segments.",
+      "rationale": "Extra-support wire improves deliverability of balloons and atherectomy systems through resistant calcium.",
+      "detail": "Exchange before stent delivery if resistance is felt on balloon advancement.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "wire-tortuous",
+      "domain": "wire",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "morphology", "op": "eq", "value": "Tortuous" }
+      ],
+      "action": "Soft steerable workhorse wire; gentle primary curve only.",
+      "rationale": "Over-shaping the tip straightens the vessel and increases wall stress.",
+      "detail": "Avoid aggressive tip angulation — a gentle curve navigates tortuous segments more reliably and reduces risk of vessel trauma.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "wire-angulated",
+      "domain": "wire",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "morphology", "op": "eq", "value": "Angulated" }
+      ],
+      "action": "Soft steerable workhorse wire; avoid over-shaping the tip.",
+      "rationale": "An aggressive tip angle causes the wire to preferentially follow the outer wall at the bend rather than the lumen.",
+      "detail": "A gentle curve navigates the angle more reliably than a sharply shaped tip.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "wire-long-tortuous-sevcalc",
+      "domain": "wire",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "lesion_long", "op": "is_true" },
+        { "field": "morphology", "op": "eq", "value": "Tortuous" },
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Soft-tipped workhorse wire for crossing; extra-support wire for device delivery after lesion preparation.",
+      "rationale": "Combined long-tortuous-severe calcification creates compound deliverability challenge. Stiff wire risks vessel trauma; soft wire may be insufficient for device delivery.",
+      "detail": "Consider GEC before escalating to stiffer wire. Exchange after successful lesion preparation rather than upfront.",
+      "caution": "Avoid aggressive wire manipulation in tortuous segments — perforation risk is elevated.",
+      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    }
+
+  ]
+}

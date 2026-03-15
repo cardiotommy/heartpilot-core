@@ -1,0 +1,105 @@
+{
+  "domain": "stent",
+  "version": "1.0.0",
+  "last_reviewed": "2025-01",
+  "sources": ["ESC 2024", "EBC 2022", "SCAI 2020"],
+  "rules": [
+
+    {
+      "id": "stent-long-sequence",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "lesion_long", "op": "is_true" }
+      ],
+      "action": "Deploy distal stent first, work proximally. Post-dilate each segment with NC balloon before deploying the next.",
+      "rationale": "Proximal-first deployment obstructs the distal vessel for the remainder of the procedure. Sequential distal-to-proximal deployment and post-dilatation prevents geographic miss and stent underexpansion.",
+      "detail": "Plan overlap zones carefully — overlap should be ≥3mm and avoid placing overlaps in side branches.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "stent-bif-thin-strut",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "Ultra-thin strut DES preferred for bifurcation PCI.",
+      "rationale": "Ultra-thin struts facilitate SB rewiring through stent cells and reduce jailing effect.",
+      "detail": "Size stent to distal MV reference diameter for provisional strategy (Murray's law).",
+      "caution": null,
+      "evidence": { "source": "EBC", "year": 2022, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "stent-lm",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "Size stent to distal MV reference (Murray's law) for bifurcation cases; use proximal reference for shaft/ostial disease.",
+      "rationale": "Proximal LM is larger than the distal reference — sizing to the distal vessel avoids overexpansion proximally.",
+      "detail": "Proximal stent edge must not protrude into the aorta. Post-dilate with NC balloon sized to proximal LM to ensure full expansion at the largest segment. Confirm MSA with IVUS before completing.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "stent-graft",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" }
+      ],
+      "action": "BMS and DES are equally effective in SVG intervention. Use slightly undersized stent diameter with generous length to minimise plaque extrusion.",
+      "rationale": "SVG PCI has high ischaemic event rates regardless of stent type — minimise stent trauma.",
+      "detail": "Individualise stent choice based on lesion diameter, long-term DAPT tolerance, and patient adherence. Consider prolonged DAPT based on the DAPT score.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "stent-reduced-ef",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "lvef_reduced", "op": "is_true" }
+      ],
+      "action": "Target complete revascularisation where feasible; stage if haemodynamic reserve is limited.",
+      "rationale": "Residual ischaemia with impaired LV function is associated with worse long-term outcomes.",
+      "detail": "Staged complete revascularisation is preferable to complex multivessel PCI in a single session when haemodynamic reserve is limited. Minimise stent length per vessel to reduce ischaemic time.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
+      "active": true
+    },
+
+    {
+      "id": "stent-last-vessel",
+      "domain": "stent",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "last_remaining_vessel", "op": "is_true" }
+      ],
+      "action": "IVUS mandatory. Confirm optimal result — stent sizing and expansion are critical. Discuss bailout strategy with the team before starting.",
+      "rationale": "A poorly expanded or failed stent in the only remaining coronary is catastrophic — there is no haemodynamic reserve to tolerate an inadequate result.",
+      "detail": "Accept a longer procedure time to ensure the optimal result.",
+      "caution": "Discuss abrupt closure bailout with the team and theatre before the procedure begins.",
+      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    }
+
+  ]
+}
