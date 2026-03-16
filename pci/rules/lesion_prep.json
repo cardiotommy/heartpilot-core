@@ -266,32 +266,16 @@
       "active": true
     },
     {
-      "id": "prep-thrombus-timi0-graft",
+      "id": "prep-thrombus-graft",
       "domain": "lesion_prep",
       "priority": 3,
       "logic": "all",
       "conditions": [
         { "field": "thrombus", "op": "is_true" },
-        { "field": "timi_zero", "op": "is_true" },
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Avoid aspiration thrombectomy in SVG. EPD mandatory. Consider pharmacoinvasive approach (GP IIb/IIIa) before definitive stenting. Direct stenting preferred over pre-dilation.",
-      "caution": "Aspiration in a thrombosed degenerated SVG carries high no-reflow risk.",
-      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
-      "active": true
-    },
-    {
-      "id": "prep-thrombus-preserved-graft",
-      "domain": "lesion_prep",
-      "priority": 3,
-      "logic": "all",
-      "conditions": [
-        { "field": "thrombus", "op": "is_true" },
-        { "field": "timi_zero", "op": "is_false" },
-        { "field": "vessel", "op": "eq", "value": "Graft" }
-      ],
-      "action": "Avoid aspiration thrombectomy. EPD as standard. Pre-treat with GP IIb/IIIa. Direct stenting preferred over pre-dilation where anatomy permits.",
-      "caution": null,
+      "action": "Consider aspiration thrombectomy if significant thrombus burden. Consider pre-treating with GP IIb/IIIa.",
+      "caution": "Higher risk of no-reflow. Consider thrombectomy run prior to retrieving EPD. Limited RCT evidence.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
@@ -334,34 +318,6 @@
       "action": "EPD whenever technically feasible (ACC/AHA Class I/B; ESC Class IIa/B). Intracoronary vasodilators (verapamil, adenosine, nitroprusside) liberally — delivered distally via microcatheter or OTW balloon.",
       "caution": null,
       "evidence": { "source": "ACC/AHA", "year": 2021, "class": "I", "level": "B" },
-      "active": true
-    },
-    {
-      "id": "prep-graft-timi-impaired",
-      "domain": "lesion_prep",
-      "priority": 2,
-      "logic": "all",
-      "conditions": [
-        { "field": "vessel", "op": "eq", "value": "Graft" },
-        { "field": "timi_impaired", "op": "is_true" }
-      ],
-      "action": "Restore flow cautiously. Avoid aspiration thrombectomy in SVG. Deploy EPD first; consider GP IIb/IIIa infusion to reduce thrombus burden. Reassess true lesion severity after flow restoration.",
-      "caution": null,
-      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
-      "active": true
-    },
-    {
-      "id": "prep-graft-thrombus-burden",
-      "domain": "lesion_prep",
-      "priority": 3,
-      "logic": "all",
-      "conditions": [
-        { "field": "vessel", "op": "eq", "value": "Graft" },
-        { "field": "thrombus", "op": "is_true" }
-      ],
-      "action": "For moderate thrombus: guide extension aspiration. For very large thrombus: mechanical thrombectomy (AngioJet, Penumbra). Maintain high ACT throughout.",
-      "caution": "Limited RCT evidence for SVG thrombectomy devices.",
-      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
     {
