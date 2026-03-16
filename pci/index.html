@@ -364,7 +364,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .new-case-btn{font-size:10px;padding:4px 10px;opacity:.7;}
 .new-case-btn:hover{opacity:1;}
 
-.top-blocks { padding:0 0 4px 0; display:flex; flex-direction:column; gap:8px; }
+.top-blocks { padding:0 0 4px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .summary-oneliner { font-size:11px; color:var(--text); line-height:1.6;
   padding:10px 12px; background:var(--s1); border-radius:6px;
   border-left:2px solid var(--blue); margin-bottom:8px; font-style:italic; box-shadow:var(--shadow-sm); }
@@ -1108,7 +1108,7 @@ function buildTopBlocks(d) {
   }
   let haemoHtml = '';
   if (d.haemodynamicSupport) {
-    haemoHtml = '<div class="rr-haemo"><div class="rr-haemo-lbl">⚠ Haemodynamic Support</div><div class="rr-haemo-txt">'+h(d.haemodynamicSupport)+'</div></div>';
+    haemoHtml = '<div class="rr-haemo" style="grid-column:1/-1"><div class="rr-haemo-lbl">⚠ Haemodynamic Support</div><div class="rr-haemo-txt">'+h(d.haemodynamicSupport)+'</div></div>';
   }
   return '<div class="top-blocks">'
     +'<div class="card"><div class="card-hd">'
