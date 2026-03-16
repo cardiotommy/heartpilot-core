@@ -26,7 +26,7 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Standard workhorse for crossing; exchange to extra-support wire (e.g. Grand Slam, Iron Man) before device delivery through heavily calcified segments. If balloon won't cross, exchange to Rotawire for atherectomy.",
+      "action": "Standard workhorse for crossing; consider exchanging to extra-support wire (e.g. Grand Slam, Iron Man) before device delivery through heavily calcified segments. If balloon won't cross, exchange to Rotawire for atherectomy.",
       "caution": null,
       "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
