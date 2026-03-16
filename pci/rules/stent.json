@@ -31,7 +31,9 @@
       "domain": "stent",
       "priority": 1,
       "logic": "all",
-      "conditions": [],
+      "conditions": [
+        { "field": "vessel", "op": "not_eq", "value": "Graft" }
+      ],
       "action": "Post-dilate with NC balloon sized to vessel reference to achieve full apposition. Confirm expansion with intravascular imaging in complex cases.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
