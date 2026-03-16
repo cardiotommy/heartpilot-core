@@ -90,6 +90,20 @@
       "active": true
     },
     {
+      "id": "stent-graft-postdilation",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" },
+        { "field": "calcification", "op": "not_eq", "value": "severe" }
+      ],
+      "action": "Avoid post-dilatation; if required, size 1:1 — never oversize.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+    {
       "id": "stent-reduced-ef",
       "domain": "stent",
       "priority": 2,
