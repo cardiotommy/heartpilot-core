@@ -316,12 +316,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .rr-haemo-lbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.13em;color:var(--red);margin-bottom:4px;}
 .rr-haemo-txt{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.5;}
 
-/* MCS indicator strip */
-.mcs-strip{display:none;margin-top:8px;padding:8px 11px;border-radius:5px;font-family:var(--mono);font-size:9px;line-height:1.6;}
-.mcs-strip.show{display:block;}
-.mcs-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:var(--green);}
-.mcs-amber{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);color:var(--amber);}
-.mcs-red{background:rgba(240,64,64,.06);border:1px solid rgba(240,64,64,.22);color:var(--red);}
 
 .params-wrap { border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:12px; }
 .params-hdr { display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
@@ -651,7 +645,6 @@ body.analysis-done { overflow-y: auto; }
               <div class="ocard" id="haem-compromised" onclick="setHaem('compromised')"><div class="ocard-t">Compromised</div><div class="ocard-d">Relative hypotension, tachycardia, or reduced cardiac output without frank shock</div></div>
             </div>
           </div>
-          <div class="mcs-strip" id="mcs-strip"></div>
         </div>
 
         <!-- STEP 7: Review -->
@@ -869,7 +862,6 @@ function setLvef(v) {
   S.lvef = v;
   ['normal','mild','moderate','severe'].forEach(k =>
     document.getElementById('lvef-'+k).className = 'ocard'+(k===v?' sel':''));
-  updMcsStrip();
   updNextBtn();
 }
 
@@ -877,7 +869,6 @@ function setHaem(v) {
   S.haemStatus = v;
   ['stable','compromised'].forEach(k =>
     document.getElementById('haem-'+k).className = 'ocard'+(k===v?' sel':''));
-  updMcsStrip();
   updNextBtn();
 }
 
@@ -885,53 +876,14 @@ function setMV(v) {
   S.multiVessel = v;
   document.getElementById('mv-y').className = 'tog'+(v?' sy':'');
   document.getElementById('mv-n').className = 'tog'+(!v?' sn':'');
-  updMcsStrip();
   updNextBtn();
 }
 
-function updMcsStrip() {
-  const strip = document.getElementById('mcs-strip');
-  if (!strip) return;
-  const {lvef, singleVessel, multiVessel, haemStatus} = S;
-  const lms = S.vessel === 'LM';
-  const proxLAD = S.vessel === 'LAD';
-  const severeEF = lvef === 'severe';
-  const reducedEF = lvef === 'moderate' || lvef === 'severe';
-  const lastVessel = !!singleVessel;
-  const compromised = haemStatus === 'compromised';
-  const highRiskVessel = lms || proxLAD;
-  let score = 0;
-  if (severeEF) score += 3;
-  else if (reducedEF) score += 2;
-  if (lastVessel) score += 3;
-  if (compromised) score += 2;
-  if (highRiskVessel) score += 1;
-  if (multiVessel && reducedEF) score += 1;
-  let cls, msg;
-  if (score >= 5) {
-    cls = 'mcs-red';
-    msg = '<b>MCS strongly recommended</b> — Multiple high-risk criteria present ('
-      +(lastVessel?'last remaining vessel, ':'')+(severeEF?'severely impaired EF, ':'')
-      +(compromised?'haemodynamic compromise, ':'')+(lms?'LMS PCI, ':'').replace(/, $/, '')
-      +'). Prophylactic MCS before wiring per ACC/AHA/SCAI high-risk PCI guidance.';
-  } else if (score >= 3) {
-    cls = 'mcs-amber';
-    msg = '<b>MCS should be considered</b> — Significant high-risk features present. Discuss prophylactic MCS with team before PCI.';
-  } else if (score >= 1) {
-    cls = 'mcs-green';
-    msg = '<b>MCS generally not required</b> — Limited high-risk features. Standard high-risk PCI precautions apply.';
-  } else {
-    strip.className = 'mcs-strip'; strip.innerHTML = ''; return;
-  }
-  strip.className = 'mcs-strip show ' + cls;
-  strip.innerHTML = msg;
-}
 
 function setLRV(v) {
   S.singleVessel = v;
   document.getElementById('lrv-y').className = 'tog'+(v?' sy':'');
   document.getElementById('lrv-n').className = 'tog'+(!v?' sn':'');
-  updMcsStrip();
   updNextBtn();
 }
 
