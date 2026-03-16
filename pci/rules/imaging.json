@@ -85,6 +85,20 @@
       "active": true
     },
     {
+      "id": "img-last-vessel",
+      "domain": "imaging",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "last_remaining_vessel", "op": "is_true" }
+      ],
+      "action": "IVUS mandatory pre- and post-stenting. No compromises on stent optimisation — MSA and edge dissection assessment are non-negotiable when there is no bailout vessel.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "active": true
+    },
+
+    {
       "id": "img-graft",
       "domain": "imaging",
       "priority": 2,

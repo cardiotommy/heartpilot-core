@@ -77,8 +77,8 @@
       "conditions": [
         { "field": "last_remaining_vessel", "op": "is_true" }
       ],
-      "action": "IVUS mandatory. Accept a longer procedure to ensure optimal result. Discuss bailout strategy for abrupt closure with the team before starting.",
-      "caution": "A failed stent in the only remaining coronary is catastrophic — no haemodynamic reserve exists for an inadequate result.",
+      "action": "Accept a longer procedure to ensure an optimal stent result. Discuss bailout strategy for abrupt closure with the team before wiring.",
+      "caution": "A failed stent in the only remaining coronary is catastrophic — there is no haemodynamic reserve for an inadequate result.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
     }

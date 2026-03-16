@@ -1192,34 +1192,22 @@ function cardEquip(d) {
 
   // ── Guide / Access ────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--blue)', 'Guide Selection'));
-  rows.push(row('pip-b', e.guideType||'—'));
   rows.push(rowsForSection('access'));
 
   // ── Wire ──────────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--green)', 'Wire Selection'));
-  rows.push(row('pip-g', e.guidewireType||'—'));
-  if (e.guidewireRationale) rows.push(badgedTip('gl', e.guidewireRationale));
   rows.push(rowsForSection('wire'));
 
   // ── Lesion Preparation ────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--amber)', 'Lesion Preparation'));
-  const prepTxt = [p.strategy, p.balloonSpec].filter(Boolean).join(' — ') || '—';
-  rows.push(row('pip-a', prepTxt));
-  if (p.calciumModification)
-    rows.push(badgedTip('gl', p.calciumModification+(p.calciumModificationRationale?' — '+p.calciumModificationRationale:''), 'ESC 2024'));
   rows.push(rowsForSection('lesion_prep'));
 
   // ── Imaging ───────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--blue)', 'Imaging'));
-  const imgTxt = (im.modality && im.modality!=='none')
-    ? im.modality+(im.rationale?' — '+im.rationale:'')
-    : 'IVUS — lesion assessment and stent optimisation';
-  rows.push(row('pip-b', imgTxt));
   rows.push(rowsForSection('imaging'));
 
   // ── Stent ─────────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--green)', 'Stent'));
-  rows.push(row('pip-g', e.stentType||'—'));
   rows.push(rowsForSection('stent'));
 
   // ── Bifurcation (if applicable) ───────────────────────────────────────────
@@ -1227,13 +1215,7 @@ function cardEquip(d) {
     rows.push(sectionHdr('var(--amber)', 'Bifurcation'));
     rows.push(rowsForSection('bifurcation'));
   }
-
-  // ── Haemodynamics (if applicable) ────────────────────────────────────────
-  const haemRules = ruleGroups['haemodynamics'] || [];
-  if (haemRules.length) {
-    rows.push(sectionHdr('var(--red)', 'Haemodynamic Support'));
-    rows.push(rowsForSection('haemodynamics'));
-  }
+  // Note: haemodynamic support is rendered in the top banner above the card.
 
   return '<div class="card">'
     +'<div class="card-toggle" onclick="toggleCard(this)">'

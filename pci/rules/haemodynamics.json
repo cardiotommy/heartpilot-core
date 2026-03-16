@@ -4,6 +4,7 @@
   "last_reviewed": "2025-01",
   "sources": ["ESC 2024", "ACC/AHA/SCAI 2021", "CULPRIT-SHOCK"],
   "rules": [
+
     {
       "id": "haem-culprit-only-shock",
       "domain": "haemodynamics",
@@ -18,6 +19,7 @@
       "evidence": { "source": "ESC", "year": 2024, "class": "III", "level": "A" },
       "active": true
     },
+
     {
       "id": "haem-mcs-last-vessel-seveef",
       "domain": "haemodynamics",
@@ -27,11 +29,12 @@
         { "field": "last_remaining_vessel", "op": "is_true" },
         { "field": "lvef_severe", "op": "is_true" }
       ],
-      "action": "Prophylactic MCS strongly recommended before wiring. Microaxial pump preferred over IABP. Confirm cardiac surgical backup.",
+      "action": "Last remaining vessel + severely impaired EF: prophylactic MCS mandatory before wiring. Microaxial pump (e.g. Impella) strongly preferred over IABP. Confirm surgical backup.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
+
     {
       "id": "haem-mcs-last-vessel-compromised",
       "domain": "haemodynamics",
@@ -41,24 +44,28 @@
         { "field": "last_remaining_vessel", "op": "is_true" },
         { "field": "haem_status", "op": "eq", "value": "compromised" }
       ],
-      "action": "Prophylactic MCS strongly recommended. Establish support before wiring. Microaxial pump preferred.",
+      "action": "Last remaining vessel + haemodynamic compromise: prophylactic MCS mandatory before wiring. Microaxial pump preferred. Femoral access for large-bore device.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
+
     {
       "id": "haem-mcs-last-vessel",
       "domain": "haemodynamics",
       "priority": 2,
       "logic": "all",
       "conditions": [
-        { "field": "last_remaining_vessel", "op": "is_true" }
+        { "field": "last_remaining_vessel", "op": "is_true" },
+        { "field": "lvef_severe", "op": "is_false" },
+        { "field": "haem_status", "op": "not_eq", "value": "compromised" }
       ],
-      "action": "Prophylactic MCS strongly recommended before wiring. Microaxial pump or IABP depending on EF. Confirm cardiac surgical backup.",
+      "action": "Last remaining vessel: prophylactic MCS strongly recommended before wiring. IABP acceptable if EF is preserved; microaxial pump if EF moderate. Confirm cardiac surgical backup.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
+
     {
       "id": "haem-mcs-severe-ef-high-risk-vessel",
       "domain": "haemodynamics",
@@ -66,13 +73,15 @@
       "logic": "all",
       "conditions": [
         { "field": "lvef_severe", "op": "is_true" },
-        { "field": "vessel", "op": "in", "value": ["LM", "LAD"] }
+        { "field": "vessel", "op": "in", "value": ["LM", "LAD"] },
+        { "field": "last_remaining_vessel", "op": "is_false" }
       ],
-      "action": "Prophylactic MCS should be strongly considered. Microaxial pump preferred given large territory at risk and poor haemodynamic reserve.",
+      "action": "Severely impaired EF with large jeopardy territory (LM or proximal LAD): prophylactic MCS should be strongly considered before wiring. Microaxial pump preferred.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
       "active": true
     },
+
     {
       "id": "haem-mcs-consider",
       "domain": "haemodynamics",
@@ -82,10 +91,11 @@
         { "field": "lvef_severe", "op": "is_true" },
         { "field": "haem_status", "op": "eq", "value": "compromised" }
       ],
-      "action": "MCS should be considered. Discuss with team before proceeding. IABP minimum; microaxial pump if EF <35% or large jeopardy territory.",
+      "action": "High-risk haemodynamic profile: discuss MCS with team before proceeding. IABP minimum; microaxial pump if EF <35% or large jeopardy territory.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
-      "active": true
+      "active": false
     }
+
   ]
 }
