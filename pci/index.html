@@ -192,19 +192,34 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .mval{font-family:var(--mono);font-size:11px;font-weight:500;text-align:right;line-height:1.4;}
 .mval.hi{color:var(--red);}.mval.med{color:var(--amber);}.mval.ok{color:var(--green);}.mval.neu{color:var(--text);}
 
-/* Lesion Summary coloured inner panel */
-.rr-summary-txt { font-size:13px; color:var(--text); line-height:1.55; margin-bottom:10px; text-align:center; }
-.rr-summary-badges { display:flex; gap:6px; justify-content:center; }
-.rr-class-badge { display:inline-block; font-family:var(--mono); font-size:9px; font-weight:600;
-  letter-spacing:.08em; padding:2px 8px; border-radius:3px; border:1px solid; }
-.aha-A  { background:rgba(21,128,61,.1);  border-color:rgba(21,128,61,.3);  color:var(--green); }
-.aha-B1 { background:rgba(180,83,9,.08);  border-color:rgba(180,83,9,.28);  color:var(--amber); }
-.aha-B2 { background:rgba(180,83,9,.1);   border-color:rgba(180,83,9,.35);  color:var(--amber); }
-.aha-C  { background:rgba(192,57,43,.1);  border-color:rgba(192,57,43,.3);  color:var(--red); }
-.rr-cplx-low       { background:rgba(21,128,61,.1);  border-color:rgba(21,128,61,.25);  color:var(--green); }
-.rr-cplx-moderate  { background:rgba(180,83,9,.1);   border-color:rgba(180,83,9,.25);   color:var(--amber); }
-.rr-cplx-high      { background:rgba(192,57,43,.1);  border-color:rgba(192,57,43,.25);  color:var(--red); }
-.rr-cplx-very_high { background:rgba(192,57,43,.15); border-color:rgba(192,57,43,.35);  color:var(--red); }
+/* ── Verdict card ──────────────────────────────────── */
+.vc-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;animation:cIn .28s ease both;box-shadow:var(--shadow-sm);}
+.vc-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--border);}
+.vc-hd-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);display:flex;align-items:center;gap:6px;}
+.vc-hd-tag{font-family:var(--mono);font-size:8px;color:var(--muted);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;background:var(--s1);}
+.vc-params{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.vc-param{flex:1;min-width:80px;padding:9px 12px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--border);}
+.vc-param:last-child{border-right:none;}
+.vc-param-lbl{font-family:var(--mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);}
+.vc-param-val{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--text);}
+.vc-param-val.ok{color:var(--green);}
+.vc-param-val.med{color:var(--amber);}
+.vc-param-val.hi{color:var(--red);}
+.vc-param-val.neu{color:var(--text);}
+.vc-rec{padding:14px 16px;border-bottom:1px solid var(--border);border-left:3px solid var(--green);}
+.vc-rec-eyebrow{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:5px;}
+.vc-rec-headline{font-family:'DM Serif Display',Georgia,serif;font-size:20px;font-weight:400;line-height:1.15;letter-spacing:-.01em;margin-bottom:5px;color:var(--text);}
+.vc-rec-rationale{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.65;}
+.vc-mcs{margin-top:10px;padding:8px 10px;background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:4px;font-family:var(--mono);font-size:9.5px;color:var(--dim);line-height:1.6;}
+.vc-mcs-lbl{font-weight:600;color:var(--red);margin-right:4px;}
+.vc-footer{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;flex-wrap:wrap;gap:8px;}
+.vc-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.vc-badge{font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.07em;padding:2px 7px;border-radius:3px;border:1px solid;}
+.vc-badge-ok{color:var(--green);background:rgba(21,128,61,.08);border-color:rgba(21,128,61,.28);}
+.vc-badge-med{color:var(--amber);background:rgba(180,83,9,.08);border-color:rgba(180,83,9,.28);}
+.vc-badge-hi{color:var(--red);background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.28);}
+.vc-badge-neu{color:var(--dim);background:var(--s2);border-color:var(--border2);}
+.vc-guideline{font-family:var(--mono);font-size:8.5px;color:var(--muted);display:flex;align-items:center;gap:4px;}
 
 /* Badged tips inside Strategy Details */
 .sd-tip-badged { padding:6px 0 6px 14px; border-left:1px solid var(--border2); margin:2px 0; }
@@ -308,48 +323,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .mcs-amber{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);color:var(--amber);}
 .mcs-red{background:rgba(240,64,64,.06);border:1px solid rgba(240,64,64,.22);color:var(--red);}
 
-/* ── Mobile responsive ─────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .app { height:auto; min-height:100dvh; overflow:auto; }
-  header { padding:0 14px; height:46px; }
-  .brand-name { font-size:13px; }
-  .brand-sub { display:none; }
-  .disclaimer { font-size:8px; padding:3px 7px; }
-  .progress-bar { padding:0 14px; height:32px; justify-content:center; }
-  .snode { display:none; padding:0 6px; }
-  .snode.active { display:flex; }
-  .ssep { display:none; }
-  .main { grid-template-columns:1fr; grid-template-rows:auto auto; overflow:visible; height:auto; min-height:0; }
-  .wizard-panel { border-right:none; border-bottom:none; display:block; overflow:visible; }
-  .wizard-scroll { padding:16px 16px 100px 16px; overflow:visible; height:auto; min-height:0; flex:none; }
-  #step-6 { overflow:visible; }
-  .params-wrap { overflow:visible; }
-  .rgrid { overflow:visible; max-height:none; }
-  .wiz-footer { position:fixed; bottom:0; left:0; right:0; z-index:100;
-    background:rgba(255,255,255,.94) !important; backdrop-filter:blur(12px); border-top:1px solid var(--border);
-    padding-bottom:env(safe-area-inset-bottom, 0px); }
-  .results-panel { overflow:visible; min-height:0; }
-  .res-scroll { flex:none; overflow:visible; max-height:none; }
-  .wiz-footer { padding:10px 16px; }
-  .sctr { display:none; }
-  .ogrid.c3 { grid-template-columns:1fr 1fr; }
-  .egrid { grid-template-columns:1fr; }
-  .step-title { font-size:15px; }
-  .med-btn { width:44px; height:34px; }
-  .medina-wrap { padding:12px 10px; }
-  .sl-big { font-size:28px; }
-  .rgrid { grid-template-columns:1fr; }
-  .card-bd { padding:10px; }
-  .card-toggle { padding:9px 10px; }
-}
-@media (max-width: 380px) {
-  .ogrid.c2 { grid-template-columns:1fr; }
-  .trow { flex-direction:column; }
-  .tog { min-width:unset; }
-  .params-wrap { max-height:none; }
-  .rgrid { max-height:none; overflow:visible; }
-}
-
 .params-wrap { border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:12px; }
 .params-hdr { display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
   background:var(--s2); cursor:pointer; font-family:var(--mono); font-size:9px;
@@ -364,10 +337,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .new-case-btn{font-size:10px;padding:4px 10px;opacity:.7;}
 .new-case-btn:hover{opacity:1;}
 
-.top-blocks { padding:0 0 4px 0; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.summary-oneliner { font-size:11px; color:var(--text); line-height:1.6;
-  padding:10px 12px; background:var(--s1); border-radius:6px;
-  border-left:2px solid var(--blue); margin-bottom:8px; font-style:italic; box-shadow:var(--shadow-sm); }
 .rr-head { font-family:var(--mono); font-size:9px; text-transform:uppercase;
   letter-spacing:.13em; color:var(--dim); margin-bottom:8px; }
 
@@ -404,16 +373,53 @@ body.analysis-done { overflow-y: auto; }
 .analysis-done-app .sctr { display:none !important; }
 .analysis-done-app #new-case-btn { display:block !important; }
 
+/* ── Mobile responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app { height:auto; min-height:100dvh; overflow:auto; }
+  header { padding:0 14px; height:46px; }
+  .brand-name { font-size:13px; }
+  .brand-sub { display:none; }
+  .disclaimer { font-size:8px; padding:3px 7px; }
+  .progress-bar { padding:0 14px; height:32px; justify-content:center; }
+  .snode { display:none; padding:0 6px; }
+  .snode.active { display:flex; }
+  .ssep { display:none; }
+  .main { grid-template-columns:1fr; grid-template-rows:auto auto; overflow:visible; height:auto; min-height:0; }
+  .wizard-panel { border-right:none; border-bottom:none; display:block; overflow:visible; }
+  .wizard-scroll { padding:16px 16px 100px 16px; overflow:visible; height:auto; min-height:0; flex:none; }
+  #step-6 { overflow:visible; }
+  .params-wrap { overflow:visible; }
+  .rgrid { overflow:visible; max-height:none; }
+  .wiz-footer { position:fixed; bottom:0; left:0; right:0; z-index:100;
+    background:rgba(255,255,255,.94) !important; backdrop-filter:blur(12px); border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom, 0px); }
+  .results-panel { overflow:visible; min-height:0; }
+  .res-scroll { flex:none; overflow:visible; max-height:none; }
+  .wiz-footer { padding:10px 16px; }
+  .sctr { display:none; }
+  .ogrid.c3 { grid-template-columns:1fr 1fr; }
+  .egrid { grid-template-columns:1fr; }
+  .step-title { font-size:15px; }
+  .med-btn { width:44px; height:34px; }
+  .medina-wrap { padding:12px 10px; }
+  .sl-big { font-size:28px; }
+  .rgrid { grid-template-columns:1fr; }
+  .card-bd { padding:10px; }
+  .card-toggle { padding:9px 10px; }
+  .vc-param { min-width:72px; padding:8px 10px; }
+  .vc-rec-headline { font-size:17px; }
+}
+@media (max-width: 380px) {
+  .ogrid.c2 { grid-template-columns:1fr; }
+  .trow { flex-direction:column; }
+  .tog { min-width:unset; }
+  .params-wrap { max-height:none; }
+  .rgrid { max-height:none; overflow:visible; }
+}
 @media (max-width: 768px) {
   body:not(.analysis-done) { padding-bottom: 70px; }
-}
-@media (max-width: 768px) {
   .si { padding:9px 0; }
   .si-txt { font-size:12px; }
-}
-@media (max-width: 768px) {
-  .snode.active .snum { width:22px; height:22px; font-size:10px; }
-  .snode.active .slbl { font-size:10px; }
 }
 </style>
 </head>
@@ -939,8 +945,6 @@ function newCase() {
   document.getElementById('next-btn').style.display = '';
   document.getElementById('results').innerHTML = '<div class="empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div style="margin-top:8px;opacity:.3;font-size:11px">Complete all steps to generate strategy</div></div>';
   document.getElementById('res-label').textContent = '—';
-  const old = document.getElementById('review-results');
-  if (old) old.remove();
   Object.assign(S, {vessel:null,bifurcation:null,medina:[0,0,0],sbSize:null,sbAngle:null,
     calcification:null,thrombus:null,timi:null,lesionLength:15,morphology:null,
     lvef:'normal',haemStatus:null,multiVessel:null,singleVessel:null});
@@ -948,7 +952,6 @@ function newCase() {
 }
 
 // ── Knowledge layer: rule engine ─────────────────────────────────────────
-// PciEngine and PciLoader are loaded from engine/evaluator.js + engine/loader.js.
 let ALL_RULES = [];
 
 async function loadKnowledge() {
@@ -959,7 +962,6 @@ async function loadKnowledge() {
   }
 }
 
-// Returns matched rules grouped by domain for the current wizard state
 function getMatchedRules() {
   if (!ALL_RULES.length) return {};
   const caseInput = PciLoader.caseFromWizardState(S);
@@ -967,7 +969,6 @@ function getMatchedRules() {
   return PciEngine.groupByDomain(result);
 }
 
-// Returns flat matched rule array for a specific domain
 function matchedForDomain(domain) {
   const groups = getMatchedRules();
   return groups[domain] || [];
@@ -1024,7 +1025,6 @@ function runAnalysis() {
   ldot.classList.add('active');
   document.getElementById('res-label').textContent = 'Analysing…';
 
-  // Yield to browser to paint the loading state, then compute synchronously
   requestAnimationFrame(() => {
     const data = buildStrategy();
 
@@ -1049,27 +1049,10 @@ function runAnalysis() {
   });
 }
 
-// ── AI layer removed ──────────────────────────────────────────────
-// buildPrompt() and buildExpertContext() live in the private AI-enhanced
-// version of this wizard. The core engine generates strategy deterministically.
-
-
+// ── Render results ─────────────────────────────────
 function renderResults(d) {
   const el = document.getElementById('results');
   el.innerHTML = '';
-
-  const pw = document.getElementById('params-wrap');
-  if (pw) {
-    const clone = pw.cloneNode(true);
-    clone.id = 'params-wrap-results';
-    clone.querySelector('[id="params-lbl"]') && (clone.querySelector('[id="params-lbl"]').id = 'params-lbl-r');
-    clone.querySelector('[id="params-chev"]') && (clone.querySelector('[id="params-chev"]').id = 'params-chev-r');
-    clone.querySelector('[id="review-grid"]') && (clone.querySelector('[id="review-grid"]').id = 'review-grid-r');
-    clone.setAttribute('onclick','');
-    clone.querySelector('.params-hdr').setAttribute('onclick','toggleParamsResults()');
-    clone.classList.add('params-collapsed');
-    el.appendChild(clone);
-  }
 
   const topHtml = buildTopBlocks(d);
   const topEl = document.createElement('div');
@@ -1085,51 +1068,79 @@ function renderResults(d) {
   });
 }
 
+// ── Verdict card ───────────────────────────────────
 function buildTopBlocks(d) {
-  const cls = d.accAhaClass || 'B2';
   const bs = d.bifurcationStrategy;
-  const isProv = bs && bs.approach === 'provisional';
-  let bifHtml = '';
-  if (S.bifurcation && d.bifurcationInvolvement && bs) {
-    bifHtml = '<div class="card rr-bif-card">'
-      +'<div class="card-hd">'
-      +'<span class="card-ttl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Recommended Strategy</span>'
-      +'<span class="rr-bif-medina">Medina '+h(d.medinaClass||'—')+(d.sideBranchMm?' · SB '+h(d.sideBranchMm):'')+'</span>'
-      +'</div><div class="rr-bif-body">'
-      +'<div class="rr-bif-strat" style="color:'+(isProv?'var(--green)':'var(--amber)')+'">'+(isProv?'Provisional':'2-Stent')+': '+h(bs.technique||'—')+'</div>'
-      +'<div class="rr-bif-rat">'+h(bs.rationale||'')+'</div>'
-      +'</div></div>';
-  } else if (!S.bifurcation) {
-    bifHtml = '<div class="card rr-bif-card">'
-      +'<div class="card-hd"><span class="card-ttl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Recommended Strategy</span></div>'
-      +'<div class="rr-bif-body"><div class="rr-bif-strat" style="color:var(--green)">Provisional — Single Vessel</div>'
-      +'<div class="rr-bif-rat">No bifurcation involvement. Standard single-vessel PCI — refer to strategy details.</div>'
-      +'</div></div>';
-  }
-  let haemoHtml = '';
-  if (d.haemodynamicSupport) {
-    haemoHtml = '<div class="rr-haemo" style="grid-column:1/-1"><div class="rr-haemo-lbl">⚠ Haemodynamic Support</div><div class="rr-haemo-txt">'+h(d.haemodynamicSupport)+'</div></div>';
-  }
-  return '<div class="top-blocks">'
-    +'<div class="card"><div class="card-hd">'
-    +'<span class="card-ttl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Lesion Summary</span>'
-    +'</div><div class="card-bd" style="padding:12px 16px 14px;">'
-    +(d.accAhaRationale?'<div class="rr-summary-txt">'+h(d.accAhaRationale)+'</div>':'')
-    +'<div class="rr-summary-badges">'
-    +'<span class="rr-class-badge aha-badge aha-'+cls+'">ACC/AHA '+cls+'</span>'
-    +'<span class="rr-class-badge rr-cplx rr-cplx-'+(d.complexityLevel||'moderate')+'">Complexity · '+h((d.complexityLevel||'').replace('_',' '))+'</span>'
-    +'</div></div></div>'
-    +bifHtml+haemoHtml+'</div>';
-}
+  const isProv = !S.bifurcation || !bs || bs.approach === 'provisional';
+  const accentCol = isProv ? 'var(--green)' : 'var(--amber)';
 
-function toggleParamsResults() {
-  const wrap = document.getElementById('params-wrap-results');
-  if (!wrap) return;
-  const chev = wrap.querySelector('.params-chev');
-  const lbl  = wrap.querySelector('.params-hdr span');
-  const collapsed = wrap.classList.toggle('params-collapsed');
-  if (chev) chev.style.transform = collapsed ? 'rotate(-90deg)' : '';
-  if (lbl)  lbl.textContent = collapsed ? 'Case Parameters (tap to expand)' : 'Case Parameters';
+  // Parameter strip colour coding
+  const calcColour = {none:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.calcification]||'neu';
+  const timiColour = S.timi < 2 ? 'hi' : S.timi < 3 ? 'med' : 'ok';
+  const lvefColour = {normal:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.lvef]||'neu';
+  const bifColour  = S.bifurcation ? 'med' : 'ok';
+  const bifVal     = S.bifurcation ? S.medina.join(',') : 'None';
+  const lvefLbl    = {normal:'Normal',mild:'Mild',moderate:'Moderate',severe:'Severe'}[S.lvef]||S.lvef;
+
+  const params = [
+    {l:'Vessel',      v:S.vessel||'—',       c:'neu'},
+    {l:'Length',      v:S.lesionLength+'mm',  c:S.lesionLength>20?'med':'neu'},
+    {l:'Calcium',     v:cap(S.calcification), c:calcColour},
+    {l:'TIMI',        v:'Grade '+S.timi,      c:timiColour},
+    {l:'Bifurcation', v:bifVal,               c:bifColour},
+    {l:'LVEF',        v:lvefLbl,              c:lvefColour},
+  ];
+
+  const paramHtml = params.map(p =>
+    '<div class="vc-param">'
+    +'<div class="vc-param-lbl">'+h(p.l)+'</div>'
+    +'<div class="vc-param-val '+p.c+'">'+h(String(p.v))+'</div>'
+    +'</div>'
+  ).join('');
+
+  // Recommendation headline (serif + em for technique)
+  let headline = '';
+  if (!S.bifurcation) {
+    headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">Single Vessel</em>';
+  } else if (bs) {
+    if (bs.approach === 'provisional') {
+      headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">'+h(bs.technique||'T-stenting')+'</em>';
+    } else {
+      headline = '2-Stent \u2014 <em style="font-style:italic;color:var(--amber)">'+h(bs.technique||'DK-Crush')+'</em>';
+    }
+  }
+
+  // MCS inset (only when haemodynamic support indicated)
+  const mcsHtml = d.haemodynamicSupport
+    ? '<div class="vc-mcs"><span class="vc-mcs-lbl">\u26a0 MCS \u2014</span>'+h(d.haemodynamicSupport)+'</div>'
+    : '';
+
+  // Footer badges
+  const cls = d.accAhaClass || 'B1';
+  const clsBadgeCls = cls==='C' ? 'vc-badge-hi' : cls==='B2' ? 'vc-badge-med' : 'vc-badge-ok';
+  const cplx = (d.complexityLevel||'moderate').replace('_',' ');
+  const cplxCls = (d.complexityLevel==='very_high'||d.complexityLevel==='high') ? 'vc-badge-hi' : 'vc-badge-neu';
+
+  return '<div class="vc-card">'
+    +'<div class="vc-hd">'
+    +'<span class="vc-hd-lbl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>&nbsp;Case Assessment</span>'
+    +'<span class="vc-hd-tag">'+h(S.vessel||'—')+' \u00b7 '+h(String(S.lesionLength))+'mm</span>'
+    +'</div>'
+    +'<div class="vc-params">'+paramHtml+'</div>'
+    +'<div class="vc-rec" style="border-left-color:'+accentCol+'">'
+    +'<div class="vc-rec-eyebrow">Recommended Strategy</div>'
+    +'<div class="vc-rec-headline">'+headline+'</div>'
+    +'<div class="vc-rec-rationale">'+h(d.accAhaRationale||'')+'</div>'
+    +mcsHtml
+    +'</div>'
+    +'<div class="vc-footer">'
+    +'<div class="vc-badges">'
+    +'<span class="vc-badge '+clsBadgeCls+'">ACC/AHA '+h(cls)+'</span>'
+    +'<span class="vc-badge '+cplxCls+'">Complexity \u00b7 '+h(cplx)+'</span>'
+    +'</div>'
+    +'<div class="vc-guideline"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>&nbsp;ESC 2024 \u00b7 ACC/AHA 2021</div>'
+    +'</div>'
+    +'</div>';
 }
 
 function toggleCard(btn) {
@@ -1137,11 +1148,6 @@ function toggleCard(btn) {
 }
 
 function cardEquip(d) {
-  const e  = d.equipment||{};
-  const p  = d.lesionPrep||{};
-  const im = d.imaging||{};
-
-  // Match rules via engine for the current wizard state
   const ruleGroups = getMatchedRules();
 
   function rowsForSection(domain) {
@@ -1159,10 +1165,6 @@ function cardEquip(d) {
   function sectionHdr(colour, label) {
     return '<div class="sd-hdr" style="--sd-col:'+colour+'">'+label+'</div>';
   }
-  function row(pipCls, txt) {
-    if (!txt) return '';
-    return '<div class="si"><div class="pip '+pipCls+'"></div><div class="si-txt">'+h(txt)+'</div></div>';
-  }
   function badgedTip(type, txt, src, recClass, recClassSrc) {
     if (!txt) return '';
     let badge = '';
@@ -1173,9 +1175,9 @@ function cardEquip(d) {
       const rc = String(recClass).trim().toUpperCase();
       if (rc === 'I') classCss = 'tip-class-I';
       else if (rc.startsWith('III')) classCss = 'tip-class-III';
-      badge = '<span class="tip-badge '+classCss+'">Class '+h(recClass)+(recClassSrc ? ' · '+h(recClassSrc) : '')+'</span>';
+      badge = '<span class="tip-badge '+classCss+'">Class '+h(recClass)+(recClassSrc ? ' \u00b7 '+h(recClassSrc) : '')+'</span>';
     } else {
-      badge = '<span class="tip-badge tip-consensus">Consensus'+(src?' · '+h(String(src).replace(/\s*\d{4}.*$/,'')):'')+'</span>';
+      badge = '<span class="tip-badge tip-consensus">Consensus'+(src?' \u00b7 '+h(String(src).replace(/\s*\d{4}.*$/,'')):'')+'</span>';
     }
     return '<div class="sd-tip sd-tip-badged">'
       +'<span class="tip-body">'+h(txt)+badge+'</span>'
@@ -1184,38 +1186,31 @@ function cardEquip(d) {
   function cautionTip(txt) {
     if (!txt) return '';
     return '<div class="sd-tip sd-tip-warn" style="color:var(--red);border-left-color:rgba(192,57,43,.3)">'
-      +'⚠ '+h(txt)
+      +'\u26a0 '+h(txt)
       +'</div>';
   }
 
   const rows = [];
 
-  // ── Guide / Access ────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--blue)', 'Guide Selection'));
   rows.push(rowsForSection('access'));
 
-  // ── Wire ──────────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--green)', 'Wire Selection'));
   rows.push(rowsForSection('wire'));
 
-  // ── Lesion Preparation ────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--amber)', 'Lesion Preparation'));
   rows.push(rowsForSection('lesion_prep'));
 
-  // ── Imaging ───────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--blue)', 'Imaging'));
   rows.push(rowsForSection('imaging'));
 
-  // ── Stent ─────────────────────────────────────────────────────────────────
   rows.push(sectionHdr('var(--green)', 'Stent'));
   rows.push(rowsForSection('stent'));
 
-  // ── Bifurcation (if applicable) ───────────────────────────────────────────
   if (S.bifurcation) {
     rows.push(sectionHdr('var(--amber)', 'Bifurcation'));
     rows.push(rowsForSection('bifurcation'));
   }
-  // Note: haemodynamic support is rendered in the top banner above the card.
 
   return '<div class="card">'
     +'<div class="card-toggle" onclick="toggleCard(this)">'
@@ -1228,10 +1223,6 @@ function cardEquip(d) {
 }
 
 // ── Deterministic strategy builder ────────────────────────────────
-// Primary output of the core engine. Combines the rule engine matches
-// with algorithmic classification logic to produce a full strategy object.
-// In the AI-enhanced version this output is passed to the API as structured
-// context; here it is the complete result.
 function buildStrategy() {
   const v=S.vessel||'LAD', bif=S.bifurcation, calc=S.calcification;
   const isR=['RCA','AM','PDA','PLB'].includes(v);
@@ -1333,7 +1324,6 @@ const lvefG = v => {
 buildPbar();
 showStep(0);
 </script>
-
 
 <div style="position:fixed;bottom:0;right:12px;z-index:50;padding-bottom:calc(6px + env(safe-area-inset-bottom));pointer-events:none;">
   <a href="about.html" style="pointer-events:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:rgba(168,164,159,.6);text-decoration:none;text-transform:uppercase;transition:color .15s;" onmouseover="this.style.color='#706b66'" onmouseout="this.style.color='rgba(168,164,159,.6)'">About</a>
