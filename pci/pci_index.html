@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>HeartPilot — PCI Strategy Planner</title>
+<style>
+html {
+  color-scheme: light;
+  background: #f7f5f2;
+}
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: light;
+    background: #f7f5f2 !important;
+    filter: none !important;
+  }
+  body {
+    background: #f7f5f2 !important;
+    color: #1a1714 !important;
+    filter: none !important;
+  }
+}
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#f7f5f2;--s1:#ffffff;--s2:#f0ece7;--s3:#e8e3dd;
+  --border:#e2ddd8;--border2:#ccc7c0;
+  --red:#c0392b;--redg:rgba(192,57,43,.10);
+  --amber:#b45309;--amberg:rgba(180,83,9,.10);
+  --green:#15803d;--greeng:rgba(21,128,61,.10);
+  --blue:#1d5fa8;--blueg:rgba(29,95,168,.10);
+  --text:#1a1714;--dim:#706b66;--muted:#a8a49f;
+  --shadow-sm:0 1px 3px rgba(26,23,20,.06),0 1px 2px rgba(26,23,20,.04);
+  --shadow-md:0 4px 16px rgba(26,23,20,.08),0 2px 6px rgba(26,23,20,.05);
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(192,57,43,.025) 0%,transparent 50%),radial-gradient(circle at 80% 100%,rgba(29,95,168,.025) 0%,transparent 50%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(112,107,102,.16) 1px,transparent 1px);background-size:28px 28px;opacity:.4;pointer-events:none;z-index:0;}
+
+/* Layout */
+.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;min-height:500px;overflow:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:50px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:32px;height:32px;border:1.5px solid var(--red);border-radius:6px;display:grid;place-items:center;color:var(--red);background:rgba(192,57,43,.05);box-shadow:0 0 0 3px rgba(192,57,43,.07);}
+.brand-name{font-family:'DM Serif Display',Georgia,serif;font-size:16px;font-weight:400;letter-spacing:.01em;}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:1px;}
+.disclaimer{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:3px 9px;border:1px solid var(--border2);border-radius:100px;background:var(--s1);}
+
+/* Progress */
+.progress-bar{display:flex;align-items:center;padding:0 24px;height:36px;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+.progress-bar::-webkit-scrollbar{display:none;}
+.snode{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 10px;height:100%;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
+.snode.active{color:var(--text);border-bottom-color:var(--red);font-weight:600;}
+.snode.done{color:var(--green);border-bottom-color:var(--green);}
+.snode-num{width:16px;height:16px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;font-size:8px;font-weight:600;flex-shrink:0;}
+.snode.done .snode-num{background:var(--green);border-color:var(--green);color:#fff;font-size:7px;}
+.ssep{width:14px;height:1px;background:var(--border2);flex-shrink:0;}
+
+/* Main two-column */
+.main{display:grid;grid-template-columns:1fr;flex:1;overflow:hidden;min-height:0;}
+.main.analysis-done{grid-template-columns:1fr;overflow:visible;flex:none;}
+.main.analysis-done .wizard-panel{display:none;}
+.main.analysis-done{height:auto;}
+body.analysis-done{overflow:auto;height:auto;}
+
+.main.analysis-done .results-panel{display:flex !important;flex-direction:column;}
+#results{display:flex;flex-direction:column;gap:10px;padding:20px 20px 32px;}
+
+/* Wizard */
+.wizard-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;}
+.wizard-scroll{flex:1;overflow-y:auto;padding:24px 28px;min-height:200px;}
+.wizard-scroll::-webkit-scrollbar{width:3px;}
+.wizard-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* Steps: all hidden, active shown */
+.step{display:none;flex-direction:column;gap:16px;}
+.step.active{display:flex;animation:fadeUp .15s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#step-0.active{opacity:1!important;}
+.step-title{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+.step-desc{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px;}
+
+/* ── Vessel selector ───────────────────────────────── */
+.vbtn{position:relative;display:block;cursor:pointer;border:none;background:none;width:100%;text-align:left;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.vbtn-inner{margin:2px 4px;padding:10px 12px;border-radius:5px;border:1.5px solid transparent;background:transparent;transition:background .12s,border-color .12s;display:flex;flex-direction:column;gap:1px;}
+.vbtn:hover .vbtn-inner{background:var(--s3);border-color:var(--border2);}
+.vbtn.sel .vbtn-inner{background:var(--redg);border-color:rgba(240,64,64,.45);}
+.vbtn-abbr{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--dim);display:flex;align-items:center;gap:6px;}
+.vbtn.sel .vbtn-abbr{color:var(--red);}
+.vbtn:hover .vbtn-abbr{color:var(--text);}
+.vbtn-name{font-family:var(--mono);font-size:9px;color:var(--dim);}
+.vbtn.sel .vbtn-name{color:rgba(240,64,64,.65);}
+.vbtn[data-level="1"] .vbtn-inner{margin-left:20px;}
+.vbtn[data-level="2"] .vbtn-inner{margin-left:36px;}
+.vbtn[data-level="1"]::before,.vbtn[data-level="2"]::before{content:'';position:absolute;left:22px;top:0;bottom:0;width:1px;background:var(--border2);}
+.vbtn[data-level="2"]::before{left:38px;}
+
+.sel-tag{display:none;align-items:center;justify-content:center;gap:8px;padding:8px 14px;background:var(--redg);border:1px solid rgba(240,64,64,.3);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--red);font-weight:600;margin-top:2px;}
+.sel-tag.show{display:flex;}
+
+/* ── Form elements ─────────────────────────────────── */
+.fgroup{display:flex;flex-direction:column;gap:8px;}
+.flabel{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);}
+.fsub{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:-4px;line-height:1.5;}
+
+.trow{display:flex;gap:8px;flex-wrap:wrap;}
+.tog{flex:1;min-width:80px;padding:13px 14px;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:6px;border:1.5px solid var(--border);background:var(--s1);color:var(--dim);font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;text-align:center;transition:all .13s;box-shadow:var(--shadow-sm);}
+.tog:hover{border-color:var(--border2);color:var(--text);background:var(--s2);}
+.tog.sy{border-color:var(--red);color:var(--red);background:var(--redg);}
+.tog.sn{border-color:var(--green);color:var(--green);background:var(--greeng);}
+.tog.sv{border-color:var(--blue);color:var(--blue);background:var(--blueg);}
+
+.ogrid{display:grid;gap:8px;}
+.ogrid.c2{grid-template-columns:1fr 1fr;}
+.ogrid.c3{grid-template-columns:1fr 1fr 1fr;}
+.ocard{padding:12px;min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:7px;border:1.5px solid var(--border);background:var(--s1);cursor:pointer;transition:all .13s;display:flex;flex-direction:column;gap:3px;box-shadow:var(--shadow-sm);}
+.ocard:hover{border-color:var(--border2);background:var(--s2);}
+.ocard.sel{border-color:var(--blue);background:var(--blueg);}
+.ocard-t{font-size:12px;font-weight:600;}
+.ocard-d{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.5;}
+.ocard.sel .ocard-t{color:var(--blue);}
+
+/* Medina */
+.medina-wrap{display:flex;align-items:flex-end;justify-content:center;gap:0;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;}
+.med-seg{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.med-btn{width:52px;height:38px;border-radius:6px;border:1.5px solid var(--border2);background:var(--s2);font-family:var(--mono);font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;display:grid;place-items:center;}
+.med-btn:hover{border-color:var(--dim);color:var(--text);}
+.med-btn.on{background:var(--redg);border-color:var(--red);color:var(--red);}
+.med-lbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.med-sep{width:24px;height:3px;background:var(--border2);margin:0 2px 20px;border-radius:2px;}
+.med-display{text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px;}
+.med-display b{color:var(--red);font-size:13px;}
+
+/* Slider */
+.sl-wrap{display:flex;flex-direction:column;gap:8px;}
+.sl-top{display:flex;align-items:baseline;justify-content:space-between;}
+.sl-big{font-family:var(--sans);font-size:38px;font-weight:700;letter-spacing:-1px;color:var(--red);line-height:1;}
+.sl-unit{font-size:13px;color:var(--dim);margin-left:2px;}
+.sl-hint{font-family:var(--mono);font-size:9px;color:var(--muted);}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;background:var(--border2);border-radius:3px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 2px 6px rgba(192,57,43,.3);cursor:pointer;}
+.sl-ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);}
+
+/* Stepper */
+.num-wrap{display:flex;align-items:center;gap:10px;}
+.num-btn{width:36px;height:36px;border-radius:6px;border:1px solid var(--border2);background:var(--s2);color:var(--dim);font-size:18px;cursor:pointer;display:grid;place-items:center;transition:all .13s;flex-shrink:0;}
+.num-btn:hover{border-color:var(--dim);color:var(--text);}
+.num-disp{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--text);min-width:52px;text-align:center;}
+.num-unit{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+/* Review */
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.ritem{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:9px 11px;box-shadow:var(--shadow-sm);}
+.rlbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:3px;}
+.rval{font-family:var(--mono);font-size:11px;font-weight:500;line-height:1.35;}
+.rval.hi{color:var(--red);}.rval.med{color:var(--amber);}.rval.ok{color:var(--green);}.rval.neu{color:var(--text);}
+
+/* Footer */
+.wiz-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 28px;border-top:1px solid var(--border);background:rgba(255,255,255,.92);backdrop-filter:blur(12px);flex-shrink:0;gap:12px;}
+.btn{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:8px 18px;border-radius:5px;border:1px solid var(--border2);background:var(--s2);color:var(--dim);cursor:pointer;transition:all .13s;}
+.btn:hover{background:var(--s3);border-color:var(--dim);color:var(--text);}
+.btn.pri{background:var(--red);border-color:var(--red);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(192,57,43,.25);}
+.btn.pri:hover{background:#a93225;}
+.btn:disabled{opacity:.28;pointer-events:none;}
+.fr{display:flex;gap:8px;align-items:center;}
+.sctr{font-family:var(--mono);font-size:9px;color:var(--muted);}
+
+/* Results panel */
+.results-panel{display:none;flex-direction:column;background:var(--bg);overflow:hidden;min-height:0;}
+.panel-bar{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:40px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.bar-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);display:flex;align-items:center;gap:7px;}
+.res-scroll{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.res-scroll::-webkit-scrollbar{width:3px;}
+.res-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-align:center;line-height:1.9;}
+.empty svg{opacity:.13;margin-bottom:6px;}
+
+/* Cards */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;animation:cIn .28s ease both;box-shadow:var(--shadow-sm);}
+@keyframes cIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--border);}
+.card-ttl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);display:flex;align-items:center;gap:6px;}
+.card-bd{padding:12px;}
+
+.mrow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);}
+.mrow:last-child{border:none;}
+.mlbl{font-family:var(--mono);font-size:10px;color:var(--dim);flex-shrink:0;}
+.mval{font-family:var(--mono);font-size:11px;font-weight:500;text-align:right;line-height:1.4;}
+.mval.hi{color:var(--red);}.mval.med{color:var(--amber);}.mval.ok{color:var(--green);}.mval.neu{color:var(--text);}
+
+/* ── Verdict card ──────────────────────────────────── */
+.vc-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;overflow:hidden;animation:cIn .28s ease both;box-shadow:var(--shadow-sm);}
+.vc-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--border);}
+.vc-hd-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);display:flex;align-items:center;gap:6px;}
+.vc-hd-tag{font-family:var(--mono);font-size:8px;color:var(--muted);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;background:var(--s1);}
+.vc-params{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.vc-param{flex:1;min-width:80px;padding:9px 12px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--border);}
+.vc-param:last-child{border-right:none;}
+.vc-param-lbl{font-family:var(--mono);font-size:7.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);}
+.vc-param-val{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--text);}
+.vc-param-val.ok{color:var(--green);}
+.vc-param-val.med{color:var(--amber);}
+.vc-param-val.hi{color:var(--red);}
+.vc-param-val.neu{color:var(--text);}
+.vc-rec{padding:14px 16px;border-bottom:1px solid var(--border);border-left:3px solid var(--green);}
+.vc-rec-eyebrow{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:5px;}
+.vc-rec-headline{font-family:'DM Serif Display',Georgia,serif;font-size:20px;font-weight:400;line-height:1.15;letter-spacing:-.01em;margin-bottom:5px;color:var(--text);}
+.vc-rec-rationale{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.65;}
+.vc-mcs{margin-top:10px;padding:8px 10px;background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:4px;font-family:var(--mono);font-size:9.5px;color:var(--dim);line-height:1.6;}
+.vc-mcs-lbl{font-weight:600;color:var(--red);margin-right:4px;}
+.vc-footer{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;flex-wrap:wrap;gap:8px;}
+.vc-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.vc-badge{font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.07em;padding:2px 7px;border-radius:3px;border:1px solid;}
+.vc-badge-ok{color:var(--green);background:rgba(21,128,61,.08);border-color:rgba(21,128,61,.28);}
+.vc-badge-med{color:var(--amber);background:rgba(180,83,9,.08);border-color:rgba(180,83,9,.28);}
+.vc-badge-hi{color:var(--red);background:rgba(192,57,43,.08);border-color:rgba(192,57,43,.28);}
+.vc-badge-neu{color:var(--dim);background:var(--s2);border-color:var(--border2);}
+.vc-guideline{font-family:var(--mono);font-size:8.5px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+
+/* Badged tips inside Strategy Details */
+.sd-tip-badged { padding:6px 0 6px 14px; border-left:1px solid var(--border2); margin:2px 0; }
+.tip-badge { display:inline-flex; align-items:center; vertical-align:middle; font-family:var(--mono); font-size:8.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; padding:1px 7px; border-radius:3px; border:1px solid; flex-shrink:0; margin-left:6px; position:relative; top:-1px; }
+.tip-exp        { color:#7c3aed; background:rgba(124,58,237,.08); border-color:rgba(124,58,237,.25); }
+.tip-class-I    { color:var(--green);  background:rgba(21,128,61,.08);  border-color:rgba(21,128,61,.3); }
+.tip-class-II   { color:var(--amber);  background:rgba(180,83,9,.08);   border-color:rgba(180,83,9,.3); }
+.tip-class-III  { color:var(--red);    background:rgba(192,57,43,.08);  border-color:rgba(192,57,43,.3); }
+.tip-consensus  { color:var(--muted);  background:var(--s2);            border-color:var(--border2); }
+.tip-body { font-family:var(--mono); font-size:10.5px; color:var(--dim); line-height:1.7; }
+
+/* Strategy Details sections */
+.sd-hdr{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;
+  color:var(--sd-col);border-left:2px solid var(--sd-col);padding:3px 0 3px 8px;
+  margin:10px 0 4px;background:color-mix(in srgb,var(--sd-col) 5%,transparent);border-radius:0 3px 3px 0;}
+.sd-hdr:first-child{margin-top:0;}
+.sd-tip{font-family:var(--mono);font-size:10.5px;color:var(--dim);line-height:1.7;
+  padding:4px 0 4px 14px;border-left:1px solid var(--border2);margin:2px 0;}
+.sd-tip-warn{color:var(--red);border-left-color:rgba(192,57,43,.3);}
+
+.si{display:flex;gap:10px;align-items:flex-start;padding:5px 0;}
+.si:last-child{border:none;}
+.pip{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.pip-g{background:var(--green);}
+.pip-a{background:var(--amber);}
+.pip-r{background:var(--red);}
+.pip-b{background:var(--blue);}
+.si-txt{font-size:13px;line-height:1.55;color:var(--dim);}
+.si-txt b{display:block;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.11em;color:var(--text);margin-bottom:2px;font-weight:500;}
+
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.ebox{background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:9px 10px;}
+.elbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-bottom:4px;}
+.eval{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text);line-height:1.45;}
+
+.bif-box{border-radius:7px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.bif-box.prov{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);}
+.bif-box.two{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);}
+.bif-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.14em;}
+.bif-box.prov .bif-lbl{color:var(--green);}
+.bif-box.two .bif-lbl{color:var(--amber);}
+.bif-tec{font-size:14px;font-weight:700;color:var(--text);}
+.bif-rat{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.65;}
+.bif-steps{display:flex;flex-direction:column;gap:5px;margin-top:6px;padding-top:8px;border-top:1px solid var(--border);}
+.bif-step{display:flex;gap:8px;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.6;}
+.bif-n{font-weight:700;flex-shrink:0;}
+
+.med-res-wrap{display:flex;align-items:center;justify-content:center;gap:0;padding:8px 0 4px;}
+.mr-seg{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.mr-box{width:28px;height:20px;border-radius:3px;border:1px solid var(--border2);background:var(--s3);font-size:10px;display:grid;place-items:center;font-weight:600;}
+.mr-box.on{background:var(--redg);border-color:var(--red);color:var(--red);}
+.mr-lbl{font-size:7px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.mr-sep{font-size:13px;color:var(--muted);margin-bottom:14px;padding:0 3px;}
+
+/* Loading */
+.skel{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.skel-ln{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--s3) 25%,var(--border2) 50%,var(--s3) 75%);background-size:200% 100%;animation:shim 1.3s infinite;}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.logwrap{font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;flex-direction:column;gap:4px;margin-bottom:2px;}
+.logln{display:flex;gap:10px;opacity:0;animation:fi .22s ease forwards;}
+@keyframes fi{to{opacity:1}}
+.logts{color:var(--muted);flex-shrink:0;}.logmsg{color:var(--dim);}.logmsg.ok{color:var(--green);}.logmsg.warn{color:var(--amber);}
+
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--muted);}
+.live-dot.active{background:var(--red);box-shadow:0 0 6px var(--red);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.warn-box{padding:9px 11px;background:rgba(240,64,64,.04);border:1px solid rgba(240,64,64,.11);border-radius:5px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;}
+.info-box{padding:9px 11px;background:rgba(96,165,250,.04);border:1px solid rgba(96,165,250,.12);border-radius:5px;font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.6;}
+
+/* SB angle sub-panel */
+#sb-angle-wrap{display:none;flex-direction:column;gap:8px;margin-top:2px;}
+#sb-angle-wrap.show{display:flex;}
+
+/* Collapsible card */
+.card-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.card-toggle:hover{background:color-mix(in srgb, var(--s3) 85%, var(--text) 15%);}
+.card-toggle .card-ttl{pointer-events:none;}
+.toggle-chevron{font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.card.collapsed .toggle-chevron{transform:rotate(-90deg);}
+.card-collapsible{overflow:hidden;max-height:2000px;transition:max-height .25s ease,opacity .2s ease;opacity:1;}
+.card.collapsed .card-collapsible{max-height:0;opacity:0;}
+
+/* Review results section */
+.review-results{margin-top:10px;display:flex;flex-direction:column;gap:7px;}
+.rr-head{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+
+.rr-bif-card{}
+.rr-bif-body{padding:9px 11px;}
+.rr-bif-medina{font-family:var(--mono);font-size:8.5px;color:var(--muted);}
+.rr-bif-strat{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.rr-bif-rat{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.5;}
+.rr-haemo{background:rgba(240,64,64,.04);border:1px solid rgba(240,64,64,.15);border-radius:6px;padding:9px 11px;}
+.rr-haemo-lbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.13em;color:var(--red);margin-bottom:4px;}
+.rr-haemo-txt{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.5;}
+
+/* MCS indicator strip */
+.mcs-strip{display:none;margin-top:8px;padding:8px 11px;border-radius:5px;font-family:var(--mono);font-size:9px;line-height:1.6;}
+.mcs-strip.show{display:block;}
+.mcs-green{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:var(--green);}
+.mcs-amber{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.22);color:var(--amber);}
+.mcs-red{background:rgba(240,64,64,.06);border:1px solid rgba(240,64,64,.22);color:var(--red);}
+
+.params-wrap { border:1px solid var(--border); border-radius:7px; overflow:hidden; margin-bottom:12px; }
+.params-hdr { display:flex; align-items:center; justify-content:space-between; padding:8px 12px;
+  background:var(--s2); cursor:pointer; font-family:var(--mono); font-size:9px;
+  text-transform:uppercase; letter-spacing:.12em; color:var(--dim); user-select:none; }
+.params-hdr:hover { background:var(--s3); }
+.params-chev { transition:transform .2s; font-size:9px; }
+.params-collapsed .rgrid { display:none; }
+.params-wrap .rgrid { border-top:1px solid var(--border); margin:0; border-radius:0; }
+.expert-tip { margin-top:5px; padding:5px 8px; background:rgba(96,165,250,.06);
+  border-radius:5px; border-left:2px solid var(--blue); }
+.expert-tip .si-txt { color:var(--blue); }
+.new-case-btn{font-size:10px;padding:4px 10px;opacity:.7;}
+.new-case-btn:hover{opacity:1;}
+
+.rr-head { font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.13em; color:var(--dim); margin-bottom:8px; }
+
+body.analysis-done { overflow-y: auto; }
+.analysis-done-app { height: auto !important; overflow: visible !important; }
+.analysis-done-app .main.analysis-done { overflow: visible !important; height: auto; }
+.analysis-done-app .results-panel { overflow: visible !important; height: auto; }
+.analysis-done-app .res-scroll { overflow: visible !important; flex: none; height: auto; }
+.analysis-done-app header { position: sticky; top: 0; z-index: 100; }
+
+#haem-stable.sel    { border-color:var(--green) !important; background:var(--greeng) !important; }
+#haem-stable.sel .ocard-t { color:var(--green) !important; }
+#haem-compromised.sel { border-color:var(--red) !important; background:var(--redg) !important; }
+#haem-compromised.sel .ocard-t { color:var(--red) !important; }
+
+#lvef-normal.sel    { border-color:var(--green) !important; background:var(--greeng) !important; }
+#lvef-normal.sel .ocard-t { color:var(--green) !important; }
+#lvef-mild.sel      { border-color:var(--amber) !important; background:var(--amberg) !important; }
+#lvef-mild.sel .ocard-t { color:var(--amber) !important; }
+#lvef-moderate.sel  { border-color:var(--amber) !important; background:var(--amberg) !important; }
+#lvef-moderate.sel .ocard-t { color:var(--amber) !important; }
+#lvef-severe.sel    { border-color:var(--red) !important; background:var(--redg) !important; }
+#lvef-severe.sel .ocard-t { color:var(--red) !important; }
+
+#mv-n.sel { border-color:var(--green) !important; background:var(--greeng) !important; color:var(--green) !important; }
+#mv-y.sel { border-color:var(--red) !important; background:var(--redg) !important; color:var(--red) !important; }
+
+#lrv-n.sel { border-color:var(--green) !important; background:var(--greeng) !important; color:var(--green) !important; }
+#lrv-y.sel { border-color:var(--red) !important; background:var(--redg) !important; color:var(--red) !important; }
+
+.analysis-done-app .wiz-footer { display:flex !important; }
+.analysis-done-app #back-btn,
+.analysis-done-app #next-btn,
+.analysis-done-app .sctr { display:none !important; }
+.analysis-done-app #new-case-btn { display:block !important; }
+
+/* ── Mobile responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app { height:auto; min-height:100dvh; overflow:auto; }
+  header { padding:0 14px; height:46px; }
+  .brand-name { font-size:13px; }
+  .brand-sub { display:none; }
+  .disclaimer { font-size:8px; padding:3px 7px; }
+  .progress-bar { padding:0 14px; height:32px; justify-content:center; }
+  .snode { display:none; padding:0 6px; }
+  .snode.active { display:flex; }
+  .ssep { display:none; }
+  .main { grid-template-columns:1fr; grid-template-rows:auto auto; overflow:visible; height:auto; min-height:0; }
+  .wizard-panel { border-right:none; border-bottom:none; display:block; overflow:visible; }
+  .wizard-scroll { padding:16px 16px 100px 16px; overflow:visible; height:auto; min-height:0; flex:none; }
+  #step-6 { overflow:visible; }
+  .params-wrap { overflow:visible; }
+  .rgrid { overflow:visible; max-height:none; }
+  .wiz-footer { position:fixed; bottom:0; left:0; right:0; z-index:100;
+    background:rgba(255,255,255,.94) !important; backdrop-filter:blur(12px); border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom, 0px); }
+  .results-panel { overflow:visible; min-height:0; }
+  .res-scroll { flex:none; overflow:visible; max-height:none; }
+  .wiz-footer { padding:10px 16px; }
+  .sctr { display:none; }
+  .ogrid.c3 { grid-template-columns:1fr 1fr; }
+  .egrid { grid-template-columns:1fr; }
+  .step-title { font-size:15px; }
+  .med-btn { width:44px; height:34px; }
+  .medina-wrap { padding:12px 10px; }
+  .sl-big { font-size:28px; }
+  .rgrid { grid-template-columns:1fr; }
+  .card-bd { padding:10px; }
+  .card-toggle { padding:9px 10px; }
+  .vc-param { min-width:72px; padding:8px 10px; }
+  .vc-rec-headline { font-size:17px; }
+}
+@media (max-width: 380px) {
+  .ogrid.c2 { grid-template-columns:1fr; }
+  .trow { flex-direction:column; }
+  .tog { min-width:unset; }
+  .params-wrap { max-height:none; }
+  .rgrid { max-height:none; overflow:visible; }
+}
+@media (max-width: 768px) {
+  body:not(.analysis-done) { padding-bottom: 70px; }
+  .si { padding:9px 0; }
+  .si-txt { font-size:12px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+      <div class="brand-icon"><svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 6 A10 10 0 0 1 24 6" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-linecap="round"/>
+  <line x1="16" y1="3" x2="16" y2="5.5" stroke="currentColor" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>
+  <line x1="7"  y1="7.5" x2="8.8" y2="9"  stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+  <line x1="25" y1="7.5" x2="23.2" y2="9" stroke="currentColor" stroke-width="1" opacity="0.3" stroke-linecap="round"/>
+  <path d="M16 25 C16 25 6 17.5 6 11.5 C6 8.5 8.2 6.5 11 6.5 C13 6.5 14.8 7.6 16 9.2 C17.2 7.6 19 6.5 21 6.5 C23.8 6.5 26 8.5 26 11.5 C26 17.5 16 25 16 25Z"
+        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M16 25 L13.5 28.5 L16 27.5 L18.5 28.5 Z" fill="currentColor" opacity="0.8"/>
+  <circle cx="16" cy="15" r="1.2" fill="currentColor" opacity="0.55"/>
+</svg></div>
+      <div><div class="brand-name">HeartPilot</div><div class="brand-sub">PCI Strategy Planner</div></div>
+    </a>
+    <span class="disclaimer">Research &amp; Education Only</span>
+  </header>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="pbar"></div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Wizard -->
+    <div class="wizard-panel">
+      <div class="wizard-scroll">
+
+        <!-- STEP 1: Vessel -->
+        <div class="step active" id="step-0" style="opacity:1;">
+          <div>
+            <div class="step-title">Select Lesion Location</div>
+            <div class="step-desc">Choose the affected vessel or territory</div>
+          </div>
+          <div class="ogrid c2" style="gap:8px;margin-top:4px;">
+            <button class="vbtn" data-vid="LM" onclick="selVessel('LM')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">LM</span><span class="vbtn-name">Left Main</span></div>
+            </button>
+            <button class="vbtn" data-vid="LAD" onclick="selVessel('LAD')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">LAD</span><span class="vbtn-name">Left Anterior Descending</span></div>
+            </button>
+            <button class="vbtn" data-vid="LCx" onclick="selVessel('LCx')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">LCx</span><span class="vbtn-name">Left Circumflex</span></div>
+            </button>
+            <button class="vbtn" data-vid="RCA" onclick="selVessel('RCA')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">RCA</span><span class="vbtn-name">Right Coronary Artery</span></div>
+            </button>
+            <button class="vbtn" data-vid="Branch" onclick="selVessel('Branch')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">Branch</span><span class="vbtn-name">Side Branch / Marginal</span></div>
+            </button>
+            <button class="vbtn" data-vid="Graft" onclick="selVessel('Graft')">
+              <div class="vbtn-inner"><span class="vbtn-abbr">Graft</span><span class="vbtn-name">Bypass Graft</span></div>
+            </button>
+          </div>
+          <div class="sel-tag" id="vessel-tag">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span id="vessel-tag-txt">—</span>
+          </div>
+        </div>
+
+        <!-- STEP 2: Bifurcation -->
+        <div class="step" id="step-1">
+          <div>
+            <div class="step-title">Bifurcation Involvement</div>
+            <div class="step-desc">Does the lesion involve a side branch?</div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Bifurcation lesion?</div>
+            <div class="trow">
+              <div class="tog" id="bif-y" onclick="setBif(true)">Yes — involves side branch</div>
+              <div class="tog" id="bif-n" onclick="setBif(false)">No — single vessel</div>
+            </div>
+          </div>
+          <div id="bif-extra" style="display:none;flex-direction:column;gap:14px;">
+            <div class="fgroup">
+              <div class="flabel">Medina Classification</div>
+              <div class="fsub">Toggle: 1 = disease present, 0 = absent</div>
+              <div class="medina-wrap">
+                <div class="med-seg"><button class="med-btn" id="mb0" onclick="togMed(0)">0</button><div class="med-lbl">MV Prox</div></div>
+                <div class="med-sep"></div>
+                <div class="med-seg"><button class="med-btn" id="mb1" onclick="togMed(1)">0</button><div class="med-lbl">MV Dist</div></div>
+                <div class="med-sep"></div>
+                <div class="med-seg"><button class="med-btn" id="mb2" onclick="togMed(2)">0</button><div class="med-lbl">Side Branch</div></div>
+              </div>
+              <div class="med-display" id="med-disp">Medina class: <b>—</b></div>
+            </div>
+            <div class="fgroup">
+              <div class="flabel">Side branch diameter</div>
+              <div class="trow">
+                <div class="tog" id="sb-s" onclick="setSB('lt1.5')">&lt;1.5 mm</div>
+                <div class="tog" id="sb-m" onclick="setSB('1.5-2.5')">1.5–2.5 mm</div>
+                <div class="tog" id="sb-l" onclick="setSB('gt2.5')">&gt;2.5 mm</div>
+              </div>
+            </div>
+            <div id="sb-angle-wrap">
+              <div class="flabel">Side branch take-off angle</div>
+              <div class="fsub">Angle between main vessel and side branch at carina</div>
+              <div class="ogrid c3">
+                <div class="ocard" id="ang-acute" onclick="setSBAngle('acute')">
+                  <div class="ocard-t" style="font-size:11px">Acute</div>
+                  <div class="ocard-d">&lt;45° — T-shaped or sharp take-off</div>
+                </div>
+                <div class="ocard" id="ang-moderate" onclick="setSBAngle('moderate')">
+                  <div class="ocard-t" style="font-size:11px">Moderate</div>
+                  <div class="ocard-d">45–70° — intermediate bifurcation angle</div>
+                </div>
+                <div class="ocard" id="ang-obtuse" onclick="setSBAngle('obtuse')">
+                  <div class="ocard-t" style="font-size:11px">Obtuse</div>
+                  <div class="ocard-d">&gt;70° — Y-shaped or wide-angle bifurcation</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Calcification -->
+        <div class="step" id="step-2">
+          <div>
+            <div class="step-title">Calcification Burden</div>
+            <div class="step-desc">Estimate the degree of calcification at the lesion site</div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Calcification Grade</div>
+            <div class="ogrid c2">
+              <div class="ocard" id="calc-none" onclick="setCalc('none')"><div class="ocard-t">None</div><div class="ocard-d">No angiographic calcium visible</div></div>
+              <div class="ocard" id="calc-mild" onclick="setCalc('mild')"><div class="ocard-t">Mild</div><div class="ocard-d">Faint calcification, &lt;90° arc</div></div>
+              <div class="ocard" id="calc-moderate" onclick="setCalc('moderate')"><div class="ocard-t">Moderate</div><div class="ocard-d">90–180° arc, incomplete ring</div></div>
+              <div class="ocard" id="calc-severe" onclick="setCalc('severe')"><div class="ocard-t">Severe</div><div class="ocard-d">&gt;180° arc, nodular or circumferential</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Thrombus & TIMI -->
+        <div class="step" id="step-3">
+          <div>
+            <div class="step-title">Thrombus &amp; TIMI Flow</div>
+            <div class="step-desc">Angiographic thrombus and baseline coronary flow</div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Angiographic thrombus present?</div>
+            <div class="trow">
+              <div class="tog" id="thr-y" onclick="setThr(true)">Yes — thrombus present</div>
+              <div class="tog" id="thr-n" onclick="setThr(false)">No — absent</div>
+            </div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">TIMI Flow Grade</div>
+            <div class="ogrid c2">
+              <div class="ocard" id="timi-0" onclick="setTimi(0)"><div class="ocard-t">TIMI 0</div><div class="ocard-d">No perfusion — complete occlusion</div></div>
+              <div class="ocard" id="timi-1" onclick="setTimi(1)"><div class="ocard-t">TIMI 1</div><div class="ocard-d">Minimal penetration, no distal filling</div></div>
+              <div class="ocard" id="timi-2" onclick="setTimi(2)"><div class="ocard-t">TIMI 2</div><div class="ocard-d">Partial filling, sluggish clearance</div></div>
+              <div class="ocard" id="timi-3" onclick="setTimi(3)"><div class="ocard-t">TIMI 3</div><div class="ocard-d">Normal — complete brisk perfusion</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: Lesion -->
+        <div class="step" id="step-4">
+          <div>
+            <div class="step-title">Lesion Characteristics</div>
+            <div class="step-desc">Length and morphological features</div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Lesion Length</div>
+            <div class="sl-wrap">
+              <div class="sl-top">
+                <div><span class="sl-big" id="len-val">15</span><span class="sl-unit"> mm</span></div>
+                <span class="sl-hint">5–60 mm</span>
+              </div>
+              <input type="range" id="len-sl" min="5" max="60" value="15" step="1" oninput="updLen(this.value)">
+              <div class="sl-ticks"><span>Short (&lt;10mm)</span><span>Medium (10–20mm)</span><span>Long (&gt;20mm)</span></div>
+            </div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Morphology</div>
+            <div class="ogrid c3">
+              <div class="ocard" id="morph-Discrete"  onclick="setMorph('Discrete')"><div class="ocard-t" style="font-size:11px">Discrete</div></div>
+              <div class="ocard" id="morph-Tubular"   onclick="setMorph('Tubular')"><div class="ocard-t" style="font-size:11px">Tubular</div></div>
+              <div class="ocard" id="morph-Diffuse"   onclick="setMorph('Diffuse')"><div class="ocard-t" style="font-size:11px">Diffuse</div></div>
+              <div class="ocard" id="morph-Ostial"    onclick="setMorph('Ostial')"><div class="ocard-t" style="font-size:11px">Ostial</div></div>
+              <div class="ocard" id="morph-Angulated" onclick="setMorph('Angulated')"><div class="ocard-t" style="font-size:11px">Angulated</div></div>
+              <div class="ocard" id="morph-Tortuous"  onclick="setMorph('Tortuous')"><div class="ocard-t" style="font-size:11px">Tortuous</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 6: Cardiac Function -->
+        <div class="step" id="step-5">
+          <div>
+            <div class="step-title">Cardiac Function</div>
+            <div class="step-desc">LV function and procedural risk factors for MCS need during high-risk PCI</div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">LV Ejection Fraction</div>
+            <div class="ogrid c2">
+              <div class="ocard" id="lvef-normal" onclick="setLvef('normal')"><div class="ocard-t">Normal</div><div class="ocard-d">EF &gt;55%</div></div>
+              <div class="ocard" id="lvef-mild" onclick="setLvef('mild')"><div class="ocard-t">Mildly Impaired</div><div class="ocard-d">EF 45–55%</div></div>
+              <div class="ocard" id="lvef-moderate" onclick="setLvef('moderate')"><div class="ocard-t">Moderately Impaired</div><div class="ocard-d">EF 30–44%</div></div>
+              <div class="ocard" id="lvef-severe" onclick="setLvef('severe')"><div class="ocard-t">Severely Impaired</div><div class="ocard-d">EF &lt;30%</div></div>
+            </div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Last Remaining Patent Vessel?</div>
+            <div class="fsub">Is this the only coronary still supplying viable myocardium?</div>
+            <div class="trow">
+              <div class="tog" id="lrv-n" onclick="setLRV(false)">No — other vessels patent</div>
+              <div class="tog" id="lrv-y" onclick="setLRV(true)">Yes — last remaining vessel</div>
+            </div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Extent of CAD</div>
+            <div class="fsub">Number of vessels with significant disease (including non-target vessels)</div>
+            <div class="trow">
+              <div class="tog" id="mv-n" onclick="setMV(false)">Single vessel disease</div>
+              <div class="tog" id="mv-y" onclick="setMV(true)">Multivessel disease</div>
+            </div>
+          </div>
+          <div class="fgroup">
+            <div class="flabel">Pre-procedural Haemodynamic Status</div>
+            <div class="fsub">Patient's haemodynamic state at the time of planned PCI</div>
+            <div class="ogrid c2">
+              <div class="ocard" id="haem-stable" onclick="setHaem('stable')"><div class="ocard-t">Stable</div><div class="ocard-d">Normal BP, no signs of low cardiac output</div></div>
+              <div class="ocard" id="haem-compromised" onclick="setHaem('compromised')"><div class="ocard-t">Compromised</div><div class="ocard-d">Relative hypotension, tachycardia, or reduced cardiac output without frank shock</div></div>
+            </div>
+          </div>
+          <div class="mcs-strip" id="mcs-strip"></div>
+        </div>
+
+        <!-- STEP 7: Review -->
+        <div class="step" id="step-6">
+          <div>
+            <div class="step-title">Review &amp; Analyse</div>
+            <div class="step-desc">Confirm all parameters before generating PCI strategy</div>
+          </div>
+          <div class="params-wrap" id="params-wrap"><div class="params-hdr" onclick="toggleParams()"><span id="params-lbl">Case Parameters</span><span class="params-chev" id="params-chev">&#9660;</span></div><div class="rgrid" id="review-grid"></div></div>
+          <div class="warn-box">⚠ AI-generated strategy — for research and educational use only. Requires review by a qualified interventional cardiologist.</div>
+        </div>
+
+      </div><!-- /wizard-scroll -->
+
+      <div class="wiz-footer">
+        <button class="btn" id="new-case-btn" onclick="newCase()" style="display:none">← New Case</button>
+        <button class="btn" id="back-btn" onclick="goBack()" style="display:none">← Back</button>
+        <div class="fr">
+          <span class="sctr" id="step-ctr">Step 1 of 7</span>
+          <button class="btn pri" id="next-btn" onclick="goNext()">Next →</button>
+        </div>
+      </div>
+    </div><!-- /wizard-panel -->
+
+    <!-- Results -->
+    <div class="results-panel">
+      <div class="panel-bar">
+        <span class="bar-lbl"><span class="live-dot" id="ldot"></span>PCI Strategy</span>
+        <span class="bar-lbl" id="res-label">—</span>
+      </div>
+      <div class="res-scroll" id="results">
+        <div class="empty">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Complete the lesion<br>assessment to generate<br>a PCI strategy
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="engine/evaluator.js"></script>
+<script src="engine/loader.js"></script>
+<script>
+// ── State ──────────────────────────────────────────
+const S = {
+  vessel: null, bifurcation: null, medina: [0,0,0], sbSize: null, sbAngle: null,
+  calcification: null, thrombus: null, timi: null,
+  lesionLength: 15, morphology: null,
+  age: 65, lvef: 'normal', haemStatus: null, multiVessel: null, singleVessel: null,
+};
+
+const VNAMES = {
+  LM:'Left Main', LAD:'LAD', LCx:'Left Circumflex',
+  RCA:'Right Coronary Artery', Branch:'Side Branch / Marginal', Graft:'Bypass Graft'
+};
+
+const STEPS = ['Vessel','Bifurcation','Calcium','Thrombus','Lesion','Cardiac Fn','Review'];
+let cur = 0;
+
+// ── Progress bar ───────────────────────────────────
+function buildPbar() {
+  document.getElementById('pbar').innerHTML = STEPS.map((s,i) =>
+    '<div class="snode" id="sn'+i+'"><div class="snode-num">'+(i+1)+'</div>'+s+'</div>' +
+    (i < STEPS.length-1 ? '<div class="ssep"></div>' : '')
+  ).join('');
+}
+
+function updPbar() {
+  STEPS.forEach((_,i) => {
+    const el = document.getElementById('sn'+i);
+    el.className = 'snode' + (i===cur?' active':i<cur?' done':'');
+    el.querySelector('.snode-num').innerHTML = i < cur
+      ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+      : String(i+1);
+  });
+}
+
+// ── Navigation ─────────────────────────────────────
+function showStep(n) {
+  document.querySelectorAll('.step').forEach((el,i) => {
+    el.classList.toggle('active', i===n);
+  });
+  cur = n;
+  updPbar();
+  document.getElementById('back-btn').style.display = n>0 ? 'inline-flex' : 'none';
+  document.getElementById('step-ctr').textContent = 'Step '+(n+1)+' of '+STEPS.length;
+  document.getElementById('next-btn').textContent = n===STEPS.length-1 ? '▶ Generate PCI Strategy' : 'Next →';
+  updNextBtn();
+  if (n===STEPS.length-1) buildReview();
+  if (window.innerWidth <= 768) {
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    document.querySelector('.wizard-scroll').scrollTop = 0;
+  }
+}
+
+function valid(n) {
+  if (n===0) return !!S.vessel;
+  if (n===1) return S.vessel === 'Graft' || S.bifurcation !== null;
+  if (n===2) return !!S.calcification;
+  if (n===3) return S.thrombus !== null && S.timi !== null;
+  if (n===4) return !!S.morphology;
+  if (n===5) return !!S.lvef && S.haemStatus !== null && S.multiVessel !== null && S.singleVessel !== null;
+  return true;
+}
+
+function updNextBtn() {
+  document.getElementById('next-btn').disabled = !valid(cur);
+}
+
+function goNext() {
+  if (cur === STEPS.length-1) { runAnalysis(); return; }
+  if (!valid(cur)) return;
+  const next = (cur === 0 && S.vessel === 'Graft') ? 2 : cur + 1;
+  if (cur === 0 && S.vessel === 'Graft') {
+    S.bifurcation = false;
+    S.medina = [0,0,0]; S.sbSize = null; S.sbAngle = null;
+  }
+  showStep(next);
+}
+
+function goBack() {
+  if (cur <= 0) return;
+  const prev = (cur === 2 && S.vessel === 'Graft') ? 0 : cur - 1;
+  showStep(prev);
+}
+
+// ── Vessel ─────────────────────────────────────────
+function selVessel(id) {
+  S.vessel = id;
+  document.querySelectorAll('.vbtn').forEach(el => el.classList.remove('sel'));
+  const btn = document.querySelector('.vbtn[data-vid="'+id+'"]');
+  if (btn) btn.classList.add('sel');
+  document.getElementById('vessel-tag-txt').textContent = (VNAMES[id]||id);
+  document.getElementById('vessel-tag').classList.add('show');
+  updNextBtn();
+}
+
+// ── Bifurcation ────────────────────────────────────
+function setBif(v) {
+  S.bifurcation = v;
+  document.getElementById('bif-y').className = 'tog'+(v?' sy':'');
+  document.getElementById('bif-n').className = 'tog'+(!v?' sn':'');
+  document.getElementById('bif-extra').style.display = v ? 'flex' : 'none';
+  if (!v) { S.medina=[0,0,0]; S.sbSize=null; }
+  updNextBtn();
+}
+
+function setSBAngle(v) {
+  S.sbAngle = v;
+  ['acute','moderate','obtuse'].forEach(a =>
+    document.getElementById('ang-'+a).className = 'ocard'+(a===v?' sel':''));
+  updNextBtn();
+}
+
+function togMed(i) {
+  S.medina[i] ^= 1;
+  const btn = document.getElementById('mb'+i);
+  btn.textContent = S.medina[i];
+  btn.className = 'med-btn'+(S.medina[i]?' on':'');
+  document.getElementById('med-disp').innerHTML = 'Medina class: <b>'+S.medina.join(',')+'</b>';
+}
+
+function setSB(v) {
+  S.sbSize = v;
+  [['sb-s','lt1.5'],['sb-m','1.5-2.5'],['sb-l','gt2.5']].forEach(([id,val]) =>
+    document.getElementById(id).className = 'tog'+(val===v?' sv':''));
+  const angWrap = document.getElementById('sb-angle-wrap');
+  if (v === 'gt2.5') {
+    angWrap.classList.add('show');
+  } else {
+    angWrap.classList.remove('show');
+    S.sbAngle = null;
+    ['acute','moderate','obtuse'].forEach(a =>
+      document.getElementById('ang-'+a).className = 'ocard');
+  }
+  updNextBtn();
+}
+
+// ── Calcification ──────────────────────────────────
+function setCalc(v) {
+  S.calcification = v;
+  ['none','mild','moderate','severe'].forEach(k =>
+    document.getElementById('calc-'+k).className = 'ocard'+(k===v?' sel':''));
+  updNextBtn();
+}
+
+// ── Thrombus / TIMI ────────────────────────────────
+function setThr(v) {
+  S.thrombus = v;
+  document.getElementById('thr-y').className = 'tog'+(v?' sy':'');
+  document.getElementById('thr-n').className = 'tog'+(!v?' sn':'');
+  updNextBtn();
+}
+
+function setTimi(v) {
+  S.timi = v;
+  [0,1,2,3].forEach(t => document.getElementById('timi-'+t).className = 'ocard'+(t===v?' sel':''));
+  updNextBtn();
+}
+
+// ── Lesion ─────────────────────────────────────────
+function updLen(v) { S.lesionLength=+v; document.getElementById('len-val').textContent=v; }
+
+function setMorph(v) {
+  S.morphology = v;
+  ['Discrete','Tubular','Diffuse','Ostial','Angulated','Tortuous'].forEach(m =>
+    document.getElementById('morph-'+m).className = 'ocard'+(m===v?' sel':''));
+  updNextBtn();
+}
+
+// ── Patient ────────────────────────────────────────
+function setLvef(v) {
+  S.lvef = v;
+  ['normal','mild','moderate','severe'].forEach(k =>
+    document.getElementById('lvef-'+k).className = 'ocard'+(k===v?' sel':''));
+  updMcsStrip();
+  updNextBtn();
+}
+
+function setHaem(v) {
+  S.haemStatus = v;
+  ['stable','compromised'].forEach(k =>
+    document.getElementById('haem-'+k).className = 'ocard'+(k===v?' sel':''));
+  updMcsStrip();
+  updNextBtn();
+}
+
+function setMV(v) {
+  S.multiVessel = v;
+  document.getElementById('mv-y').className = 'tog'+(v?' sy':'');
+  document.getElementById('mv-n').className = 'tog'+(!v?' sn':'');
+  updMcsStrip();
+  updNextBtn();
+}
+
+function updMcsStrip() {
+  const strip = document.getElementById('mcs-strip');
+  if (!strip) return;
+  const {lvef, singleVessel, multiVessel, haemStatus} = S;
+  const lms = S.vessel === 'LM';
+  const proxLAD = S.vessel === 'LAD';
+  const severeEF = lvef === 'severe';
+  const reducedEF = lvef === 'moderate' || lvef === 'severe';
+  const lastVessel = !!singleVessel;
+  const compromised = haemStatus === 'compromised';
+  const highRiskVessel = lms || proxLAD;
+  let score = 0;
+  if (severeEF) score += 3;
+  else if (reducedEF) score += 2;
+  if (lastVessel) score += 3;
+  if (compromised) score += 2;
+  if (highRiskVessel) score += 1;
+  if (multiVessel && reducedEF) score += 1;
+  let cls, msg;
+  if (score >= 5) {
+    cls = 'mcs-red';
+    msg = '<b>MCS strongly recommended</b> — Multiple high-risk criteria present ('
+      +(lastVessel?'last remaining vessel, ':'')+(severeEF?'severely impaired EF, ':'')
+      +(compromised?'haemodynamic compromise, ':'')+(lms?'LMS PCI, ':'').replace(/, $/, '')
+      +'). Prophylactic MCS before wiring per ACC/AHA/SCAI high-risk PCI guidance.';
+  } else if (score >= 3) {
+    cls = 'mcs-amber';
+    msg = '<b>MCS should be considered</b> — Significant high-risk features present. Discuss prophylactic MCS with team before PCI.';
+  } else if (score >= 1) {
+    cls = 'mcs-green';
+    msg = '<b>MCS generally not required</b> — Limited high-risk features. Standard high-risk PCI precautions apply.';
+  } else {
+    strip.className = 'mcs-strip'; strip.innerHTML = ''; return;
+  }
+  strip.className = 'mcs-strip show ' + cls;
+  strip.innerHTML = msg;
+}
+
+function setLRV(v) {
+  S.singleVessel = v;
+  document.getElementById('lrv-y').className = 'tog'+(v?' sy':'');
+  document.getElementById('lrv-n').className = 'tog'+(!v?' sn':'');
+  updMcsStrip();
+  updNextBtn();
+}
+
+// ── Review ─────────────────────────────────────────
+function newCase() {
+  document.querySelector('.main').classList.remove('analysis-done');
+  document.body.classList.remove('analysis-done');
+  document.querySelector('.app').classList.remove('analysis-done-app');
+  document.getElementById('new-case-btn').style.display = 'none';
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('next-btn').style.display = '';
+  document.getElementById('results').innerHTML = '<div class="empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><div style="margin-top:8px;opacity:.3;font-size:11px">Complete all steps to generate strategy</div></div>';
+  document.getElementById('res-label').textContent = '—';
+  Object.assign(S, {vessel:null,bifurcation:null,medina:[0,0,0],sbSize:null,sbAngle:null,
+    calcification:null,thrombus:null,timi:null,lesionLength:15,morphology:null,
+    lvef:'normal',haemStatus:null,multiVessel:null,singleVessel:null});
+  showStep(0);
+}
+
+// ── Knowledge layer: rule engine ─────────────────────────────────────────
+let ALL_RULES = [];
+
+async function loadKnowledge() {
+  try {
+    ALL_RULES = await PciLoader.loadRules('rules/');
+  } catch(e) {
+    console.warn('HeartPilot: rule engine failed to load —', e);
+  }
+}
+
+function getMatchedRules() {
+  if (!ALL_RULES.length) return {};
+  const caseInput = PciLoader.caseFromWizardState(S);
+  const result = PciEngine.evaluate(caseInput, ALL_RULES);
+  return PciEngine.groupByDomain(result);
+}
+
+function matchedForDomain(domain) {
+  const groups = getMatchedRules();
+  return groups[domain] || [];
+}
+
+loadKnowledge();
+
+function toggleParams() {
+  const wrap = document.getElementById('params-wrap');
+  const chev = document.getElementById('params-chev');
+  const lbl  = document.getElementById('params-lbl');
+  const collapsed = wrap.classList.toggle('params-collapsed');
+  chev.style.transform = collapsed ? 'rotate(-90deg)' : '';
+  lbl.textContent = collapsed ? 'Case Parameters (tap to expand)' : 'Case Parameters';
+}
+function collapseParams() {
+  const wrap = document.getElementById('params-wrap');
+  if (!wrap) return;
+  wrap.classList.add('params-collapsed');
+  const chev = document.getElementById('params-chev');
+  if (chev) chev.style.transform = 'rotate(-90deg)';
+  const lbl = document.getElementById('params-lbl');
+  if (lbl) lbl.textContent = 'Case Parameters (tap to expand)';
+}
+
+function buildReview() {
+  const sbMap={'lt1.5':'<1.5mm','1.5-2.5':'1.5–2.5mm','gt2.5':'>2.5mm'};
+  const bif = S.bifurcation
+    ? 'Yes — Medina '+S.medina.join(',')+(S.sbSize?', SB '+sbMap[S.sbSize]:'')
+    : 'No';
+  const rows = [
+    {l:'Vessel',       v:VNAMES[S.vessel]||S.vessel||'—'},
+    {l:'Morphology',   v:S.morphology||'—'},
+    {l:'Length',       v:S.lesionLength+' mm'},
+    {l:'Calcification',v:cap(S.calcification)},
+    {l:'Thrombus',     v:S.thrombus?'Present':'Absent', c:S.thrombus?'hi':'ok'},
+    {l:'TIMI Flow',    v:'Grade '+(S.timi??'—'), c:S.timi<2?'hi':S.timi<3?'med':'ok'},
+    {l:'Bifurcation',  v:bif, c:S.bifurcation?'med':'ok'},
+    {l:'LVEF',         v:lvefG(S.lvef), c:S.lvef==='severe'?'hi':S.lvef==='moderate'?'med':'ok'},
+    {l:'CAD Extent',    v:S.multiVessel?'Multivessel':'Single vessel', c:S.multiVessel?'med':'ok'},
+    {l:'Haem Status',   v:S.haemStatus==='compromised'?'Compromised':'Stable', c:S.haemStatus==='compromised'?'med':'ok'},
+    {l:'Last Vessel',   v:S.singleVessel?'Yes':'No', c:S.singleVessel?'hi':'ok'},
+    ...(S.bifurcation&&S.sbAngle?[{l:'SB Angle',v:{acute:'Acute (<45°)',moderate:'Moderate (45–70°)',obtuse:'Obtuse (>70°)'}[S.sbAngle]||S.sbAngle}]:[]),
+  ];
+  document.getElementById('review-grid').innerHTML = rows.map(r =>
+    '<div class="ritem"><div class="rlbl">'+r.l+'</div><div class="rval '+(r.c||'neu')+'">'+r.v+'</div></div>'
+  ).join('');
+}
+
+// ── Analysis ───────────────────────────────────────
+function runAnalysis() {
+  const resEl = document.getElementById('results');
+  const ldot  = document.getElementById('ldot');
+  ldot.classList.add('active');
+  document.getElementById('res-label').textContent = 'Analysing…';
+
+  requestAnimationFrame(() => {
+    const data = buildStrategy();
+
+    if (!S.bifurcation) {
+      data.medinaClass = null; data.medinaDescription = null;
+      data.sideBranchMm = null; data.bifurcationStrategy = null;
+    }
+
+    renderResults(data);
+    ldot.classList.remove('active');
+    document.getElementById('res-label').textContent = 'Complete';
+    collapseParams();
+    document.querySelector('.main').classList.add('analysis-done');
+    document.body.classList.add('analysis-done');
+    document.querySelector('.app').classList.add('analysis-done-app');
+    document.getElementById('new-case-btn').style.display = 'block';
+    document.getElementById('back-btn').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none';
+    if (window.innerWidth <= 768) {
+      setTimeout(() => { window.scrollTo({top:0, behavior:'smooth'}); }, 150);
+    }
+  });
+}
+
+// ── Render results ─────────────────────────────────
+function renderResults(d) {
+  const el = document.getElementById('results');
+  el.innerHTML = '';
+
+  const topHtml = buildTopBlocks(d);
+  const topEl = document.createElement('div');
+  topEl.innerHTML = topHtml;
+  el.appendChild(topEl);
+
+  [cardEquip(d)].filter(Boolean).forEach((html,i) => {
+    const w = document.createElement('div');
+    w.innerHTML = html;
+    const card = w.firstElementChild;
+    card.style.animationDelay = (i*0.08)+'s';
+    el.appendChild(card);
+  });
+}
+
+// ── Verdict card ───────────────────────────────────
+function buildTopBlocks(d) {
+  const bs = d.bifurcationStrategy;
+  const isProv = !S.bifurcation || !bs || bs.approach === 'provisional';
+  const accentCol = isProv ? 'var(--green)' : 'var(--amber)';
+
+  // Parameter strip colour coding
+  const calcColour = {none:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.calcification]||'neu';
+  const timiColour = S.timi < 2 ? 'hi' : S.timi < 3 ? 'med' : 'ok';
+  const lvefColour = {normal:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.lvef]||'neu';
+  const bifColour  = S.bifurcation ? 'med' : 'ok';
+  const bifVal     = S.bifurcation ? S.medina.join(',') : 'None';
+  const lvefLbl    = {normal:'Normal',mild:'Mild',moderate:'Moderate',severe:'Severe'}[S.lvef]||S.lvef;
+
+  const params = [
+    {l:'Vessel',      v:S.vessel||'—',       c:'neu'},
+    {l:'Length',      v:S.lesionLength+'mm',  c:S.lesionLength>20?'med':'neu'},
+    {l:'Calcium',     v:cap(S.calcification), c:calcColour},
+    {l:'TIMI',        v:'Grade '+S.timi,      c:timiColour},
+    {l:'Bifurcation', v:bifVal,               c:bifColour},
+    {l:'LVEF',        v:lvefLbl,              c:lvefColour},
+  ];
+
+  const paramHtml = params.map(p =>
+    '<div class="vc-param">'
+    +'<div class="vc-param-lbl">'+h(p.l)+'</div>'
+    +'<div class="vc-param-val '+p.c+'">'+h(String(p.v))+'</div>'
+    +'</div>'
+  ).join('');
+
+  // Recommendation headline (serif + em for technique)
+  let headline = '';
+  if (!S.bifurcation) {
+    headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">Single Vessel</em>';
+  } else if (bs) {
+    if (bs.approach === 'provisional') {
+      headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">'+h(bs.technique||'T-stenting')+'</em>';
+    } else {
+      headline = '2-Stent \u2014 <em style="font-style:italic;color:var(--amber)">'+h(bs.technique||'DK-Crush')+'</em>';
+    }
+  }
+
+  // MCS inset (only when haemodynamic support indicated)
+  const mcsHtml = d.haemodynamicSupport
+    ? '<div class="vc-mcs"><span class="vc-mcs-lbl">\u26a0 MCS \u2014</span>'+h(d.haemodynamicSupport)+'</div>'
+    : '';
+
+  // Footer badges
+  const cls = d.accAhaClass || 'B1';
+  const clsBadgeCls = cls==='C' ? 'vc-badge-hi' : cls==='B2' ? 'vc-badge-med' : 'vc-badge-ok';
+  const cplx = (d.complexityLevel||'moderate').replace('_',' ');
+  const cplxCls = (d.complexityLevel==='very_high'||d.complexityLevel==='high') ? 'vc-badge-hi' : 'vc-badge-neu';
+
+  return '<div class="vc-card">'
+    +'<div class="vc-hd">'
+    +'<span class="vc-hd-lbl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>&nbsp;Case Assessment</span>'
+    +'<span class="vc-hd-tag">'+h(S.vessel||'—')+' \u00b7 '+h(String(S.lesionLength))+'mm</span>'
+    +'</div>'
+    +'<div class="vc-params">'+paramHtml+'</div>'
+    +'<div class="vc-rec" style="border-left-color:'+accentCol+'">'
+    +'<div class="vc-rec-eyebrow">Recommended Strategy</div>'
+    +'<div class="vc-rec-headline">'+headline+'</div>'
+    +'<div class="vc-rec-rationale">'+h(d.accAhaRationale||'')+'</div>'
+    +mcsHtml
+    +'</div>'
+    +'<div class="vc-footer">'
+    +'<div class="vc-badges">'
+    +'<span class="vc-badge '+clsBadgeCls+'">ACC/AHA '+h(cls)+'</span>'
+    +'<span class="vc-badge '+cplxCls+'">Complexity \u00b7 '+h(cplx)+'</span>'
+    +'</div>'
+    +'<div class="vc-guideline"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>&nbsp;ESC 2024 \u00b7 ACC/AHA 2021</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function toggleCard(btn) {
+  btn.closest('.card').classList.toggle('collapsed');
+}
+
+function cardEquip(d) {
+  const ruleGroups = getMatchedRules();
+
+  function rowsForSection(domain) {
+    return (ruleGroups[domain] || [])
+      .map(r => {
+        const cls = r.evidence?.class || null;
+        const src = r.evidence?.source || null;
+        const rows = [badgedTip('gl', r.action, src, cls, src)];
+        if (r.caution) rows.push(cautionTip(r.caution));
+        return rows.join('');
+      })
+      .join('');
+  }
+
+  function sectionHdr(colour, label) {
+    return '<div class="sd-hdr" style="--sd-col:'+colour+'">'+label+'</div>';
+  }
+  function badgedTip(type, txt, src, recClass, recClassSrc) {
+    if (!txt) return '';
+    let badge = '';
+    if (type === 'exp') {
+      badge = '<span class="tip-badge tip-exp">Expert Tip</span>';
+    } else if (recClass) {
+      let classCss = 'tip-class-II';
+      const rc = String(recClass).trim().toUpperCase();
+      if (rc === 'I') classCss = 'tip-class-I';
+      else if (rc.startsWith('III')) classCss = 'tip-class-III';
+      badge = '<span class="tip-badge '+classCss+'">Class '+h(recClass)+(recClassSrc ? ' \u00b7 '+h(recClassSrc) : '')+'</span>';
+    } else {
+      badge = '<span class="tip-badge tip-consensus">Consensus'+(src?' \u00b7 '+h(String(src).replace(/\s*\d{4}.*$/,'')):'')+'</span>';
+    }
+    return '<div class="sd-tip sd-tip-badged">'
+      +'<span class="tip-body">'+h(txt)+badge+'</span>'
+      +'</div>';
+  }
+  function cautionTip(txt) {
+    if (!txt) return '';
+    return '<div class="sd-tip sd-tip-warn" style="color:var(--red);border-left-color:rgba(192,57,43,.3)">'
+      +'\u26a0 '+h(txt)
+      +'</div>';
+  }
+
+  const rows = [];
+
+  rows.push(sectionHdr('var(--blue)', 'Guide Selection'));
+  rows.push(rowsForSection('access'));
+
+  rows.push(sectionHdr('var(--green)', 'Wire Selection'));
+  rows.push(rowsForSection('wire'));
+
+  rows.push(sectionHdr('var(--amber)', 'Lesion Preparation'));
+  rows.push(rowsForSection('lesion_prep'));
+
+  rows.push(sectionHdr('var(--blue)', 'Imaging'));
+  rows.push(rowsForSection('imaging'));
+
+  rows.push(sectionHdr('var(--green)', 'Stent'));
+  rows.push(rowsForSection('stent'));
+
+  if (S.bifurcation) {
+    rows.push(sectionHdr('var(--amber)', 'Bifurcation'));
+    rows.push(rowsForSection('bifurcation'));
+  }
+
+  return '<div class="card">'
+    +'<div class="card-toggle" onclick="toggleCard(this)">'
+    +'<span class="card-ttl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Strategy Details</span>'
+    +'<span class="toggle-chevron">&#9660;</span>'
+    +'</div>'
+    +'<div class="card-collapsible"><div class="card-bd">'
+    +rows.join('')
+    +'</div></div></div>';
+}
+
+// ── Deterministic strategy builder ────────────────────────────────
+function buildStrategy() {
+  const v=S.vessel||'LAD', bif=S.bifurcation, calc=S.calcification;
+  const isR=['RCA','AM','PDA','PLB'].includes(v);
+  const isGraft=(v==='Graft');
+  const sev=calc==='severe', mod=calc==='moderate';
+  const sevCalc=sev, modCalc=mod;
+  const lms=(v==='LM'), long=S.lesionLength>20;
+  const sbLg=S.sbSize==='gt2.5', sbInv=S.medina[2]===1;
+  const sbMap={'lt1.5':'<1.5mm','1.5-2.5':'1.5–2.5mm','gt2.5':'>2.5mm'};
+  let bifStrat=null;
+  if(bif){
+    if(sbLg&&sbInv){
+      const ang = S.sbAngle;
+      let tech, techRat;
+      if (ang === 'acute') {
+        tech = 'DK-Crush';
+        techRat = 'Acute SB take-off angle strongly favours DK-Crush — T-shaped anatomy makes rewiring through crushed struts more predictable.';
+      } else if (ang === 'obtuse') {
+        tech = 'Culotte or DK-Crush';
+        techRat = 'Obtuse SB take-off angle favours Culotte when both branches are of similar calibre. DK-Crush remains an acceptable alternative.';
+      } else {
+        tech = 'DK-Crush (preferred) or Culotte';
+        techRat = 'Large SB with ostial disease — upfront 2-stent per EBC/ESC consensus. DK-Crush preferred for most anatomies.';
+      }
+      bifStrat={approach:'two_stent',technique:tech,rationale:techRat,
+        steps:['Wire both branches; pre-dilate MV and SB ostium',
+          'Deploy SB stent → crush → first kissing balloon → deploy MV stent → re-wire SB → FKBI',
+          'Apply POT before SB treatment and rePOT after any SB balloon inflation',
+          'Post-stent intravascular imaging to confirm SB ostial coverage',
+          'FKBI mandatory']};
+    } else {
+      bifStrat={approach:'provisional',technique:'Provisional T-stenting with POT–rePOT',
+        rationale:'Provisional strategy is the default for most bifurcation lesions per EBC/ESC consensus.',
+        steps:['Wire MV and SB (jailed wire technique)',
+          'Deploy MV stent; apply POT immediately',
+          'Re-wire SB through proximal cell; confirm with contrast',
+          'KBI only if: SB TIMI <3, residual stenosis >75%, or significant dissection',
+          'Apply rePOT after KBI; proceed to SB stenting only if provisional result unsatisfactory']};
+    }
+  }
+  return {
+    accAhaClass: sev||long||bif||v==='LM'?(bif&&v==='LM'?'C':'B2'):'B1',
+    accAhaRationale: v+' lesion '+S.lesionLength+'mm, '+(calc==='none'?'no':calc)+' calcification'+(bif?', bifurcation Medina '+S.medina.join(','):'')+(v==='LM'?' — left main involvement.':''),
+    estimatedSuccess: sev?'~60–70%':bif?'~70–80%':long?'~75–85%':'>85%',
+    complexityLevel: (v==='LM'||(bif&&sbLg))?'very_high':(sev||bif||(S.lvef==='severe'&&S.singleVessel))?'high':'moderate',
+    bifurcationInvolvement:!!bif,
+    medinaClass:bif?S.medina.join(','):null,
+    medinaDescription:bif?'Medina '+S.medina.join(',')+(S.medina[0]?' — proximal MV':'')+(S.medina[1]?', distal MV':'')+(S.medina[2]?', SB ostium':''):null,
+    sideBranchMm:bif?(sbMap[S.sbSize]||'not specified'):null,
+    bifurcationStrategy:bifStrat,
+    lesionPrep:{
+      strategy: sevCalc?'Calcium modification required':'Pre-dilatation required',
+      balloonSpec: sevCalc?'Non-compliant balloon post-atherectomy/IVL':'Semi-compliant balloon, sized to RVD',
+      calciumModification: sevCalc?'Rotational atherectomy or intravascular lithotripsy':modCalc?'Scoring or cutting balloon':null,
+      calciumModificationRationale: sevCalc?'Severe calcium requires modification before stenting':modCalc?'Moderate calcium may respond to scoring balloon; escalate to IVL if waist persists':null,
+    },
+    imaging:{
+      modality: 'IVUS',
+      rationale: lms?'Mandatory for LM — stent sizing, ostial coverage, and MSA optimisation':sevCalc?'Confirm adequate calcium modification and stent expansion':long?'Avoid geographic miss and confirm expansion throughout stented length':bif?'Guide POT sizing and confirm SB ostial coverage':'Confirm stent apposition and expansion',
+    },
+    equipment:{
+      guideType:isGraft?'JR4 or MP for right-sided grafts; AL1 or Hockey Stick for left-sided grafts. Prioritise coaxial alignment over backup force.':isR?'Judkins Right first choice; Amplatz Left for additional backup or tortuous anatomy':lms?'Large-lumen guide (7–8Fr); EBU or XB preferred':'EBU or XB-type for left system',
+      guidewireType:bif?'Soft workhorse wire (MV) + second workhorse wire (SB jailing)':sev?'Atherectomy-compatible wire; extra-support wire for device delivery':'Soft-tipped workhorse wire',
+      guidewireRationale:bif?'Second wire protects SB and facilitates re-access if SB flow is compromised':sev?'Compatible with atherectomy; extra-support improves deliverability through resistant calcium':'Standard workhorse appropriate',
+      balloonType:sev?'Scoring or cutting balloon for calcium modification; NC balloon post-dilatation':'Semi-compliant for pre-dilation; NC balloon for post-dilatation',
+      stentType:'Thin-strut drug-eluting stent (DES)'+(bif?' — ultra-thin strut preferred':'')+(long?'; overlapping DES if >28mm coverage required':''),
+      extraEquipment:[...(sev?['Rotational atherectomy system or IVL system']:[]),(calc!=='none'?'Intravascular imaging catheter (IVUS or OCT)':null),...(bif?['Y-connector for dual wire access','Inflation device for simultaneous kissing balloons']:[]),...((S.singleVessel||S.lvef==='severe')?['Mechanical circulatory support device']:[])].filter(Boolean),
+    },
+    haemodynamicSupport:(()=>{
+      const lrv=S.singleVessel; const lvef=S.lvef; const haem=S.haemStatus;
+      const lmv=S.vessel==='LM'; const proxLAD=S.vessel==='LAD';
+      const sevEF=lvef==='severe'; const redEF=lvef==='moderate'||lvef==='severe'; const compromised=haem==='compromised';
+      if(lrv&&sevEF) return 'Last remaining vessel + EF <30%: prophylactic MCS strongly recommended. Microaxial pump preferred over IABP.';
+      if(lrv) return 'Last remaining vessel: prophylactic MCS strongly recommended before wiring.';
+      if(sevEF&&(lmv||proxLAD)) return (lmv?'Unprotected LM':'Proximal LAD')+' PCI with severely impaired EF: prophylactic MCS should be strongly considered.';
+      if(sevEF||compromised) return 'High-risk features: prophylactic MCS should be considered. IABP minimum; microaxial pump if EF <35%.';
+      return null;
+    })(),
+    keyConsiderations:[
+      long?'Long lesion ('+S.lesionLength+'mm) — ensure adequate stent length; intravascular imaging strongly recommended':null,
+      S.timi<3?'TIMI '+S.timi+' flow at baseline — restore antegrade flow early':null,
+      S.thrombus?'Thrombus present — consider staged procedure or aspiration to reduce no-reflow risk':null,
+      'Radial access preferred to minimise access-site complications',
+    ].filter(Boolean),
+  };
+}
+
+// ── Utils ──────────────────────────────────────────
+const cap  = s  => s ? s.charAt(0).toUpperCase()+s.slice(1) : '—';
+const h = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const lvefG = v => {
+  if (typeof v === 'string') {
+    return {normal:'Normal (EF >55%)',mild:'Mildly Impaired (EF 45–55%)',moderate:'Moderately Impaired (EF 30–44%)',severe:'Severely Impaired (EF <30%)'}[v] || v;
+  }
+  return v<30?'Severely Impaired':v<40?'Severely Reduced':v<50?'Reduced':v<55?'Mildly Reduced':'Normal';
+};
+
+// ── Boot ───────────────────────────────────────────
+buildPbar();
+showStep(0);
+</script>
+
+<div style="position:fixed;bottom:0;right:12px;z-index:50;padding-bottom:calc(6px + env(safe-area-inset-bottom));pointer-events:none;">
+  <a href="about.html" style="pointer-events:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:rgba(168,164,159,.6);text-decoration:none;text-transform:uppercase;transition:color .15s;" onmouseover="this.style.color='#706b66'" onmouseout="this.style.color='rgba(168,164,159,.6)'">About</a>
+</div>
+</body>
+</html>
