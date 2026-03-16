@@ -9,7 +9,9 @@
       "domain": "stent",
       "priority": 1,
       "logic": "all",
-      "conditions": [],
+      "conditions": [
+	{ "field": "vessel", "op": "not_eq", "value": "Graft" }
+	],
       "action": "New-generation thin-strut drug-eluting stent (DES) recommended for ALL PCI indications, irrespective of presentation, lesion type, planned DAPT duration, or anticoagulant therapy.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
@@ -86,9 +88,9 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "DES and BMS are comparably effective in SVG PCI (DIVA, ISAR-CABG). Use slightly undersized diameter with generous length to minimise plaque extrusion. Avoid high-pressure post-dilation unless imaging shows inadequate expansion.",
+      "action": "DES and BMS are comparably effective in SVG PCI (DIVA, ISAR-CABG), however new-generation thin-strut DES recommended for ALL PCI indications. Use slightly undersized diameter with generous length to minimise plaque extrusion.",
       "caution": null,
-      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
     },
     {
