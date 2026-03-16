@@ -304,7 +304,7 @@
         { "field": "vessel", "op": "eq", "value": "Graft" },
         { "field": "calcification", "op": "not_eq", "value": "severe" }
       ],
-      "action": "Direct stenting preferred. Avoid routine pre-dilation unless severely stenotic or EPD delivery requires it. Slow nominal-pressure inflations. Avoid post-dilatation; if required, size 1:1 — never oversize.",
+      "action": "Direct stenting preferred. Avoid routine pre-dilation unless severely stenotic or EPD delivery requires it. Slow nominal-pressure inflations.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
       "active": true
