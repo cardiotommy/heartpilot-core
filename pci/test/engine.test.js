@@ -75,6 +75,17 @@ test('lesion_vlong derived from lesion_length_mm > 30', () => {
   assert.strictEqual(d2.lesion_vlong, false);
 });
 
+test('lesion_long and lesion_vlong are false at the exact threshold values (20, 30)', () => {
+  const d20 = derive({ lesion_length_mm: 20, timi: 3, lvef: 'normal', haem_status: 'stable', bifurcation: { present: false } });
+  assert.strictEqual(d20.lesion_long, false, 'lesion_long must be false at exactly 20mm (> not >=)');
+  const d21 = derive({ lesion_length_mm: 21, timi: 3, lvef: 'normal', haem_status: 'stable', bifurcation: { present: false } });
+  assert.strictEqual(d21.lesion_long, true, 'lesion_long must be true at 21mm');
+  const d30 = derive({ lesion_length_mm: 30, timi: 3, lvef: 'normal', haem_status: 'stable', bifurcation: { present: false } });
+  assert.strictEqual(d30.lesion_vlong, false, 'lesion_vlong must be false at exactly 30mm (> not >=)');
+  const d31 = derive({ lesion_length_mm: 31, timi: 3, lvef: 'normal', haem_status: 'stable', bifurcation: { present: false } });
+  assert.strictEqual(d31.lesion_vlong, true, 'lesion_vlong must be true at 31mm');
+});
+
 test('timi_zero and timi_impaired derived correctly', () => {
   const d0 = derive({ timi: 0, lesion_length_mm: 15, lvef: 'normal', haem_status: 'stable', bifurcation: { present: false } });
   assert.strictEqual(d0.timi_zero, true);
@@ -161,6 +172,19 @@ test('op: derived field via is_true (lesion_long)', () => {
   const longD = derive(longCase);
   const r = evalCondition(longCase, longD, { field: 'lesion_long', op: 'is_true' });
   assert.strictEqual(r.result, true);
+});
+
+test('op: has and not_has for array fields', () => {
+  const arrCase = { ...BASE, flags: ['complex', 'calcified'] };
+  const arrD = derive(arrCase);
+  const r1 = evalCondition(arrCase, arrD, { field: 'flags', op: 'has', value: 'complex' });
+  assert.strictEqual(r1.result, true);
+  const r2 = evalCondition(arrCase, arrD, { field: 'flags', op: 'has', value: 'urgent' });
+  assert.strictEqual(r2.result, false);
+  const r3 = evalCondition(arrCase, arrD, { field: 'flags', op: 'not_has', value: 'urgent' });
+  assert.strictEqual(r3.result, true);
+  const r4 = evalCondition(arrCase, arrD, { field: 'flags', op: 'not_has', value: 'complex' });
+  assert.strictEqual(r4.result, false);
 });
 
 test('logic: any fires when any condition matches', () => {
@@ -334,6 +358,226 @@ test('Inactive rules are never matched', () => {
   };
   const result = evaluate(BASE, [...ALL_RULES, inactiveRule]);
   assertNotMatched(result, 'test-inactive');
+});
+
+test('minPriority option excludes rules below the threshold', () => {
+  // acc-radial-preference is priority 1 and always fires without a filter
+  const unfiltered = evaluate(BASE, ALL_RULES);
+  assertMatched(unfiltered, 'acc-radial-preference');
+  // With minPriority: 2 it must be absent
+  const filtered = evaluate(BASE, ALL_RULES, { minPriority: 2 });
+  assertNotMatched(filtered, 'acc-radial-preference');
+  // Priority-2 rules still fire
+  assert.ok(filtered.matchCount > 0, 'Should still have priority-2+ matches');
+});
+
+test('Wire selection fires for tortuous morphology', () => {
+  const tort = { ...BASE, morphology: 'Tortuous' };
+  const result = evaluate(tort, ALL_RULES);
+  assertMatched(result, 'wire-tortuous');
+  assertNotMatched(result, 'wire-angulated');
+});
+
+test('Wire selection fires for angulated morphology', () => {
+  const ang = { ...BASE, morphology: 'Angulated' };
+  const result = evaluate(ang, ALL_RULES);
+  assertMatched(result, 'wire-angulated');
+  assertNotMatched(result, 'wire-tortuous');
+});
+
+test('Complex wire rule fires for long + tortuous + severe calcium combination', () => {
+  const complex = { ...BASE, lesion_length_mm: 25, morphology: 'Tortuous', calcification: 'severe' };
+  const result = evaluate(complex, ALL_RULES);
+  assertMatched(result, 'wire-long-tortuous-sevcalc');
+  assertMatched(result, 'wire-tortuous');   // less-specific rule also fires
+  assertMatched(result, 'wire-sevcalc');    // less-specific rule also fires
+  // Non-matching morphology rule must not fire
+  assertNotMatched(result, 'wire-angulated');
+});
+
+test('Complex wire rule does NOT fire when any of its three conditions is absent', () => {
+  // Tortuous + severe but NOT long (length 15mm)
+  const notLong = { ...BASE, morphology: 'Tortuous', calcification: 'severe', lesion_length_mm: 15 };
+  assertNotMatched(evaluate(notLong, ALL_RULES), 'wire-long-tortuous-sevcalc');
+  // Long + severe but NOT tortuous
+  const notTort = { ...BASE, morphology: 'Discrete', calcification: 'severe', lesion_length_mm: 25 };
+  assertNotMatched(evaluate(notTort, ALL_RULES), 'wire-long-tortuous-sevcalc');
+  // Long + tortuous but NOT severe calcium
+  const notCalc = { ...BASE, morphology: 'Tortuous', calcification: 'mild', lesion_length_mm: 25 };
+  assertNotMatched(evaluate(notCalc, ALL_RULES), 'wire-long-tortuous-sevcalc');
+});
+
+test('Reduced EF fires prep and stent rules', () => {
+  const reducedEf = { ...BASE, lvef: 'moderate', calcification: 'severe', lesion_length_mm: 25 };
+  const result = evaluate(reducedEf, ALL_RULES);
+  assertMatched(result, 'prep-reduced-ef-sevcalc');  // lvef_reduced + severe calc
+  assertMatched(result, 'prep-reduced-ef-long');      // lvef_reduced + lesion_long
+  assertMatched(result, 'stent-reduced-ef');          // lvef_reduced alone
+});
+
+test('Reduced EF rules do not fire for normal LVEF', () => {
+  const normalEf = { ...BASE, lvef: 'normal', calcification: 'severe', lesion_length_mm: 25 };
+  const result = evaluate(normalEf, ALL_RULES);
+  assertNotMatched(result, 'prep-reduced-ef-sevcalc');
+  assertNotMatched(result, 'prep-reduced-ef-long');
+  assertNotMatched(result, 'stent-reduced-ef');
+});
+
+test('Last remaining vessel fires prep and stent bailout rules', () => {
+  const lrv = { ...BASE, last_remaining_vessel: true, calcification: 'severe' };
+  const result = evaluate(lrv, ALL_RULES);
+  assertMatched(result, 'prep-last-vessel-sevcalc');  // LRV + severe calc
+  assertMatched(result, 'stent-last-vessel');          // LRV alone (IVUS mandatory)
+  assertMatched(result, 'haem-mcs-last-vessel');       // generic LRV haem rule
+});
+
+test('Last remaining vessel + haem compromised fires strongest MCS rule', () => {
+  const lrvShock = { ...BASE, last_remaining_vessel: true, haem_status: 'compromised' };
+  const result = evaluate(lrvShock, ALL_RULES);
+  assertMatched(result, 'haem-mcs-last-vessel-compromised');
+  assertMatched(result, 'haem-mcs-last-vessel');  // generic LRV rule also fires
+});
+
+test('Moderate calcium fires scoring balloon rule', () => {
+  const modCalc = { ...BASE, calcification: 'moderate' };
+  const result = evaluate(modCalc, ALL_RULES);
+  assertMatched(result, 'prep-modcalc');
+  assertNotMatched(result, 'prep-sevcalc');  // severe-only rule must not fire
+});
+
+test('Moderate calcium + long lesion fires compound prep rule', () => {
+  const modLong = { ...BASE, calcification: 'moderate', lesion_length_mm: 25 };
+  const result = evaluate(modLong, ALL_RULES);
+  assertMatched(result, 'prep-modcalc-long');
+  assertMatched(result, 'prep-modcalc');  // less-specific rule also fires
+});
+
+test('Very long lesion fires imaging and sequencing rules', () => {
+  const vlong = { ...BASE, lesion_length_mm: 35 };
+  const result = evaluate(vlong, ALL_RULES);
+  assertMatched(result, 'prep-vlong-lesion');    // lesion_vlong
+  assertMatched(result, 'stent-long-sequence');  // lesion_long
+  assertMatched(result, 'img-complex-lesion');   // any: lesion_long matches
+});
+
+test('TIMI impaired fires flow restoration rule', () => {
+  const timiImpaired = { ...BASE, timi: 1 };
+  const result = evaluate(timiImpaired, ALL_RULES);
+  assertMatched(result, 'prep-timi-impaired');
+});
+
+test('TIMI impaired rule does not fire for TIMI 3', () => {
+  const result = evaluate({ ...BASE, timi: 3 }, ALL_RULES);
+  assertNotMatched(result, 'prep-timi-impaired');
+});
+
+test('Ostial morphology fires ostial prep and imaging rules', () => {
+  const ostial = { ...BASE, morphology: 'Ostial' };
+  const result = evaluate(ostial, ALL_RULES);
+  assertMatched(result, 'prep-ostial');
+  assertMatched(result, 'img-ostial');
+});
+
+test('Diffuse morphology fires overlap sequencing rule', () => {
+  const diffuse = { ...BASE, morphology: 'Diffuse' };
+  const result = evaluate(diffuse, ALL_RULES);
+  assertMatched(result, 'prep-diffuse');
+});
+
+test('Tortuous or Angulated morphology fires guide extension access rule', () => {
+  const tort = evaluate({ ...BASE, morphology: 'Tortuous' }, ALL_RULES);
+  assertMatched(tort, 'acc-tort-ang-guide-extension');
+  const ang = evaluate({ ...BASE, morphology: 'Angulated' }, ALL_RULES);
+  assertMatched(ang, 'acc-tort-ang-guide-extension');
+  // A discrete lesion must not trigger the guide extension rule
+  assertNotMatched(evaluate(BASE, ALL_RULES), 'acc-tort-ang-guide-extension');
+});
+
+test('RCA with tortuous or angulated morphology fires RCA-specific guide rule', () => {
+  const rcaTort = { ...BASE, vessel: 'RCA', morphology: 'Tortuous' };
+  const result = evaluate(rcaTort, ALL_RULES);
+  assertMatched(result, 'acc-rca-tort-ang-guide');
+  assertMatched(result, 'acc-tort-ang-guide-extension');  // generic rule also fires
+  // Non-RCA vessel must not trigger the RCA-specific rule
+  const ladTort = { ...BASE, vessel: 'LAD', morphology: 'Tortuous' };
+  assertNotMatched(evaluate(ladTort, ALL_RULES), 'acc-rca-tort-ang-guide');
+});
+
+test('Haem compromised fires access guide rule', () => {
+  const shock = { ...BASE, haem_status: 'compromised' };
+  const result = evaluate(shock, ALL_RULES);
+  assertMatched(result, 'acc-haem-compromised-guide');
+});
+
+test('Graft + thrombus fires thrombus burden rule', () => {
+  const graftThr = { ...BASE, vessel: 'Graft', thrombus: true, timi: 1 };
+  const result = evaluate(graftThr, ALL_RULES);
+  assertMatched(result, 'prep-graft-thrombus-burden');
+});
+
+test('Thrombus with preserved flow in a graft fires graft-specific preserved-flow rule', () => {
+  const graftThr1 = { ...BASE, vessel: 'Graft', thrombus: true, timi: 1 };
+  const result = evaluate(graftThr1, ALL_RULES);
+  assertMatched(result, 'prep-thrombus-preserved-graft');
+  assertNotMatched(result, 'prep-thrombus-preserved-native');
+  assertNotMatched(result, 'prep-thrombus-timi0-graft');
+});
+
+test('Severe calcium + long lesion fires escalation and dual-prep rules', () => {
+  const sevcLong = { ...BASE, calcification: 'severe', lesion_length_mm: 25 };
+  const result = evaluate(sevcLong, ALL_RULES);
+  assertMatched(result, 'prep-sevcalc-long');      // severe + lesion_long
+  assertMatched(result, 'prep-sevcalc-dual-prep'); // fires for any severe calc
+  assertMatched(result, 'prep-sevcalc');           // generic severe calc also fires
+  assertMatched(result, 'stent-long-sequence');    // long lesion stent rule
+});
+
+test('Long lesion fires stent sequencing rule independently', () => {
+  const longLesion = { ...BASE, lesion_length_mm: 25 };
+  const result = evaluate(longLesion, ALL_RULES);
+  assertMatched(result, 'stent-long-sequence');
+  assertNotMatched(result, 'prep-sevcalc-long');  // no calcium condition met
+});
+
+test('Bifurcation fires completeness rules: thin strut, rewire, KBI threshold, post-stent imaging', () => {
+  const bifCase = { ...BASE, bifurcation: { present: true, medina_sb: 0, sb_size: '1.5-2.5' } };
+  const result = evaluate(bifCase, ALL_RULES);
+  assertMatched(result, 'stent-bif-thin-strut');
+  assertMatched(result, 'bif-sb-rewire-proximal-cell');
+  assertMatched(result, 'bif-kbi-threshold');
+  assertMatched(result, 'img-bif-post-stent');
+  // No large+ostial SB — 2-stent and FKBI rules must NOT fire
+  assertNotMatched(result, 'bif-2stent-indication');
+  assertNotMatched(result, 'bif-fkbi-mandatory');
+});
+
+test('LAD vessel fires proximal LAD imaging rule', () => {
+  const ladCase = { ...BASE, vessel: 'LAD' };
+  const result = evaluate(ladCase, ALL_RULES);
+  assertMatched(result, 'img-prox-lad');
+});
+
+test('Graft vessel fires graft imaging rule', () => {
+  const graftCase = { ...BASE, vessel: 'Graft' };
+  const result = evaluate(graftCase, ALL_RULES);
+  assertMatched(result, 'img-graft');
+});
+
+test('haem-mcs-consider fires for severe EF alone (any logic)', () => {
+  const sevEf = { ...BASE, lvef: 'severe' };
+  const result = evaluate(sevEf, ALL_RULES);
+  assertMatched(result, 'haem-mcs-consider');
+});
+
+test('haem-mcs-consider fires for compromised haem status alone (any logic)', () => {
+  const comp = { ...BASE, haem_status: 'compromised' };
+  const result = evaluate(comp, ALL_RULES);
+  assertMatched(result, 'haem-mcs-consider');
+});
+
+test('haem-mcs-consider does not fire for stable haem status and normal EF', () => {
+  const result = evaluate(BASE, ALL_RULES);
+  assertNotMatched(result, 'haem-mcs-consider');
 });
 
 test('All rules have required fields: id, domain, priority, logic, active, action, evidence', () => {
