@@ -1,14 +1,11 @@
-# Environment variables — never commit these
+# env
 .env
 .env.local
 .env.production
-
-# Netlify local dev
-.netlify/
 
 # macOS
 .DS_Store
 **/.DS_Store
 
-# Node (if you ever add dependencies)
+# Node
 node_modules/
