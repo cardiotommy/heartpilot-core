@@ -5,6 +5,18 @@
   "sources": ["ESC 2024", "EBC 2022", "SCAI 2020"],
   "rules": [
     {
+      "id": "stent-default",
+      "domain": "stent",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [],
+      "action": "Thin-strut drug-eluting stent (DES). Size to distal vessel reference; post-dilate with NC balloon to achieve full apposition.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
+      "active": true
+    },
+
+    {
       "id": "stent-long-sequence",
       "domain": "stent",
       "priority": 2,

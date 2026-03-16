@@ -5,6 +5,35 @@
   "sources": ["ESC 2018", "ESC 2024", "SCAI", "SCAI 2020"],
   "rules": [
     {
+      "id": "acc-rca-guide-selection",
+      "domain": "access",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "RCA" },
+        { "field": "morphology", "op": "not_in", "value": ["Tortuous", "Angulated"] }
+      ],
+      "action": "Judkins Right first choice for RCA. Amplatz Left if additional backup force is needed or anatomy is non-tortuous and complex.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
+      "id": "acc-left-system-guide",
+      "domain": "access",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "in", "value": ["LAD", "LCx", "Branch"] }
+      ],
+      "action": "EBU or XB-type guide for left system. Select curve to match aortic root size — EBU 3.5 or XB 3.5 for most adults.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
       "id": "acc-radial-preference",
       "domain": "access",
       "priority": 1,

@@ -5,6 +5,21 @@
   "sources": ["ESC 2024", "EAPCI 2023", "SCAI 2020", "DUAL-PREP registry"],
   "rules": [
     {
+      "id": "prep-standard-predilation",
+      "domain": "lesion_prep",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "in", "value": ["none", "mild"] },
+        { "field": "thrombus", "op": "is_false" }
+      ],
+      "action": "Pre-dilate with semi-compliant balloon sized to 1:1 RVD. Confirm full expansion before stent delivery.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
       "id": "prep-modcalc",
       "domain": "lesion_prep",
       "priority": 2,

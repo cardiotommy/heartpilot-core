@@ -5,6 +5,21 @@
   "sources": ["ESC 2024", "SCAI"],
   "rules": [
     {
+      "id": "wire-default",
+      "domain": "wire",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "not_in", "value": ["severe"] },
+        { "field": "morphology", "op": "not_in", "value": ["Tortuous", "Angulated"] }
+      ],
+      "action": "Soft-tipped workhorse wire (e.g. Sion Blue, BMW, Fielder FC). Shape a gentle primary curve for most anatomy.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+
+    {
       "id": "wire-sevcalc",
       "domain": "wire",
       "priority": 2,

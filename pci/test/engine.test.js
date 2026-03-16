@@ -338,6 +338,55 @@ test('Inactive rules are never matched', () => {
   assertNotMatched(result, 'test-inactive');
 });
 
+test('RCA guide selection rule fires for RCA without tortuous/angulated morphology', () => {
+  const rca = { ...BASE, vessel: 'RCA', morphology: 'Discrete' };
+  const result = evaluate(rca, ALL_RULES);
+  assertMatched(result, 'acc-rca-guide-selection');
+  assertNotMatched(result, 'acc-rca-tort-ang-guide'); // specific rule needs tortuous/angulated
+});
+
+test('RCA guide selection rule does NOT fire for tortuous RCA (specific rule takes over)', () => {
+  const rcaTort = { ...BASE, vessel: 'RCA', morphology: 'Tortuous' };
+  const result = evaluate(rcaTort, ALL_RULES);
+  assertNotMatched(result, 'acc-rca-guide-selection');
+  assertMatched(result, 'acc-rca-tort-ang-guide');
+});
+
+test('Left system guide rule fires for LAD, LCx, Branch', () => {
+  ['LAD', 'LCx', 'Branch'].forEach(v => {
+    const result = evaluate({ ...BASE, vessel: v }, ALL_RULES);
+    assertMatched(result, 'acc-left-system-guide');
+  });
+  assertNotMatched(evaluate({ ...BASE, vessel: 'RCA' }, ALL_RULES), 'acc-left-system-guide');
+});
+
+test('Default pre-dilation rule fires for none/mild calcium without thrombus', () => {
+  const r1 = evaluate({ ...BASE, calcification: 'none', thrombus: false }, ALL_RULES);
+  assertMatched(r1, 'prep-standard-predilation');
+  const r2 = evaluate({ ...BASE, calcification: 'mild', thrombus: false }, ALL_RULES);
+  assertMatched(r2, 'prep-standard-predilation');
+  // Must NOT fire for moderate/severe calcium
+  assertNotMatched(evaluate({ ...BASE, calcification: 'moderate' }, ALL_RULES), 'prep-standard-predilation');
+  assertNotMatched(evaluate({ ...BASE, calcification: 'severe' }, ALL_RULES), 'prep-standard-predilation');
+  // Must NOT fire when thrombus present
+  assertNotMatched(evaluate({ ...BASE, calcification: 'none', thrombus: true, timi: 2 }, ALL_RULES), 'prep-standard-predilation');
+});
+
+test('Default wire rule fires for standard cases', () => {
+  const result = evaluate(BASE, ALL_RULES);
+  assertMatched(result, 'wire-default');
+  // Must NOT fire for severe calcium
+  assertNotMatched(evaluate({ ...BASE, calcification: 'severe' }, ALL_RULES), 'wire-default');
+  // Must NOT fire for tortuous morphology
+  assertNotMatched(evaluate({ ...BASE, morphology: 'Tortuous' }, ALL_RULES), 'wire-default');
+});
+
+test('Default stent rule fires for all cases', () => {
+  const result = evaluate(BASE, ALL_RULES);
+  assertMatched(result, 'stent-default');
+});
+
+
 test('All rules have required fields: id, domain, priority, logic, active, action, evidence', () => {
   const missing = ALL_RULES.filter(r =>
     !r.id || !r.domain || !r.priority || !r.logic || r.active === undefined ||
