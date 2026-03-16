@@ -1,10 +1,9 @@
 {
   "domain": "haemodynamics",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2024", "ACC/AHA/SCAI 2021", "CULPRIT-SHOCK"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2018", "ESC 2023 ACS", "ESC 2024 CCS", "ACC/AHA 2021", "ACC/AHA 2025 ACS", "CULPRIT-SHOCK", "DanGer Shock", "ECLS-SHOCK", "IABP-SHOCK II", "SCAI 2024 STEMI"],
   "rules": [
-
     {
       "id": "haem-culprit-only-shock",
       "domain": "haemodynamics",
@@ -14,12 +13,65 @@
         { "field": "haem_status", "op": "eq", "value": "compromised" },
         { "field": "multivessel", "op": "is_true" }
       ],
-      "action": "Treat culprit lesion only in the acute setting. Stage non-culprit vessels after haemodynamic stabilisation. Minimise contrast and inflation times.",
+      "action": "Treat culprit lesion only in the acute setting. Routine multivessel PCI in cardiogenic shock increases death and renal failure risk (CULPRIT-SHOCK). Minimise contrast and inflation times.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": "III", "level": "A" },
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "III", "level": "B" },
       "active": true
     },
-
+    {
+      "id": "haem-staged-nonculprit-cs",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" },
+        { "field": "multivessel", "op": "is_true" }
+      ],
+      "action": "Stage non-culprit PCI after haemodynamic stabilisation. Reassess non-culprit lesion significance with FFR/iFR once shock has resolved.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2023, "class": "IIa", "level": "C" },
+      "active": true
+    },
+    {
+      "id": "haem-no-routine-iabp",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" }
+      ],
+      "action": "Routine IABP is NOT recommended in cardiogenic shock — no survival benefit demonstrated (IABP-SHOCK II). IABP remains reasonable only for mechanical complications (VSD, acute MR).",
+      "caution": null,
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "III", "level": "A" },
+      "active": true
+    },
+    {
+      "id": "haem-impella-cs",
+      "domain": "haemodynamics",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" },
+        { "field": "lvef_severe", "op": "is_true" }
+      ],
+      "action": "Impella CP is reasonable to reduce mortality in severe cardiogenic shock (DanGer Shock: lactate ≥2.5, SBP <100, EF <45%). Requires experienced centres. 14Fr femoral or axillary access.",
+      "caution": null,
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "IIa", "level": "A" },
+      "active": true
+    },
+    {
+      "id": "haem-no-routine-ecmo",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "haem_status", "op": "eq", "value": "compromised" }
+      ],
+      "action": "Routine VA-ECMO is NOT recommended in cardiogenic shock — no survival benefit (ECLS-SHOCK, ECMO-CS). Reserve for refractory cardiac arrest or as bridge in extremis.",
+      "caution": null,
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "III", "level": "A" },
+      "active": true
+    },
     {
       "id": "haem-mcs-last-vessel-seveef",
       "domain": "haemodynamics",
@@ -29,12 +81,11 @@
         { "field": "last_remaining_vessel", "op": "is_true" },
         { "field": "lvef_severe", "op": "is_true" }
       ],
-      "action": "Last remaining vessel + severely impaired EF: prophylactic MCS mandatory before wiring. Microaxial pump (e.g. Impella) strongly preferred over IABP. Confirm surgical backup.",
+      "action": "Last remaining vessel + severely impaired EF: prophylactic MCS mandatory before wiring. Impella CP strongly preferred over IABP. Femoral access for large-bore device. Confirm surgical backup.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "haem-mcs-last-vessel-compromised",
       "domain": "haemodynamics",
@@ -42,14 +93,14 @@
       "logic": "all",
       "conditions": [
         { "field": "last_remaining_vessel", "op": "is_true" },
-        { "field": "haem_status", "op": "eq", "value": "compromised" }
+        { "field": "haem_status", "op": "eq", "value": "compromised" },
+        { "field": "lvef_severe", "op": "is_false" }
       ],
-      "action": "Last remaining vessel + haemodynamic compromise: prophylactic MCS mandatory before wiring. Microaxial pump preferred. Femoral access for large-bore device.",
+      "action": "Last remaining vessel + haemodynamic compromise: prophylactic MCS mandatory before wiring. Impella CP preferred. Femoral access for large-bore device.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "haem-mcs-last-vessel",
       "domain": "haemodynamics",
@@ -60,12 +111,11 @@
         { "field": "lvef_severe", "op": "is_false" },
         { "field": "haem_status", "op": "not_eq", "value": "compromised" }
       ],
-      "action": "Last remaining vessel: prophylactic MCS strongly recommended before wiring. IABP acceptable if EF is preserved; microaxial pump if EF moderate. Confirm cardiac surgical backup.",
+      "action": "Last remaining vessel: prophylactic MCS strongly recommended before wiring. IABP acceptable if EF preserved; Impella CP if EF moderate. Confirm cardiac surgical backup.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "haem-mcs-severe-ef-high-risk-vessel",
       "domain": "haemodynamics",
@@ -76,12 +126,25 @@
         { "field": "vessel", "op": "in", "value": ["LM", "LAD"] },
         { "field": "last_remaining_vessel", "op": "is_false" }
       ],
-      "action": "Severely impaired EF with large jeopardy territory (LM or proximal LAD): prophylactic MCS should be strongly considered before wiring. Microaxial pump preferred.",
+      "action": "Severely impaired EF with large jeopardy territory (LM or proximal LAD): prophylactic MCS should be strongly considered. Impella CP or microaxial pump preferred over IABP.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
       "active": true
     },
-
+    {
+      "id": "haem-mcs-high-risk-elective",
+      "domain": "haemodynamics",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "lvef_severe", "op": "is_true" },
+        { "field": "haem_status", "op": "not_eq", "value": "compromised" }
+      ],
+      "action": "Elective MCS insertion may be reasonable as adjunct to high-risk PCI in patients with LVEF ≤35% and surgically prohibitive risk. Microaxial flow pump preferred. Awaiting PROTECT IV results for definitive evidence.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "IIb", "level": "C" },
+      "active": true
+    },
     {
       "id": "haem-mcs-consider",
       "domain": "haemodynamics",
@@ -91,11 +154,10 @@
         { "field": "lvef_severe", "op": "is_true" },
         { "field": "haem_status", "op": "eq", "value": "compromised" }
       ],
-      "action": "High-risk haemodynamic profile: discuss MCS with team before proceeding. IABP minimum; microaxial pump if EF <35% or large jeopardy territory.",
+      "action": "High-risk haemodynamic profile: discuss MCS with team before proceeding. Impella CP minimum for EF <35% or large jeopardy territory. IABP is NOT adequate for cardiogenic shock (Class III/A).",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "IIa", "level": "B" },
       "active": false
     }
-
   ]
 }

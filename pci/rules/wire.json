@@ -1,8 +1,8 @@
 {
   "domain": "wire",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2024", "SCAI"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2024 CCS", "SCAI", "SCAI 2024 STEMI", "EAPCI 2023"],
   "rules": [
     {
       "id": "wire-default",
@@ -18,7 +18,6 @@
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "wire-sevcalc",
       "domain": "wire",
@@ -27,9 +26,9 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Standard workhorse for crossing; exchange to extra-support wire before device delivery through heavily calcified segments.",
+      "action": "Standard workhorse for crossing; exchange to extra-support wire (e.g. Grand Slam, Iron Man) before device delivery through heavily calcified segments. If balloon won't cross, exchange to Rotawire for atherectomy.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
     {
@@ -40,9 +39,9 @@
       "conditions": [
         { "field": "morphology", "op": "eq", "value": "Tortuous" }
       ],
-      "action": "Soft steerable workhorse wire; gentle primary curve only. Avoid over-shaping which straightens the vessel.",
+      "action": "Soft steerable workhorse wire; gentle primary curve only. Avoid over-shaping which straightens the vessel. Microcatheter should be available for wire exchange and distal medication delivery.",
       "caution": null,
-      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
       "active": true
     },
     {
@@ -53,7 +52,7 @@
       "conditions": [
         { "field": "morphology", "op": "eq", "value": "Angulated" }
       ],
-      "action": "Soft steerable workhorse wire; avoid over-shaping the tip. A gentle curve navigates the angle more reliably than an aggressive tip.",
+      "action": "Soft steerable workhorse wire; avoid over-shaping the tip. A gentle curve navigates the angle more reliably than an aggressive tip. Microcatheter assists navigation through severe angulation.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
       "active": true
@@ -71,6 +70,33 @@
       "action": "Soft-tipped workhorse for crossing; extra-support wire for device delivery after lesion preparation. Consider GEC before escalating wire stiffness.",
       "caution": "Avoid aggressive wire manipulation in tortuous segments — perforation risk is elevated.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "wire-graft-lima",
+      "domain": "wire",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" }
+      ],
+      "action": "Hydrophilic floppy wire preferred for graft wiring to mitigate plication. Avoid stiff or aggressive wires that risk dissection in degenerated conduits.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "wire-no-sb-during-atherectomy",
+      "domain": "wire",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" },
+        { "field": "bifurcation.present", "op": "is_true" }
+      ],
+      "action": "Remove SB jailing wire before rotational or orbital atherectomy of the MV — burr entanglement with jailed wire risks catastrophic complications. Re-wire SB after atherectomy.",
+      "caution": "SB wire entanglement with RA/OA burr can cause wire fracture or vessel perforation.",
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     }
   ]

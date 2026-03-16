@@ -1,9 +1,33 @@
 {
   "domain": "access",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2018", "ESC 2024", "SCAI", "SCAI 2020"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2018", "ESC 2023 ACS", "ESC 2024 CCS", "ACC/AHA 2021", "ACC/AHA 2025 ACS", "SCAI 2024 STEMI", "EAPCI 2023"],
   "rules": [
+    {
+      "id": "acc-radial-preference",
+      "domain": "access",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [],
+      "action": "Radial access is the standard approach for all PCI. Reduces bleeding, vascular complications, and mortality compared with femoral.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
+      "active": true
+    },
+    {
+      "id": "acc-left-system-guide",
+      "domain": "access",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "in", "value": ["LM", "LAD", "LCx", "Branch"] }
+      ],
+      "action": "EBU or XB-type guide for left coronary system. Select curve to match aortic root size — EBU 3.5 or XB 3.5 for most adults.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
     {
       "id": "acc-rca-guide-selection",
       "domain": "access",
@@ -13,72 +37,7 @@
         { "field": "vessel", "op": "eq", "value": "RCA" },
         { "field": "morphology", "op": "not_in", "value": ["Tortuous", "Angulated"] }
       ],
-      "action": "Judkins Right first choice for RCA. Amplatz Left if additional backup force is needed or anatomy is non-tortuous and complex.",
-      "caution": null,
-      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
-      "active": true
-    },
-
-    {
-      "id": "acc-left-system-guide",
-      "domain": "access",
-      "priority": 1,
-      "logic": "all",
-      "conditions": [
-        { "field": "vessel", "op": "in", "value": ["LAD", "LCx", "Branch"] }
-      ],
-      "action": "EBU or XB-type guide for left system. Select curve to match aortic root size — EBU 3.5 or XB 3.5 for most adults.",
-      "caution": null,
-      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
-      "active": true
-    },
-
-    {
-      "id": "acc-radial-preference",
-      "domain": "access",
-      "priority": 1,
-      "logic": "all",
-      "conditions": [],
-      "action": "Radial access preferred over femoral for all PCI.",
-      "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
-      "active": true
-    },
-    {
-      "id": "acc-lm-guide-size",
-      "domain": "access",
-      "priority": 2,
-      "logic": "all",
-      "conditions": [
-        { "field": "vessel", "op": "eq", "value": "LM" }
-      ],
-      "action": "Large-lumen guide (≥7Fr); 8Fr preferred when DK-Crush is planned. Confirm non-dampened waveform before wiring.",
-      "caution": null,
-      "evidence": { "source": "ESC", "year": 2018, "class": "I", "level": "C" },
-      "active": true
-    },
-    {
-      "id": "acc-lm-surgical-backup",
-      "domain": "access",
-      "priority": 2,
-      "logic": "all",
-      "conditions": [
-        { "field": "vessel", "op": "eq", "value": "LM" }
-      ],
-      "action": "Confirm cardiac surgical backup availability before proceeding. Size arterial access for potential MCS insertion.",
-      "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "C" },
-      "active": true
-    },
-    {
-      "id": "acc-tort-ang-guide-extension",
-      "domain": "access",
-      "priority": 2,
-      "logic": "all",
-      "conditions": [
-        { "field": "morphology", "op": "in", "value": ["Tortuous", "Angulated"] }
-      ],
-      "action": "Consider guide extension catheter (GEC) rather than escalating guide stiffness to improve device deliverability.",
+      "action": "Judkins Right first choice for RCA. Amplatz Left if additional backup force is needed.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
       "active": true
@@ -95,6 +54,45 @@
       "action": "Judkins Right first; escalate to Amplatz only if support insufficient. Deep-seating or GEC preferred over aggressive guide engagement.",
       "caution": "Amplatz carries higher ostial trauma risk in tortuous/angulated RCA.",
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "acc-tort-ang-guide-extension",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "morphology", "op": "in", "value": ["Tortuous", "Angulated"] }
+      ],
+      "action": "Consider guide extension catheter (GEC) rather than escalating guide stiffness to improve device deliverability through tortuous or angulated segments.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "acc-lm-guide-size",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "Large-lumen guide (≥7Fr) required for LM PCI; 8Fr preferred for complex bifurcation techniques. EBU or XB for left coronary engagement. Confirm non-dampened waveform before wiring.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2018, "class": "I", "level": "C" },
+      "active": true
+    },
+    {
+      "id": "acc-lm-surgical-backup",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "Confirm cardiac surgical backup availability. Non-emergent LM PCI should be performed by experienced, adequately equipped teams (≥20 LM PCI/year per operator).",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "C" },
       "active": true
     },
     {
@@ -124,6 +122,19 @@
       "active": true
     },
     {
+      "id": "acc-sevcalc-radial",
+      "domain": "access",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Radial access advised for calcified lesion PCI to reduce bleeding risk, particularly when atherectomy or IVL is planned.",
+      "caution": null,
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
+      "active": true
+    },
+    {
       "id": "acc-haem-compromised-guide",
       "domain": "access",
       "priority": 3,
@@ -131,9 +142,24 @@
       "conditions": [
         { "field": "haem_status", "op": "eq", "value": "compromised" }
       ],
-      "action": "Establish MCS before wiring if possible. Plan femoral access for large-bore device. Minimise contrast; treat culprit only if multivessel disease present.",
+      "action": "Plan dual-access strategy: radial for PCI + femoral for large-bore MCS device. If femoral needed, use ultrasound and fluoroscopy guidance routinely. Minimise contrast; treat culprit only if multivessel disease.",
       "caution": "Do not delay culprit treatment to place MCS if the patient is actively deteriorating — proceed in parallel.",
-      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "I", "level": "B" },
+      "active": true
+    },
+    {
+      "id": "acc-mcs-femoral-sizing",
+      "domain": "access",
+      "priority": 3,
+      "logic": "any",
+      "conditions": [
+        { "field": "lvef_severe", "op": "is_true" },
+        { "field": "last_remaining_vessel", "op": "is_true" },
+        { "field": "haem_compromised", "op": "is_true" }
+      ],
+      "action": "Size arterial access for potential MCS insertion: IABP 7–8Fr; Impella CP 14Fr; Impella 5.5 21Fr (axillary); VA-ECMO 15–21Fr arterial. Assess peripheral vascular disease before committing to large-bore access.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
       "active": true
     }
   ]

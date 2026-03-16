@@ -1,8 +1,8 @@
 {
   "domain": "imaging",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2024", "EBC 2022", "SCAI 2020", "RENOVATE-COMPLEX-PCI", "OCTOBER"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2018", "ESC 2023 ACS", "ESC 2024 CCS", "ACC/AHA 2021", "ACC/AHA 2025 ACS", "EBC 2022", "SCAI 2020", "EAPCI 2023", "RENOVATE-COMPLEX-PCI", "OCTOBER", "ILUMIEN IV"],
   "rules": [
     {
       "id": "img-complex-lesion",
@@ -14,7 +14,7 @@
         { "field": "lesion_long", "op": "is_true" },
         { "field": "bifurcation.present", "op": "is_true" }
       ],
-      "action": "Intravascular imaging (IVUS or OCT) recommended. Pre-stent imaging guides sizing and preparation; post-stent imaging confirms expansion and identifies edge dissection.",
+      "action": "Intravascular imaging (IVUS or OCT) is recommended for complex PCI. Pre-stent imaging guides sizing and preparation; post-stent imaging confirms expansion and identifies edge dissection. Reduces TVF and MACE (RENOVATE-COMPLEX-PCI, OCTOBER, ILUMIEN IV).",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
@@ -27,7 +27,20 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LM" }
       ],
-      "action": "IVUS mandatory. MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm². Post-dilate with NC balloon if any target unmet.",
+      "action": "IVUS mandatory for LM PCI. Post-dilate with NC balloon if MSA targets unmet. IVUS preferred over OCT for LM due to better ostial visualisation and no need for contrast flushing in large vessels.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
+      "active": true
+    },
+    {
+      "id": "img-lm-msa-targets",
+      "domain": "imaging",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "LM" }
+      ],
+      "action": "IVUS MSA targets for LM: proximal LM ≥8mm²; distal LM/polygon of confluence ≥7mm²; LAD ostium ≥6mm²; LCx ostium ≥5mm². Post-dilate with NC balloon if any target unmet.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
@@ -40,9 +53,9 @@
       "conditions": [
         { "field": "lm_bif", "op": "is_true" }
       ],
-      "action": "IVUS mandatory pre- and post-stenting. MSA targets: LM ≥8mm², LAD ostium ≥6mm², LCx ostium ≥5mm².",
+      "action": "IVUS mandatory pre- and post-stenting for LM bifurcation. Confirm SB ostial coverage, adequate MV expansion, and absence of carina shift. 3-run imaging protocol: pre-stent (both branches), post-POT, and final.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
     },
     {
@@ -53,7 +66,7 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LAD" }
       ],
-      "action": "IVUS strongly recommended for proximal LAD. OCT acceptable where detailed plaque characterisation is needed.",
+      "action": "IVUS or OCT strongly recommended for proximal LAD PCI. OCT acceptable where detailed plaque characterisation (calcium depth, lipid pool, thin-cap fibroatheroma) is needed.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "IIa", "level": "B" },
       "active": true
@@ -79,9 +92,48 @@
       "conditions": [
         { "field": "bifurcation.present", "op": "is_true" }
       ],
-      "action": "Post-stent imaging recommended to confirm SB ostial coverage, MV expansion, and absence of proximal edge dissection. IVUS preferred for LM; OCT acceptable elsewhere.",
+      "action": "Post-stent imaging recommended: confirm SB ostial coverage, MV expansion, absence of proximal edge dissection, and correct wire position (abluminal rewiring → 23% MACE if untreated). IVUS preferred for LM; OCT acceptable elsewhere.",
       "caution": null,
       "evidence": { "source": "EBC", "year": 2022, "class": "I", "level": "B" },
+      "active": true
+    },
+    {
+      "id": "img-sevcalc-mandatory",
+      "domain": "imaging",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Intravascular imaging mandatory before AND after calcium modification. Pre-stent: assess calcium depth, thickness, and arc to select modification device (OCT calcium score ≥4 → aggressive modification). Post-stent: confirm adequate expansion (MSA >80% of reference).",
+      "caution": null,
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "img-modcalc",
+      "domain": "imaging",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "moderate" }
+      ],
+      "action": "Intravascular imaging recommended to characterise calcium depth and circumference. OCT calcium thickness <0.5mm suggests calcium fracture achievable with scoring/cutting balloon alone. Thickness >0.5mm or arc >180° → consider IVL or atherectomy.",
+      "caution": null,
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "img-post-stent-targets",
+      "domain": "imaging",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "not_eq", "value": "LM" }
+      ],
+      "action": "Post-stent optimisation targets (non-LM): MSA >5.5mm² by IVUS (>4.5mm² by OCT); relative expansion >80% of average reference lumen area. Correct edge dissection if arc >60°, length >2mm, and depth to media/adventitia.",
+      "caution": null,
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
     {
@@ -97,7 +149,6 @@
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
     },
-
     {
       "id": "img-graft",
       "domain": "imaging",
@@ -106,9 +157,23 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Imaging most useful for confirming stent expansion in large grafts. Not mandated for all SVG PCI but consider when stent sizing is uncertain.",
+      "action": "Imaging most useful for confirming stent expansion in large grafts. Not mandated for all SVG PCI but consider when stent sizing is uncertain or result suboptimal.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "img-multivessel-reduced-ef",
+      "domain": "imaging",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "multivessel", "op": "is_true" },
+        { "field": "lvef_reduced", "op": "is_true" }
+      ],
+      "action": "Intravascular imaging recommended for all vessels undergoing PCI in multivessel disease with reduced EF. Optimise every stented segment to reduce target-vessel failure risk.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
     }
   ]

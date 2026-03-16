@@ -1,8 +1,8 @@
 {
   "domain": "stent",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2024", "EBC 2022", "SCAI 2020"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2018", "ESC 2023 ACS", "ESC 2024 CCS", "ACC/AHA 2021", "ACC/AHA 2025 ACS", "EBC 2022", "SCAI 2020", "SCAI 2024 STEMI"],
   "rules": [
     {
       "id": "stent-default",
@@ -10,12 +10,33 @@
       "priority": 1,
       "logic": "all",
       "conditions": [],
-      "action": "Thin-strut drug-eluting stent (DES). Size to distal vessel reference; post-dilate with NC balloon to achieve full apposition.",
+      "action": "New-generation thin-strut drug-eluting stent (DES) recommended for ALL PCI indications, irrespective of presentation, lesion type, planned DAPT duration, or anticoagulant therapy.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "A" },
       "active": true
     },
-
+    {
+      "id": "stent-no-brs",
+      "domain": "stent",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [],
+      "action": "Bioresorbable scaffolds (BRS) are NOT recommended outside clinical studies due to higher scaffold thrombosis and TVF rates compared with contemporary DES.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2018, "class": "III", "level": "C" },
+      "active": true
+    },
+    {
+      "id": "stent-nc-postdilate",
+      "domain": "stent",
+      "priority": 1,
+      "logic": "all",
+      "conditions": [],
+      "action": "Post-dilate with NC balloon sized to vessel reference to achieve full apposition. Confirm expansion with intravascular imaging in complex cases.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
     {
       "id": "stent-long-sequence",
       "domain": "stent",
@@ -24,7 +45,7 @@
       "conditions": [
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Deploy distal stent first, work proximally. Plan overlap zones (≥3mm, avoid side branches). Post-dilate each segment with NC balloon before deploying the next.",
+      "action": "Deploy distal stent first, work proximally. Plan overlap zones (≥3mm, avoid side branches). Post-dilate each segment with NC balloon before deploying the next. Total stent length ≥28mm qualifies as complex PCI (mandatory imaging).",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
@@ -50,7 +71,7 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "LM" }
       ],
-      "action": "Size to distal MV reference for bifurcation cases; proximal reference for shaft/ostial disease. Proximal edge must not protrude into the aorta. Post-dilate with NC balloon sized to proximal LM. Confirm MSA with IVUS.",
+      "action": "Size MV stent 1:1 to distal MV reference for bifurcation cases; expand proximally with POT to proximal LM size. For shaft/ostial disease, size to proximal reference. Proximal edge must not protrude into the aorta. Confirm MSA with IVUS.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": "I", "level": "B" },
       "active": true
@@ -63,9 +84,9 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "BMS and DES are equally effective in SVG PCI. Use slightly undersized diameter with generous length. Consider prolonged DAPT based on DAPT score.",
+      "action": "DES and BMS are comparably effective in SVG PCI (DIVA, ISAR-CABG). Use slightly undersized diameter with generous length to minimise plaque extrusion. Avoid high-pressure post-dilation unless imaging shows inadequate expansion.",
       "caution": null,
-      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
       "active": true
     },
     {
@@ -82,6 +103,20 @@
       "active": true
     },
     {
+      "id": "stent-multivessel-complete",
+      "domain": "stent",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "multivessel", "op": "is_true" },
+        { "field": "haem_status", "op": "not_eq", "value": "compromised" }
+      ],
+      "action": "Complete revascularisation recommended for haemodynamically stable patients with multivessel disease. May be performed during index procedure or staged within 45 days.",
+      "caution": null,
+      "evidence": { "source": "ESC", "year": 2023, "class": "I", "level": "A" },
+      "active": true
+    },
+    {
       "id": "stent-last-vessel",
       "domain": "stent",
       "priority": 3,
@@ -89,7 +124,7 @@
       "conditions": [
         { "field": "last_remaining_vessel", "op": "is_true" }
       ],
-      "action": "Accept a longer procedure to ensure an optimal stent result. Discuss bailout strategy for abrupt closure with the team before wiring.",
+      "action": "Accept a longer procedure to ensure an optimal stent result. Discuss bailout strategy for abrupt closure with the team before wiring. Imaging-guided optimisation is mandatory.",
       "caution": "A failed stent in the only remaining coronary is catastrophic — there is no haemodynamic reserve for an inadequate result.",
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true

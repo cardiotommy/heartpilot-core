@@ -1,8 +1,8 @@
 {
   "domain": "lesion_prep",
-  "version": "2.0.0",
-  "last_reviewed": "2025-01",
-  "sources": ["ESC 2024", "EAPCI 2023", "SCAI 2020", "DUAL-PREP registry"],
+  "version": "3.0.0",
+  "last_reviewed": "2025-06",
+  "sources": ["ESC 2018", "ESC 2023 ACS", "ESC 2024 CCS", "ACC/AHA 2021", "ACC/AHA 2025 ACS", "EAPCI 2023", "SCAI 2020", "SCAI 2024 STEMI", "SCAI 2024 Calcium"],
   "rules": [
     {
       "id": "prep-standard-predilation",
@@ -11,14 +11,14 @@
       "logic": "all",
       "conditions": [
         { "field": "calcification", "op": "in", "value": ["none", "mild"] },
-        { "field": "thrombus", "op": "is_false" }
+        { "field": "thrombus", "op": "is_false" },
+        { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Pre-dilate with semi-compliant balloon sized to 1:1 RVD. Confirm full expansion before stent delivery.",
+      "action": "Pre-dilate with semi-compliant balloon sized 1:1 to RVD. Confirm full expansion before stent delivery. Direct stenting is a reasonable alternative for simple, non-calcified lesions.",
       "caution": null,
       "evidence": { "source": "SCAI", "year": null, "class": null, "level": null },
       "active": true
     },
-
     {
       "id": "prep-modcalc",
       "domain": "lesion_prep",
@@ -27,9 +27,9 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "moderate" }
       ],
-      "action": "Scoring balloon first-line. Escalate to IVL if residual waist persists after scoring.",
+      "action": "Scoring or cutting balloon first-line for focal calcium. Escalate to IVL if residual waist persists after scoring. Cutting balloon preferred for proximal/aorto-ostial straight segments; scoring balloon for tortuous segments.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
     {
@@ -41,7 +41,7 @@
         { "field": "calcification", "op": "eq", "value": "moderate" },
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Scoring or cutting balloon first; escalate to IVL before stenting if waist persists — do not proceed with persistent non-compliance.",
+      "action": "Scoring or cutting balloon first; escalate to IVL before stenting if waist persists — do not proceed with persistent non-compliance in long lesions.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
@@ -54,9 +54,9 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Plan calcium modification before the case. Short atherectomy bursts (<30s). Confirm full balloon compliance before stenting.",
+      "action": "Plan calcium modification before the case. Intravascular imaging (IVUS/OCT) before selecting modification device. Confirm full balloon compliance before stenting.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
     {
@@ -67,9 +67,22 @@
       "conditions": [
         { "field": "calcification", "op": "eq", "value": "severe" }
       ],
-      "action": "Assess calcium depth and distribution with intravascular imaging before selecting modification device. IVL for deep/medial calcium and nodules; RA for superficial calcium and balloon-uncrossable lesions.",
+      "action": "IVL for deep/medial calcium, calcified nodules, large vessels, and bifurcation lesions (wire protection possible). RA for superficial calcium, balloon-uncrossable lesions, and small vessels (<2.5mm). OA as RA alternative in experienced centres.",
       "caution": null,
       "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "prep-sevcalc-ra",
+      "domain": "lesion_prep",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Rotational atherectomy: burr-to-vessel ratio 0.5–0.7; speed 140,000–180,000 rpm; short passes (<30s) with adequate flushing. Limited debulking strategy — goal is to facilitate balloon expansion, not lumen enlargement.",
+      "caution": null,
+      "evidence": { "source": "ACC/AHA", "year": 2021, "class": "IIa", "level": "B" },
       "active": true
     },
     {
@@ -94,7 +107,7 @@
         { "field": "calcification", "op": "eq", "value": "severe" },
         { "field": "lesion_long", "op": "is_true" }
       ],
-      "action": "Plan calcium modification before the case. Short RA bursts (<30s) with adequate flushing. Consider staged debulking if diffuse.",
+      "action": "Plan calcium modification before the case. Short RA bursts (<30s) with adequate flushing. Consider staged debulking if diffuse. IVL may require multiple balloons for long segments.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
       "active": true
@@ -110,7 +123,20 @@
       ],
       "action": "IVL preferred over RA at the ostium. Disengage guide during IVL pulses to avoid aortic root energy transmission.",
       "caution": "Do not inflate IVL balloon with guide deeply engaged at the ostium.",
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "prep-sevcalc-uncrossable",
+      "domain": "lesion_prep",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "If balloon won't cross: attempt Rotawire/microcatheter → RA with small burr (1.25mm). If Rotawire also won't cross: consider excimer laser atherectomy. Do not force devices through uncrossable calcium.",
+      "caution": null,
+      "evidence": { "source": "EAPCI", "year": 2023, "class": null, "level": null },
       "active": true
     },
     {
@@ -153,31 +179,75 @@
       "active": true
     },
     {
-      "id": "prep-timi-impaired",
+      "id": "prep-no-routine-aspiration",
       "domain": "lesion_prep",
       "priority": 2,
       "logic": "all",
       "conditions": [
-        { "field": "timi_impaired", "op": "is_true" }
+        { "field": "thrombus", "op": "is_true" },
+        { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Restore antegrade flow before stenting where possible. Staged approach (aspiration → reassess → definitive stenting) reduces no-reflow risk.",
+      "action": "Routine manual aspiration thrombectomy is NOT recommended during primary PCI. No mortality or reinfarction benefit demonstrated; risk of stroke.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "III", "level": "A" },
       "active": true
     },
     {
-      "id": "prep-thrombus-timi0-native",
+      "id": "prep-selective-aspiration",
       "domain": "lesion_prep",
-      "priority": 3,
+      "priority": 2,
       "logic": "all",
       "conditions": [
         { "field": "thrombus", "op": "is_true" },
         { "field": "timi_zero", "op": "is_true" },
         { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Aspiration thrombectomy first to restore flow; reassess true lesion before stenting. If TIMI 0 persists after aspiration, consider pharmacoinvasive strategy (GPI, deferred PCI 24–48h).",
+      "action": "Selective/bailout aspiration thrombectomy may be considered for very large residual thrombus burden after wire/balloon passage when flow remains severely impaired.",
+      "caution": null,
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "IIb", "level": "C" },
+      "active": true
+    },
+    {
+      "id": "prep-timi-impaired",
+      "domain": "lesion_prep",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "timi_impaired", "op": "is_true" },
+        { "field": "vessel", "op": "not_eq", "value": "Graft" }
+      ],
+      "action": "Restore antegrade flow before stenting where possible. Staged approach (small balloon → reassess → definitive stenting) reduces no-reflow risk.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "prep-gpi-noreflow",
+      "domain": "lesion_prep",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "thrombus", "op": "is_true" },
+        { "field": "timi_impaired", "op": "is_true" }
+      ],
+      "action": "IV or intracoronary GP IIb/IIIa inhibitor is reasonable for large thrombus burden, no-reflow, or slow flow during PCI. Intracoronary vasodilators (adenosine, verapamil, nitroprusside) as adjunct for no-reflow.",
+      "caution": "Routine GP IIb/IIIa administration before angiography is NOT recommended (Class III Harm).",
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": "IIa", "level": "C" },
+      "active": true
+    },
+    {
+      "id": "prep-deferred-stenting",
+      "domain": "lesion_prep",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "thrombus", "op": "is_true" },
+        { "field": "timi_zero", "op": "is_true" },
+        { "field": "vessel", "op": "not_eq", "value": "Graft" }
+      ],
+      "action": "Deferred stenting (24–48h with anticoagulation) may be considered when large thrombus persists after flow restoration, to allow thrombus resolution before definitive treatment.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
       "active": true
     },
     {
@@ -190,9 +260,9 @@
         { "field": "timi_zero", "op": "is_false" },
         { "field": "vessel", "op": "not_eq", "value": "Graft" }
       ],
-      "action": "Aspiration thrombectomy recommended before balloon or stent delivery. If high residual burden persists, consider deferred stenting (24–48h with anticoagulation and GPI).",
+      "action": "Visible thrombus with preserved flow: avoid routine aspiration. Consider GPI infusion and definitive stenting. If high residual burden persists, deferred stenting (24–48h) is an option.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
+      "evidence": { "source": "ACC/AHA", "year": 2025, "class": null, "level": null },
       "active": true
     },
     {
@@ -205,7 +275,7 @@
         { "field": "timi_zero", "op": "is_true" },
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "Avoid aspiration thrombectomy. EPD mandatory. Consider pharmacoinvasive approach (GP IIb/IIIa) before definitive stenting. Direct stenting preferred over pre-dilation.",
+      "action": "Avoid aspiration thrombectomy in SVG. EPD mandatory. Consider pharmacoinvasive approach (GP IIb/IIIa) before definitive stenting. Direct stenting preferred over pre-dilation.",
       "caution": "Aspiration in a thrombosed degenerated SVG carries high no-reflow risk.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
@@ -231,10 +301,25 @@
       "priority": 2,
       "logic": "all",
       "conditions": [
-        { "field": "vessel", "op": "eq", "value": "Graft" }
+        { "field": "vessel", "op": "eq", "value": "Graft" },
+        { "field": "calcification", "op": "not_eq", "value": "severe" }
       ],
-      "action": "Avoid pre-dilation unless lesion is severely stenotic or EPD delivery requires it. Direct stenting preferred. Slow nominal-pressure inflations. Avoid post-dilatation; if required, size 1:1 — never oversize.",
+      "action": "Direct stenting preferred. Avoid routine pre-dilation unless severely stenotic or EPD delivery requires it. Slow nominal-pressure inflations. Avoid post-dilatation; if required, size 1:1 — never oversize.",
       "caution": null,
+      "evidence": { "source": "SCAI", "year": 2024, "class": null, "level": null },
+      "active": true
+    },
+    {
+      "id": "prep-graft-sevcalc",
+      "domain": "lesion_prep",
+      "priority": 3,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" },
+        { "field": "calcification", "op": "eq", "value": "severe" }
+      ],
+      "action": "Calcium modification required despite graft setting. IVL preferred over RA in SVG (lower perforation risk). Deploy EPD before calcium modification. Liberal intracoronary vasodilators throughout.",
+      "caution": "Graft perforation risk is higher than native vessel — use conservative burr sizing if RA is selected.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
@@ -246,9 +331,23 @@
       "conditions": [
         { "field": "vessel", "op": "eq", "value": "Graft" }
       ],
-      "action": "EPD whenever technically feasible. Intracoronary vasodilators (verapamil, adenosine, nitroprusside) liberally — even before balloon or stenting, delivered distally via microcatheter or OTW balloon.",
+      "action": "EPD whenever technically feasible (ACC/AHA Class I/B; ESC Class IIa/B). Intracoronary vasodilators (verapamil, adenosine, nitroprusside) liberally — delivered distally via microcatheter or OTW balloon.",
       "caution": null,
-      "evidence": { "source": "ESC", "year": 2018, "class": "IIa", "level": "B" },
+      "evidence": { "source": "ACC/AHA", "year": 2021, "class": "I", "level": "B" },
+      "active": true
+    },
+    {
+      "id": "prep-graft-timi-impaired",
+      "domain": "lesion_prep",
+      "priority": 2,
+      "logic": "all",
+      "conditions": [
+        { "field": "vessel", "op": "eq", "value": "Graft" },
+        { "field": "timi_impaired", "op": "is_true" }
+      ],
+      "action": "Restore flow cautiously. Avoid aspiration thrombectomy in SVG. Deploy EPD first; consider GP IIb/IIIa infusion to reduce thrombus burden. Reassess true lesion severity after flow restoration.",
+      "caution": null,
+      "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
     },
     {
@@ -260,7 +359,7 @@
         { "field": "vessel", "op": "eq", "value": "Graft" },
         { "field": "thrombus", "op": "is_true" }
       ],
-      "action": "Dedicated aspiration catheters or guide extension aspiration for moderate burden; mechanical thrombectomy (AngioJet, Penumbra) for very large thrombus. Maintain high ACT throughout.",
+      "action": "For moderate thrombus: guide extension aspiration. For very large thrombus: mechanical thrombectomy (AngioJet, Penumbra). Maintain high ACT throughout.",
       "caution": "Limited RCT evidence for SVG thrombectomy devices.",
       "evidence": { "source": "SCAI", "year": 2020, "class": null, "level": null },
       "active": true
