@@ -273,6 +273,8 @@ test('Default DES and no-BRS fire for all cases', () => {
   assertMatched(r, 'stent-default');
   assertMatched(r, 'stent-no-brs');
   assertMatched(r, 'stent-nc-postdilate');
+  // NC post-dilate must NOT fire for graft cases (contradicts graft-specific guidance)
+  assertNotMatched(evaluate({ ...BASE, vessel: 'Graft' }, ALL_RULES), 'stent-nc-postdilate');
 });
 
 test('Long stent sequence fires for long lesions', () => {
