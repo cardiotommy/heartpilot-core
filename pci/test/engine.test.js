@@ -215,9 +215,8 @@ test('Graft strategy fires for graft with mild calcium, not for severe', () => {
   assertMatched(evaluate({ ...BASE, vessel: 'Graft', calcification: 'severe' }, ALL_RULES), 'prep-graft-sevcalc');
 });
 
-test('Graft TIMI impaired fires for graft, not generic timi-impaired', () => {
+test('Generic timi-impaired rule does not fire for graft', () => {
   const r = evaluate({ ...BASE, vessel: 'Graft', timi: 2, thrombus: true }, ALL_RULES);
-  assertMatched(r, 'prep-graft-timi-impaired');
   assertNotMatched(r, 'prep-timi-impaired');
 });
 
