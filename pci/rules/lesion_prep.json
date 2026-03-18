@@ -176,7 +176,7 @@
       "action": "Intravascular imaging mandatory before stenting. Deploy stents distal to proximal with ≥3mm overlap zones. Post-dilate each segment before deploying the next.",
       "caution": null,
       "evidence": { "source": "ESC", "year": 2024, "class": null, "level": null },
-      "active": true
+      "active": false
     },
     {
       "id": "prep-no-routine-aspiration",
