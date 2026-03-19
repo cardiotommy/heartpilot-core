@@ -756,6 +756,10 @@ function updNextBtn() {
   document.getElementById('next-btn').disabled = !valid(cur);
 }
 
+function autoAdvance() {
+  setTimeout(function() { if (valid(cur)) goNext(); }, 320);
+}
+
 function goNext() {
   if (cur === STEPS.length-1) { runAnalysis(); return; }
   if (!valid(cur)) return;
@@ -782,6 +786,7 @@ function selVessel(id) {
   document.getElementById('vessel-tag-txt').textContent = (VNAMES[id]||id);
   document.getElementById('vessel-tag').classList.add('show');
   updNextBtn();
+  autoAdvance();
 }
 
 // ── Bifurcation ────────────────────────────────────
@@ -790,7 +795,7 @@ function setBif(v) {
   document.getElementById('bif-y').className = 'tog'+(v?' sy':'');
   document.getElementById('bif-n').className = 'tog'+(!v?' sn':'');
   document.getElementById('bif-extra').style.display = v ? 'flex' : 'none';
-  if (!v) { S.medina=[0,0,0]; S.sbSize=null; }
+  if (!v) { S.medina=[0,0,0]; S.sbSize=null; autoAdvance(); }
   updNextBtn();
 }
 
@@ -831,6 +836,7 @@ function setCalc(v) {
   ['none','mild','moderate','severe'].forEach(k =>
     document.getElementById('calc-'+k).className = 'ocard'+(k===v?' sel':''));
   updNextBtn();
+  autoAdvance();
 }
 
 // ── Thrombus / TIMI ────────────────────────────────
@@ -863,6 +869,7 @@ function setLvef(v) {
   ['normal','mild','moderate','severe'].forEach(k =>
     document.getElementById('lvef-'+k).className = 'ocard'+(k===v?' sel':''));
   updNextBtn();
+  autoAdvance();
 }
 
 function setHaem(v) {
@@ -870,6 +877,7 @@ function setHaem(v) {
   ['stable','compromised'].forEach(k =>
     document.getElementById('haem-'+k).className = 'ocard'+(k===v?' sel':''));
   updNextBtn();
+  autoAdvance();
 }
 
 function setMV(v) {
@@ -877,14 +885,15 @@ function setMV(v) {
   document.getElementById('mv-y').className = 'tog'+(v?' sy':'');
   document.getElementById('mv-n').className = 'tog'+(!v?' sn':'');
   updNextBtn();
+  autoAdvance();
 }
-
 
 function setLRV(v) {
   S.singleVessel = v;
   document.getElementById('lrv-y').className = 'tog'+(v?' sy':'');
   document.getElementById('lrv-n').className = 'tog'+(!v?' sn':'');
   updNextBtn();
+  autoAdvance();
 }
 
 // ── Review ─────────────────────────────────────────
