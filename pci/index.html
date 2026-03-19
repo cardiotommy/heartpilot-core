@@ -845,12 +845,14 @@ function setThr(v) {
   document.getElementById('thr-y').className = 'tog'+(v?' sy':'');
   document.getElementById('thr-n').className = 'tog'+(!v?' sn':'');
   updNextBtn();
+  autoAdvance();
 }
 
 function setTimi(v) {
   S.timi = v;
   [0,1,2,3].forEach(t => document.getElementById('timi-'+t).className = 'ocard'+(t===v?' sel':''));
   updNextBtn();
+  autoAdvance();
 }
 
 // ── Lesion ─────────────────────────────────────────
