@@ -429,7 +429,7 @@ function renderResults(r) {
       + '<div class="mrow-full">' + escHtml(m.fullName) + '</div>'
       + '</div>'
       + '<div class="mrow-right">'
-      + '<span class="mrow-value">' + m.value + '</span>'
+      + '<span class="mrow-value">' + escHtml(String(m.value)) + '</span>'
       + '<span class="badge ' + badgeCls + '">' + escHtml(m.label) + '</span>'
       + '</div>'
       + '</div>';
@@ -461,7 +461,7 @@ function renderResults(r) {
     + '<div class="card-head">Evidence Basis</div>'
     + '<div class="ev-body">'
     + '<div class="ev-badges">'
-    + '<span class="ev-badge ev-source">' + escHtml(r.evidence.source) + ' ' + r.evidence.year + '</span>'
+    + '<span class="ev-badge ev-source">' + escHtml(r.evidence.source) + ' ' + escHtml(String(r.evidence.year)) + '</span>'
     + '<span class="ev-badge ev-class">Class ' + escHtml(r.evidence.classLabel) + '</span>'
     + '<span class="ev-badge ev-class">Level ' + escHtml(r.evidence.level) + '</span>'
     + '</div>'
