@@ -81,13 +81,27 @@ body.results-done{overflow:auto;height:auto;}
 .inp-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
 .inp-label span{font-weight:600;color:var(--text);}
 .inp-row{display:flex;align-items:center;gap:10px;}
-.inp-field{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:110px;transition:border-color .15s;outline:none;}
+.inp-field{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:130px;transition:border-color .15s;outline:none;}
 .inp-field:focus{border-color:var(--teal);}
 .inp-field.invalid{border-color:var(--red);}
 .inp-hint{font-size:12px;color:var(--muted);}
 .inp-select{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:12px;background:var(--s1);color:var(--text);cursor:pointer;outline:none;transition:border-color .15s;}
 .inp-select:focus{border-color:var(--teal);}
 .inp-divider{height:1px;background:var(--border);margin:4px 0;}
+/* Slider controls */
+.slider-row{display:flex;align-items:center;gap:12px;}
+.slider-wrap{flex:1;position:relative;padding-top:4px;}
+.inp-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;border:none;padding:0;display:block;}
+.inp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--text);border:2.5px solid var(--s1);box-shadow:0 0 0 1.5px var(--border2);cursor:pointer;margin-top:-7px;}
+.inp-slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;}
+.inp-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--text);border:2.5px solid var(--s1);box-shadow:0 0 0 1.5px var(--border2);cursor:pointer;border:none;}
+.inp-slider::-moz-range-track{height:4px;border-radius:2px;background:transparent;}
+.thresh-tick{position:absolute;top:4px;width:2px;height:14px;background:var(--dim);border-radius:1px;transform:translateX(-50%);pointer-events:none;}
+.inp-val{border:1.5px solid var(--border);border-radius:7px;padding:9px 10px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:88px;text-align:center;transition:border-color .15s;outline:none;flex-shrink:0;}
+.inp-val:focus{border-color:var(--teal);}
+.slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
+.hint-bad{color:rgba(192,57,43,.75);}
+.hint-ok{color:rgba(21,128,61,.75);}
 /* Results */
 .results-panel{display:none;padding:20px 24px 36px;flex-direction:column;gap:14px;max-width:640px;margin:0 auto;width:100%;}
 .main.results-done .results-panel{display:flex;}
@@ -213,8 +227,16 @@ body.results-done{overflow:auto;height:auto;}
         <!-- FFR group -->
         <div class="inp-group" id="grp-ffr" style="display:none;">
           <div class="inp-label"><span>FFR</span> — fractional flow reserve</div>
-          <div class="inp-row">
-            <input class="inp-field" id="val-ffr" type="number" step="0.01" min="0.1" max="1.0" placeholder="0.50–1.00" oninput="onValueInput()">
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" id="slide-ffr" type="range" min="0.50" max="1.00" step="0.01" oninput="onSlide('ffr')">
+              <div class="thresh-tick" id="stick-ffr"></div>
+            </div>
+            <input class="inp-val" id="val-ffr" type="number" step="0.01" min="0.5" max="1.0" placeholder="—" oninput="onTyped('ffr')">
+          </div>
+          <div class="slider-hint">
+            <span class="hint-bad">← Abnormal ≤ 0.80</span>
+            <span class="hint-ok">Normal > 0.80 →</span>
           </div>
         </div>
 
@@ -222,23 +244,39 @@ body.results-done{overflow:auto;height:auto;}
         <div class="inp-group" id="grp-resting" style="display:none;">
           <div class="inp-label"><span>Resting index</span> — select type</div>
           <div class="inp-row" style="flex-wrap:wrap;gap:8px;">
-            <select class="inp-select" id="val-resting-type" onchange="onValueInput()">
+            <select class="inp-select" id="val-resting-type" onchange="onRestingTypeChange()">
               <option value="ifr">iFR — instantaneous wave-free ratio</option>
               <option value="pdpa">Pd:Pa — resting pressure ratio</option>
               <option value="rfr">RFR — resting full-cycle ratio</option>
               <option value="dfr">DFR — diastolic pressure ratio</option>
             </select>
           </div>
-          <div class="inp-row">
-            <input class="inp-field" id="val-resting" type="number" step="0.01" min="0.1" max="1.0" placeholder="0.50–1.00" oninput="onValueInput()">
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" id="slide-resting" type="range" min="0.50" max="1.00" step="0.01" oninput="onSlide('resting')">
+              <div class="thresh-tick" id="stick-resting"></div>
+            </div>
+            <input class="inp-val" id="val-resting" type="number" step="0.01" min="0.5" max="1.0" placeholder="—" oninput="onTyped('resting')">
+          </div>
+          <div class="slider-hint">
+            <span class="hint-bad" id="hint-resting-bad">← Abnormal ≤ 0.89</span>
+            <span class="hint-ok" id="hint-resting-ok">Normal > 0.89 →</span>
           </div>
         </div>
 
         <!-- CFR group -->
         <div class="inp-group" id="grp-cfr" style="display:none;">
           <div class="inp-label"><span>CFR</span> — coronary flow reserve</div>
-          <div class="inp-row">
-            <input class="inp-field" id="val-cfr" type="number" step="0.1" min="0.5" max="10" placeholder="0.5–10" oninput="onValueInput()">
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" id="slide-cfr" type="range" min="0.5" max="10" step="0.1" oninput="onSlide('cfr')">
+              <div class="thresh-tick" id="stick-cfr"></div>
+            </div>
+            <input class="inp-val" id="val-cfr" type="number" step="0.1" min="0.5" max="10" placeholder="—" oninput="onTyped('cfr')">
+          </div>
+          <div class="slider-hint">
+            <span class="hint-bad">← Reduced &lt; 2.0</span>
+            <span class="hint-ok">Normal ≥ 2.0 →</span>
           </div>
         </div>
 
@@ -336,6 +374,19 @@ function buildValuesStep() {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
+  // Reset sliders to midpoint and redraw tracks
+  ['ffr','resting','cfr'].forEach(function (key) {
+    var cfg = SLIDER_CFG[key];
+    var slider = document.getElementById('slide-' + key);
+    if (slider) slider.value = (cfg.min + cfg.max) / 2;
+    updateTrack(key);
+  });
+  // Reset resting type to iFR default
+  var restingType = document.getElementById('val-resting-type');
+  if (restingType) restingType.value = 'ifr';
+  SLIDER_CFG.resting.thresh = 0.89;
+  document.getElementById('hint-resting-bad').textContent = '← Abnormal ≤ 0.89';
+  document.getElementById('hint-resting-ok').textContent  = 'Normal > 0.89 →';
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -378,6 +429,61 @@ function toggleMeasurement(key) {
 
 function onValueInput() {
   updNextBtn();
+}
+
+// ── Slider logic ───────────────────────────────────────────────────────────────
+
+var RESTING_THRESH = { ifr: 0.89, pdpa: 0.91, rfr: 0.89, dfr: 0.89 };
+
+var SLIDER_CFG = {
+  ffr:     { min: 0.50, max: 1.00, dec: 2, thresh: 0.80 },
+  resting: { min: 0.50, max: 1.00, dec: 2, thresh: 0.89 },
+  cfr:     { min: 0.50, max: 10.0, dec: 1, thresh: 2.0  },
+};
+
+function onSlide(key) {
+  var cfg = SLIDER_CFG[key];
+  var v = parseFloat(document.getElementById('slide-' + key).value);
+  document.getElementById('val-' + key).value = v.toFixed(cfg.dec);
+  onValueInput();
+}
+
+function onTyped(key) {
+  var cfg = SLIDER_CFG[key];
+  var v = parseFloat(document.getElementById('val-' + key).value);
+  if (!isNaN(v)) document.getElementById('slide-' + key).value = v;
+  onValueInput();
+}
+
+function onRestingTypeChange() {
+  var type = document.getElementById('val-resting-type').value;
+  var thresh = RESTING_THRESH[type] || 0.89;
+  SLIDER_CFG.resting.thresh = thresh;
+  document.getElementById('hint-resting-bad').textContent = '← Abnormal ≤ ' + thresh;
+  document.getElementById('hint-resting-ok').textContent  = 'Normal > ' + thresh + ' →';
+  updateTrack('resting');
+  onValueInput();
+}
+
+function updateTrack(key) {
+  var cfg = SLIDER_CFG[key];
+  var slider = document.getElementById('slide-' + key);
+  var tick   = document.getElementById('stick-' + key);
+  var frac = (cfg.thresh - cfg.min) / (cfg.max - cfg.min);
+  // Position tick, accounting for 9px thumb half-width on each side
+  if (tick) tick.style.left = 'calc(9px + (100% - 18px) * ' + frac + ')';
+  var pct = (frac * 100).toFixed(1) + '%';
+  slider.style.background = 'linear-gradient(to right,'
+    + 'rgba(192,57,43,.18) 0%,rgba(192,57,43,.18) ' + pct + ','
+    + 'rgba(21,128,61,.18) ' + pct + ',rgba(21,128,61,.18) 100%)';
+}
+
+function initSliders() {
+  ['ffr','resting','cfr'].forEach(function (key) {
+    var cfg = SLIDER_CFG[key];
+    document.getElementById('slide-' + key).value = (cfg.min + cfg.max) / 2;
+    updateTrack(key);
+  });
 }
 
 function collectValues() {
@@ -506,6 +612,7 @@ function escHtml(str) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 showStep(0);
+initSliders();
 </script>
 </body>
 </html>
