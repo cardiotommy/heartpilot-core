@@ -86,8 +86,7 @@ Evaluated in priority order — first matching tier wins. `derived` refers to th
 
 | Tier label | `color` / `bgColor` | Criteria |
 |---|---|---|
-| LM Bifurcation | `#7f1d1d` / `#fff5f5` | `derived.lm_bif === true` |
-| High Complexity | `#dc2626` / `#fef2f2` | `vessel === 'LM'` OR `vessel === 'Graft'` OR `calcification === 'severe'` OR `morphology === 'Diffuse'` OR `derived.sb_large === true` |
+| High Complexity | `#dc2626` / `#fef2f2` | `derived.lm_bif === true` OR `vessel === 'LM'` OR `vessel === 'Graft'` OR `calcification === 'severe'` OR `morphology === 'Diffuse'` OR `derived.sb_large === true` |
 | Moderate Complexity | `#b45309` / `#fffbeb` | `calcification === 'moderate'` OR `lesion_length_mm > 20` OR `morphology` in `['Ostial', 'Angulated', 'Tortuous']` OR `(caseInput.bifurcation && caseInput.bifurcation.present === true && derived.sb_large === false)` |
 | Standard | `#059669` / `#f0fdf4` | All other cases |
 
@@ -124,7 +123,7 @@ Always in this order. Omit a row entirely if the field is not present or is the 
 
 | `vessel` value | Display value | Badge text | `badgeStyle` |
 |---|---|---|---|
-| `LM` | `"Left Main"` | `"⚠ Highest complexity"` | `"danger"` |
+| `LM` | `"Left Main"` | `"⚠ High complexity"` | `"danger"` |
 | `Graft` | `"Bypass Graft"` | `"⚠ High complexity"` | `"danger"` |
 | `LAD` | `"LAD"` | `""` (no badge) | `"neutral"` |
 | `LCx` | `"LCx"` | `""` (no badge) | `"neutral"` |
@@ -308,8 +307,8 @@ Add to `pci/test/engine.test.js`. Require `classifier.js` at the top of the test
 - High (severe calcium): non-LM, severe calcium → `label: 'High Complexity'`
 - High (graft): `vessel: 'Graft'` → `label: 'High Complexity'`
 - High (large-SB bifurcation, non-LM): non-LM, bifurcation present, `sb_size: 'gt2.5'` → `label: 'High Complexity'`
-- LM Bifurcation: `vessel: 'LM'`, bifurcation present → `label: 'LM Bifurcation'`
-- LM without bifurcation: `vessel: 'LM'`, no bifurcation → `label: 'High Complexity'` (not LM Bifurcation)
+- High (LM with bifurcation): `vessel: 'LM'`, bifurcation present → `label: 'High Complexity'`
+- High (LM without bifurcation): `vessel: 'LM'`, no bifurcation → `label: 'High Complexity'`
 
 ### Classifier — Haemodynamic Risk tier
 
