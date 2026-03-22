@@ -52,6 +52,10 @@ cd pci
 node test/engine.test.js
 ```
 
+```bash
+node cvf/test/interpreter.test.js
+```
+
 No test framework, no install step. The suite uses only Node.js built-ins (`assert`, `fs`, `path`). A passing run prints each test with `✓` and exits 0. Any failure exits 1.
 
 **What is tested:**
@@ -251,7 +255,7 @@ There is no `package.json`, no bundler, no transpiler. Do not introduce one with
 
 ### Testing
 - Always run `node pci/test/engine.test.js` after any change to rule files or engine code
-- All 35 tests must pass before committing
+- Both test suites must pass before committing: `node pci/test/engine.test.js` and `node cvf/test/interpreter.test.js`
 - Add new tests for new clinical scenarios; don't rely on data-integrity tests alone
 
 ### Deployment
