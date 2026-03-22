@@ -347,8 +347,8 @@ function valid(n) {
   if (n === 1) {
     if (S.hasFfr && !validNum('val-ffr', 0.1, 1.0)) return false;
     if (S.hasResting && !validNum('val-resting', 0.1, 1.0)) return false;
-    if (S.hasCfr && !validNum('val-cfr', 0.1, 20)) return false;
-    if (S.hasImr && !validNum('val-imr', 1, 500)) return false;
+    if (S.hasCfr && !validNum('val-cfr', 0.5, 10)) return false;
+    if (S.hasImr && !validNum('val-imr', 1, 200)) return false;
     return true;
   }
   return true;
