@@ -11,10 +11,10 @@
  */
 'use strict';
 
-// Resolve PciEngine from environment
-const _Engine = (typeof module !== 'undefined' && module.exports)
+// Resolve PciEngine from environment (same pattern as loader.js)
+var _Engine = (typeof module !== 'undefined' && module.exports)
   ? require('./evaluator')
-  : (typeof window !== 'undefined' ? window.PciEngine : {});
+  : window.PciEngine;
 
 // ── Lesion Complexity ─────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ const LESION_TIERS = [
     color: '#b45309',
     bgColor: '#fffbeb',
     match: (c, d) => c.calcification === 'moderate' || c.lesion_length_mm > 20 ||
-      ['Ostial', 'Angulated', 'Tortuous'].includes(c.morphology) ||
+      ['Ostial', 'Angulated', 'Tortuous'].indexOf(c.morphology) !== -1 ||
       (c.bifurcation && c.bifurcation.present === true && !d.sb_large),
   },
   {
@@ -61,6 +61,7 @@ function classifyLesion(caseInput, derived) {
       return { label: tier.label, color: tier.color, bgColor: tier.bgColor, summary: lesionSummary(caseInput, derived) };
     }
   }
+  return { label: 'Standard', color: '#059669', bgColor: '#f0fdf4', summary: 'Standard lesion complexity.' };
 }
 
 // ── Haemodynamic Risk ─────────────────────────────────────────────────────────
@@ -107,6 +108,7 @@ function classifyHaem(caseInput) {
       return { label: tier.label, color: tier.color, bgColor: tier.bgColor, summary: tier.summary(caseInput) };
     }
   }
+  return { label: 'Stable', color: '#059669', bgColor: '#f0fdf4', summary: 'Haemodynamically stable.' };
 }
 
 // ── Case features list ────────────────────────────────────────────────────────
