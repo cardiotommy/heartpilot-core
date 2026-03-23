@@ -5,6 +5,8 @@ const fs   = require('fs');
 const assert = require('assert');
 
 const { evaluate, derive, evalCondition, groupByDomain } = require('../engine/evaluator.js');
+const PciClassifier = require('../engine/classifier.js');
+const { classify } = PciClassifier;
 
 function loadRulesFromDisk(rulesDir) {
   const domains = ['access', 'wire', 'lesion_prep', 'imaging', 'stent', 'bifurcation', 'haemodynamics'];
@@ -442,6 +444,185 @@ test('All rule domains match their file domain', () => {
     const fileDomain = r._fileDomain || r.domain;
     return false; // domain is stamped by loader
   });
+});
+
+// ── PciClassifier — Lesion Complexity ────────────────
+console.log('\n── PciClassifier — Lesion Complexity ───────────────');
+
+test('Standard: non-LM, no bifurcation, mild calcium, ≤20mm', () => {
+  assert.strictEqual(classify({ ...BASE }).lesionComplexity.label, 'Standard');
+});
+
+test('Moderate: moderate calcium', () => {
+  assert.strictEqual(classify({ ...BASE, calcification: 'moderate' }).lesionComplexity.label, 'Moderate Complexity');
+});
+
+test('Moderate: lesion >20mm', () => {
+  assert.strictEqual(classify({ ...BASE, lesion_length_mm: 25 }).lesionComplexity.label, 'Moderate Complexity');
+});
+
+test('Moderate: small-SB bifurcation (sb_size lt1.5)', () => {
+  const c = { ...BASE, bifurcation: { present: true, sb_size: 'lt1.5', medina_sb: 0 } };
+  assert.strictEqual(classify(c).lesionComplexity.label, 'Moderate Complexity');
+});
+
+test('High: severe calcium', () => {
+  assert.strictEqual(classify({ ...BASE, calcification: 'severe' }).lesionComplexity.label, 'High Complexity');
+});
+
+test('High: graft vessel', () => {
+  assert.strictEqual(classify({ ...BASE, vessel: 'Graft' }).lesionComplexity.label, 'High Complexity');
+});
+
+test('High: large-SB bifurcation (non-LM)', () => {
+  const c = { ...BASE, bifurcation: { present: true, sb_size: 'gt2.5', medina_sb: 1 } };
+  assert.strictEqual(classify(c).lesionComplexity.label, 'High Complexity');
+});
+
+test('High: LM with bifurcation', () => {
+  const c = { ...BASE, vessel: 'LM', bifurcation: { present: true, sb_size: 'gt2.5', medina_sb: 1 } };
+  assert.strictEqual(classify(c).lesionComplexity.label, 'High Complexity');
+});
+
+test('High: LM without bifurcation', () => {
+  assert.strictEqual(classify({ ...BASE, vessel: 'LM' }).lesionComplexity.label, 'High Complexity');
+});
+
+// ── PciClassifier — Haemodynamic Risk ────────────────
+console.log('\n── PciClassifier — Haemodynamic Risk ──────────────');
+
+test('Stable: normal LVEF, stable haem, no special flags', () => {
+  assert.strictEqual(classify({ ...BASE }).haemodynamicRisk.label, 'Stable');
+});
+
+test('Elevated: moderate LVEF', () => {
+  assert.strictEqual(classify({ ...BASE, lvef: 'moderate' }).haemodynamicRisk.label, 'Elevated Risk');
+});
+
+test('Elevated: mild LVEF + multivessel', () => {
+  assert.strictEqual(classify({ ...BASE, lvef: 'mild', multivessel: true }).haemodynamicRisk.label, 'Elevated Risk');
+});
+
+test('High Risk: last remaining vessel alone (no LVEF flag)', () => {
+  assert.strictEqual(classify({ ...BASE, last_remaining_vessel: true }).haemodynamicRisk.label, 'High Risk \u2014 MCS to consider');
+});
+
+test('High Risk: severe LVEF + LM, last_remaining_vessel false', () => {
+  const c = { ...BASE, lvef: 'severe', vessel: 'LM', last_remaining_vessel: false };
+  assert.strictEqual(classify(c).haemodynamicRisk.label, 'High Risk \u2014 MCS to consider');
+});
+
+test('Elevated: severe LVEF on non-LM non-Diffuse vessel (falls through High Risk)', () => {
+  // BASE uses vessel: 'LAD' — severe LVEF without LM/Diffuse morphology must NOT trigger High Risk
+  const c = { ...BASE, lvef: 'severe', vessel: 'LAD', last_remaining_vessel: false };
+  assert.strictEqual(classify(c).haemodynamicRisk.label, 'Elevated Risk');
+});
+
+test('Cardiogenic Shock: compromised haem', () => {
+  assert.strictEqual(classify({ ...BASE, haem_status: 'compromised' }).haemodynamicRisk.label, 'Cardiogenic Shock');
+});
+
+// ── PciClassifier — caseFeatures ─────────────────────
+console.log('\n── PciClassifier — caseFeatures ────────────────────');
+
+test('Always-present features are all included', () => {
+  const labels = classify({ ...BASE }).caseFeatures.map(f => f.label);
+  ['Vessel', 'Calcification', 'TIMI Flow', 'Thrombus', 'Lesion length', 'LVEF', 'Haemodynamics']
+    .forEach(l => assert.ok(labels.includes(l), l + ' missing'));
+});
+
+test('Bifurcation absent when not present', () => {
+  const c = { ...BASE, bifurcation: { present: false } };
+  assert.ok(!classify(c).caseFeatures.some(f => f.label === 'Bifurcation'));
+});
+
+test('Bifurcation absent when bifurcation field undefined', () => {
+  const c = { ...BASE };
+  delete c.bifurcation;
+  assert.ok(!classify(c).caseFeatures.some(f => f.label === 'Bifurcation'));
+});
+
+test('Bifurcation value assembled: SB >2.5mm · ostial · acute', () => {
+  const c = { ...BASE, bifurcation: { present: true, sb_size: 'gt2.5', medina_sb: 1, sb_angle: 'acute' } };
+  const bif = classify(c).caseFeatures.find(f => f.label === 'Bifurcation');
+  assert.ok(bif, 'Bifurcation row missing');
+  assert.strictEqual(bif.value, 'SB >2.5mm \u00b7 ostial \u00b7 acute');
+  assert.strictEqual(bif.badgeStyle, 'danger');
+});
+
+test('Bifurcation value: sb_angle moderate → "moderate angle"', () => {
+  const c = { ...BASE, bifurcation: { present: true, sb_size: 'gt2.5', medina_sb: 1, sb_angle: 'moderate' } };
+  const bif = classify(c).caseFeatures.find(f => f.label === 'Bifurcation');
+  assert.ok(bif.value.includes('moderate angle'), 'Expected "moderate angle" in value, got: ' + bif.value);
+});
+
+test('Morphology absent for Discrete', () => {
+  assert.ok(!classify({ ...BASE, morphology: 'Discrete' }).caseFeatures.some(f => f.label === 'Morphology'));
+});
+
+test('Morphology absent for Tubular', () => {
+  assert.ok(!classify({ ...BASE, morphology: 'Tubular' }).caseFeatures.some(f => f.label === 'Morphology'));
+});
+
+test('Morphology present for Ostial with warning style', () => {
+  const morph = classify({ ...BASE, morphology: 'Ostial' }).caseFeatures.find(f => f.label === 'Morphology');
+  assert.ok(morph, 'Morphology missing');
+  assert.strictEqual(morph.badgeStyle, 'warning');
+});
+
+test('Calcification severe → danger badge', () => {
+  const calc = classify({ ...BASE, calcification: 'severe' }).caseFeatures.find(f => f.label === 'Calcification');
+  assert.strictEqual(calc.badgeStyle, 'danger');
+});
+
+test('TIMI 3 → ok badge', () => {
+  const timi = classify({ ...BASE, timi: 3 }).caseFeatures.find(f => f.label === 'TIMI Flow');
+  assert.strictEqual(timi.badgeStyle, 'ok');
+});
+
+test('Thrombus false → ok badge', () => {
+  const thr = classify({ ...BASE, thrombus: false }).caseFeatures.find(f => f.label === 'Thrombus');
+  assert.strictEqual(thr.badgeStyle, 'ok');
+});
+
+test('Haemodynamics compromised → danger badge', () => {
+  const haem = classify({ ...BASE, haem_status: 'compromised' }).caseFeatures.find(f => f.label === 'Haemodynamics');
+  assert.strictEqual(haem.badgeStyle, 'danger');
+});
+
+test('Feature order: Vessel < Bifurcation < TIMI Flow < LVEF < Haemodynamics', () => {
+  const c = { ...BASE, bifurcation: { present: true, sb_size: 'gt2.5', medina_sb: 1 } };
+  const labels = classify(c).caseFeatures.map(f => f.label);
+  assert.ok(labels.indexOf('Vessel') < labels.indexOf('Bifurcation'), 'Vessel before Bifurcation');
+  assert.ok(labels.indexOf('TIMI Flow') < labels.indexOf('LVEF'), 'TIMI before LVEF');
+  assert.ok(labels.indexOf('LVEF') < labels.indexOf('Haemodynamics'), 'LVEF before Haemodynamics');
+});
+
+// ── PciClassifier — evidence sort ────────────────────
+console.log('\n── PciClassifier — evidence sort ───────────────────');
+
+test('evidenceSortKey: I·A < IIa·B < Consensus < III·B', () => {
+  function evidenceSortKey(rule) {
+    const cls = rule.evidence && rule.evidence.class;
+    const lvl = rule.evidence && rule.evidence.level;
+    if (cls === 'III') return 100;
+    if (!cls || !lvl) return 50;
+    const co = { 'I': 0, 'IIa': 10, 'IIb': 20 }[cls];
+    const lo = { 'A': 0, 'B': 1, 'C': 2 }[lvl];
+    if (co === undefined || lo === undefined) return 50;
+    return co + lo;
+  }
+  const rules = [
+    { id: 'r3', evidence: { class: null, level: null, source: 'Expert' } },
+    { id: 'r1', evidence: { class: 'I', level: 'A', source: 'ESC', year: 2024 } },
+    { id: 'r4', evidence: { class: 'III', level: 'B', source: 'EBC', year: 2024 } },
+    { id: 'r2', evidence: { class: 'IIa', level: 'B', source: 'ESC', year: 2018 } },
+  ];
+  const sorted = rules.slice().sort((a, b) => evidenceSortKey(a) - evidenceSortKey(b));
+  assert.strictEqual(sorted[0].id, 'r1', 'I·A first');
+  assert.strictEqual(sorted[1].id, 'r2', 'IIa·B second');
+  assert.strictEqual(sorted[2].id, 'r3', 'Consensus third');
+  assert.strictEqual(sorted[3].id, 'r4', 'III·B last');
 });
 
 // ── Summary ──────────────────────────────────────────
