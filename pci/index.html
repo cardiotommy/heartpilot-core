@@ -690,7 +690,6 @@ body.analysis-done { overflow-y: auto; }
 <script src="engine/loader.js"></script>
 <script src="engine/classifier.js"></script>
 <script>
-'use strict';
 // ── State ──────────────────────────────────────────
 const S = {
   vessel: null, bifurcation: null, medina: [0,0,0], sbSize: null, sbAngle: null,
@@ -998,9 +997,6 @@ function runAnalysis() {
   });
 }
 
-// Evidence sort delegated to PciClassifier (classifier.js)
-const sortRulesByEvidence = PciClassifier.sortRulesByEvidence;
-
 // ── Classification rendering ───────────────────────
 function axisCard(title, tier) {
   return '<div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);">'
@@ -1085,7 +1081,7 @@ function buildRecommendationsHtml(ruleGroups) {
     const rules = ruleGroups[section.key];
     if (!rules || !rules.length) continue;
 
-    const rowsHtml = sortRulesByEvidence(rules).map(rule => {
+    const rowsHtml = PciClassifier.sortRulesByEvidence(rules).map(rule => {
       let html = '<div style="display:flex;gap:10px;align-items:flex-start;">'
         + buildEvidenceBadge(rule)
         + '<span style="color:#374151;line-height:1.5;">' + h(rule.action) + '</span>'
