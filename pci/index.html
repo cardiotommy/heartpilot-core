@@ -688,6 +688,7 @@ body.analysis-done { overflow-y: auto; }
 
 <script src="engine/evaluator.js"></script>
 <script src="engine/loader.js"></script>
+<script src="engine/classifier.js"></script>
 <script>
 // ── State ──────────────────────────────────────────
 const S = {
@@ -925,17 +926,6 @@ async function loadKnowledge() {
   }
 }
 
-function getMatchedRules() {
-  if (!ALL_RULES.length) return {};
-  const caseInput = PciLoader.caseFromWizardState(S);
-  const result = PciEngine.evaluate(caseInput, ALL_RULES);
-  return PciEngine.groupByDomain(result);
-}
-
-function matchedForDomain(domain) {
-  const groups = getMatchedRules();
-  return groups[domain] || [];
-}
 
 loadKnowledge();
 
@@ -989,14 +979,9 @@ function runAnalysis() {
   document.getElementById('res-label').textContent = 'Analysing…';
 
   requestAnimationFrame(() => {
-    const data = buildStrategy();
+    const caseInput = PciLoader.caseFromWizardState(S);
 
-    if (!S.bifurcation) {
-      data.medinaClass = null; data.medinaDescription = null;
-      data.sideBranchMm = null; data.bifurcationStrategy = null;
-    }
-
-    renderResults(data);
+    renderResults(caseInput);
     ldot.classList.remove('active');
     document.getElementById('res-label').textContent = 'Complete';
     collapseParams();
@@ -1012,266 +997,159 @@ function runAnalysis() {
   });
 }
 
-// ── Render results ─────────────────────────────────
-function renderResults(d) {
-  const el = document.getElementById('results');
-  el.innerHTML = '';
+// ── Evidence sort helpers ──────────────────────────
+function evidenceSortKey(rule) {
+  const cls = rule.evidence && rule.evidence.class;
+  const lvl = rule.evidence && rule.evidence.level;
+  if (cls === 'III') return 100;
+  if (!cls || !lvl) return 50;
+  const co = { 'I': 0, 'IIa': 10, 'IIb': 20 }[cls];
+  const lo = { 'A': 0, 'B': 1, 'C': 2 }[lvl];
+  if (co === undefined || lo === undefined) return 50;
+  return co + lo;
+}
 
-  const topHtml = buildTopBlocks(d);
-  const topEl = document.createElement('div');
-  topEl.innerHTML = topHtml;
-  el.appendChild(topEl);
-
-  [cardEquip(d)].filter(Boolean).forEach((html,i) => {
-    const w = document.createElement('div');
-    w.innerHTML = html;
-    const card = w.firstElementChild;
-    card.style.animationDelay = (i*0.08)+'s';
-    el.appendChild(card);
+function sortRulesByEvidence(rules) {
+  return rules.slice().sort((a, b) => {
+    const ka = evidenceSortKey(a), kb = evidenceSortKey(b);
+    if (ka !== kb) return ka - kb;
+    const pd = (b.priority || 1) - (a.priority || 1);
+    if (pd !== 0) return pd;
+    return (a.id || '').localeCompare(b.id || '');
   });
 }
 
-// ── Verdict card ───────────────────────────────────
-function buildTopBlocks(d) {
-  const bs = d.bifurcationStrategy;
-  const isProv = !S.bifurcation || !bs || bs.approach === 'provisional';
-  const accentCol = isProv ? 'var(--green)' : 'var(--amber)';
+// ── Classification rendering ───────────────────────
+function axisCard(title, tier) {
+  return '<div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);">'
+    + '<div style="background:' + tier.color + ';color:#fff;padding:13px 16px;">'
+    + '<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-bottom:3px;">' + h(title) + '</div>'
+    + '<div style="font-size:18px;font-weight:700;line-height:1.2;">' + h(tier.label) + '</div>'
+    + '</div>'
+    + '<div style="background:' + tier.bgColor + ';padding:10px 16px;font-size:12px;color:#374151;line-height:1.6;">' + h(tier.summary) + '</div>'
+    + '</div>';
+}
 
-  // Parameter strip colour coding
-  const calcColour = {none:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.calcification]||'neu';
-  const timiColour = S.timi < 2 ? 'hi' : S.timi < 3 ? 'med' : 'ok';
-  const lvefColour = {normal:'ok',mild:'ok',moderate:'med',severe:'hi'}[S.lvef]||'neu';
-  const bifColour  = S.bifurcation ? 'med' : 'ok';
-  const bifVal     = S.bifurcation ? S.medina.join(',') : 'None';
-  const lvefLbl    = {normal:'Normal',mild:'Mild',moderate:'Moderate',severe:'Severe'}[S.lvef]||S.lvef;
+function buildClassificationHtml(cl) {
+  const BADGE_STYLES = {
+    danger:  'background:rgba(127,29,29,.1);color:#7f1d1d;',
+    warning: 'background:rgba(180,83,9,.12);color:#b45309;',
+    ok:      'background:rgba(21,128,61,.12);color:#15803d;',
+  };
 
-  const params = [
-    {l:'Vessel',      v:S.vessel||'—',       c:'neu'},
-    {l:'Length',      v:S.lesionLength+'mm',  c:S.lesionLength>20?'med':'neu'},
-    {l:'Calcium',     v:cap(S.calcification), c:calcColour},
-    {l:'TIMI',        v:'Grade '+S.timi,      c:timiColour},
-    {l:'Bifurcation', v:bifVal,               c:bifColour},
-    {l:'LVEF',        v:lvefLbl,              c:lvefColour},
-  ];
+  const axisHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">'
+    + axisCard('Lesion Complexity', cl.lesionComplexity)
+    + axisCard('Haemodynamic Risk', cl.haemodynamicRisk)
+    + '</div>';
 
-  const paramHtml = params.map(p =>
-    '<div class="vc-param">'
-    +'<div class="vc-param-lbl">'+h(p.l)+'</div>'
-    +'<div class="vc-param-val '+p.c+'">'+h(String(p.v))+'</div>'
-    +'</div>'
-  ).join('');
+  const featureRows = cl.caseFeatures.map((f, i) => {
+    const isLast = i === cl.caseFeatures.length - 1;
+    const badgeHtml = (f.badge && f.badgeStyle !== 'neutral')
+      ? '<span style="' + (BADGE_STYLES[f.badgeStyle] || '') + 'font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;">' + h(f.badge) + '</span>'
+      : '';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div style="font-weight:600;">' + h(f.label) + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<span style="font-family:monospace;font-weight:600;">' + h(f.value) + '</span>'
+      + badgeHtml
+      + '</div></div>'
+      + (isLast ? '' : '<div style="height:1px;background:#f0ece7;"></div>');
+  }).join('');
 
-  // Recommendation headline (serif + em for technique)
-  let headline = '';
-  if (!S.bifurcation) {
-    headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">Single Vessel</em>';
-  } else if (bs) {
-    if (bs.approach === 'provisional') {
-      headline = 'Provisional \u2014 <em style="font-style:italic;color:var(--green)">'+h(bs.technique||'T-stenting')+'</em>';
-    } else {
-      headline = '2-Stent \u2014 <em style="font-style:italic;color:var(--amber)">'+h(bs.technique||'DK-Crush')+'</em>';
-    }
-  }
+  const featHtml = '<div style="border:1px solid #e2ddd8;border-radius:12px;overflow:hidden;margin-bottom:14px;">'
+    + '<div style="background:#f0ece7;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#706b66;border-bottom:1px solid #e2ddd8;">Case Features</div>'
+    + '<div style="padding:12px 16px;display:flex;flex-direction:column;gap:9px;">' + featureRows + '</div>'
+    + '</div>';
 
-  // MCS inset (only when haemodynamic support indicated)
-  const mcsHtml = d.haemodynamicSupport
-    ? '<div class="vc-mcs"><span class="vc-mcs-lbl">\u26a0 MCS \u2014</span>'+h(d.haemodynamicSupport)+'</div>'
+  return axisHtml + featHtml;
+}
+
+// ── Recommendations rendering ──────────────────────
+const DOMAIN_SECTIONS = [
+  { key: 'access',        label: 'Access' },
+  { key: 'wire',          label: 'Wire' },
+  { key: 'lesion_prep',   label: 'Lesion Preparation' },
+  { key: 'imaging',       label: 'Imaging' },
+  { key: 'stent',         label: 'Stent' },
+  { key: 'bifurcation',   label: 'Bifurcation' },
+  { key: 'haemodynamics', label: 'Haemodynamics' },
+];
+
+function buildEvidenceBadge(rule) {
+  const cls = rule.evidence && rule.evidence.class;
+  const lvl = rule.evidence && rule.evidence.level;
+  const src = rule.evidence && rule.evidence.source;
+  const yr  = rule.evidence && rule.evidence.year;
+  const srcLine = (src || yr)
+    ? '<span style="font-size:9px;color:#a8a49f;letter-spacing:.04em;">' + h((src || '') + (yr ? ' ' + yr : '')) + '</span>'
     : '';
 
-  // Footer badges
-  const cls = d.accAhaClass || 'B1';
-  const clsBadgeCls = cls==='C' ? 'vc-badge-hi' : cls==='B2' ? 'vc-badge-med' : 'vc-badge-ok';
-  const cplx = (d.complexityLevel||'moderate').replace('_',' ');
-  const cplxCls = (d.complexityLevel==='very_high'||d.complexityLevel==='high') ? 'vc-badge-hi' : 'vc-badge-neu';
+  let badge;
+  if (cls === 'III') {
+    badge = '<span style="background:#fee2e2;color:#991b1b;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;">III' + (lvl ? ' \u00b7 ' + h(lvl) : '') + '</span>';
+  } else if (cls && lvl) {
+    badge = '<span style="background:#dbeafe;color:#1e40af;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;">' + h(cls) + ' \u00b7 ' + h(lvl) + '</span>';
+  } else {
+    badge = '<span style="background:#f1f5f9;color:#475569;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;">Consensus</span>';
+  }
 
-  return '<div class="vc-card">'
-    +'<div class="vc-hd">'
-    +'<span class="vc-hd-lbl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>&nbsp;Case Assessment</span>'
-    +'<span class="vc-hd-tag">'+h(S.vessel||'—')+' \u00b7 '+h(String(S.lesionLength))+'mm</span>'
-    +'</div>'
-    +'<div class="vc-params">'+paramHtml+'</div>'
-    +'<div class="vc-rec" style="border-left-color:'+accentCol+'">'
-    +'<div class="vc-rec-eyebrow">Recommended Strategy</div>'
-    +'<div class="vc-rec-headline">'+headline+'</div>'
-    +'<div class="vc-rec-rationale">'+h(d.accAhaRationale||'')+'</div>'
-    +mcsHtml
-    +'</div>'
-    +'<div class="vc-footer">'
-    +'<div class="vc-badges">'
-    +'<span class="vc-badge '+clsBadgeCls+'">ACC/AHA '+h(cls)+'</span>'
-    +'<span class="vc-badge '+cplxCls+'">Complexity \u00b7 '+h(cplx)+'</span>'
-    +'</div>'
-    +'<div class="vc-guideline"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>&nbsp;ESC 2024 \u00b7 ACC/AHA 2021</div>'
-    +'</div>'
-    +'</div>';
+  return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;margin-top:1px;">' + badge + srcLine + '</div>';
 }
 
-function toggleCard(btn) {
-  btn.closest('.card').classList.toggle('collapsed');
-}
+function buildRecommendationsHtml(ruleGroups) {
+  let sectionsHtml = '';
 
-function cardEquip(d) {
-  const ruleGroups = getMatchedRules();
+  for (const section of DOMAIN_SECTIONS) {
+    const rules = ruleGroups[section.key];
+    if (!rules || !rules.length) continue;
 
-  function rowsForSection(domain) {
-    return (ruleGroups[domain] || [])
-      .map(r => {
-        const cls = r.evidence?.class || null;
-        const src = r.evidence?.source || null;
-        const rows = [badgedTip('gl', r.action, src, cls, src)];
-        if (r.caution) rows.push(cautionTip(r.caution));
-        return rows.join('');
-      })
-      .join('');
-  }
-
-  function sectionHdr(colour, label) {
-    return '<div class="sd-hdr" style="--sd-col:'+colour+'">'+label+'</div>';
-  }
-  function badgedTip(type, txt, src, recClass, recClassSrc) {
-    if (!txt) return '';
-    let badge = '';
-    if (type === 'exp') {
-      badge = '<span class="tip-badge tip-exp">Expert Tip</span>';
-    } else if (recClass) {
-      let classCss = 'tip-class-II';
-      const rc = String(recClass).trim().toUpperCase();
-      if (rc === 'I') classCss = 'tip-class-I';
-      else if (rc.startsWith('III')) classCss = 'tip-class-III';
-      badge = '<span class="tip-badge '+classCss+'">Class '+h(recClass)+(recClassSrc ? ' \u00b7 '+h(recClassSrc) : '')+'</span>';
-    } else {
-      badge = '<span class="tip-badge tip-consensus">Consensus'+(src?' \u00b7 '+h(String(src).replace(/\s*\d{4}.*$/,'')):'')+'</span>';
-    }
-    return '<div class="sd-tip sd-tip-badged">'
-      +'<span class="tip-body">'+h(txt)+badge+'</span>'
-      +'</div>';
-  }
-  function cautionTip(txt) {
-    if (!txt) return '';
-    return '<div class="sd-tip sd-tip-warn" style="color:var(--red);border-left-color:rgba(192,57,43,.3)">'
-      +'\u26a0 '+h(txt)
-      +'</div>';
-  }
-
-  const rows = [];
-
-  rows.push(sectionHdr('var(--blue)', 'Guide Selection'));
-  rows.push(rowsForSection('access'));
-
-  rows.push(sectionHdr('var(--green)', 'Wire Selection'));
-  rows.push(rowsForSection('wire'));
-
-  rows.push(sectionHdr('var(--amber)', 'Lesion Preparation'));
-  rows.push(rowsForSection('lesion_prep'));
-
-  rows.push(sectionHdr('var(--blue)', 'Imaging'));
-  rows.push(rowsForSection('imaging'));
-
-  rows.push(sectionHdr('var(--green)', 'Stent'));
-  rows.push(rowsForSection('stent'));
-
-  if (S.bifurcation) {
-    rows.push(sectionHdr('var(--amber)', 'Bifurcation'));
-    rows.push(rowsForSection('bifurcation'));
-  }
-
-  return '<div class="card">'
-    +'<div class="card-toggle" onclick="toggleCard(this)">'
-    +'<span class="card-ttl"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Strategy Details</span>'
-    +'<span class="toggle-chevron">&#9660;</span>'
-    +'</div>'
-    +'<div class="card-collapsible"><div class="card-bd">'
-    +rows.join('')
-    +'</div></div></div>';
-}
-
-// ── Deterministic strategy builder ────────────────────────────────
-function buildStrategy() {
-  const v=S.vessel||'LAD', bif=S.bifurcation, calc=S.calcification;
-  const isR=['RCA','AM','PDA','PLB'].includes(v);
-  const isGraft=(v==='Graft');
-  const sev=calc==='severe', mod=calc==='moderate';
-  const sevCalc=sev, modCalc=mod;
-  const lms=(v==='LM'), long=S.lesionLength>20;
-  const sbLg=S.sbSize==='gt2.5', sbInv=S.medina[2]===1;
-  const sbMap={'lt1.5':'<1.5mm','1.5-2.5':'1.5–2.5mm','gt2.5':'>2.5mm'};
-  let bifStrat=null;
-  if(bif){
-    if(sbLg&&sbInv){
-      const ang = S.sbAngle;
-      let tech, techRat;
-      if (ang === 'acute') {
-        tech = 'DK-Crush';
-        techRat = 'Acute SB take-off angle strongly favours DK-Crush — T-shaped anatomy makes rewiring through crushed struts more predictable.';
-      } else if (ang === 'obtuse') {
-        tech = 'Culotte or DK-Crush';
-        techRat = 'Obtuse SB take-off angle favours Culotte when both branches are of similar calibre. DK-Crush remains an acceptable alternative.';
-      } else {
-        tech = 'DK-Crush (preferred) or Culotte';
-        techRat = 'Large SB with ostial disease — upfront 2-stent per EBC/ESC consensus. DK-Crush preferred for most anatomies.';
+    const rowsHtml = sortRulesByEvidence(rules).map(rule => {
+      let html = '<div style="display:flex;gap:10px;align-items:flex-start;">'
+        + buildEvidenceBadge(rule)
+        + '<span style="color:#374151;line-height:1.5;">' + h(rule.action) + '</span>'
+        + '</div>';
+      if (rule.caution) {
+        html += '<div style="background:#fff8f0;border:1px solid #fed7aa;border-radius:8px;padding:9px 12px;display:flex;gap:10px;align-items:flex-start;">'
+          + '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;margin-top:1px;">'
+          + '<span style="background:#fee2e2;color:#991b1b;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;">\u26a0 Caution</span>'
+          + '</div>'
+          + '<span style="color:#374151;line-height:1.5;">' + h(rule.caution) + '</span>'
+          + '</div>';
       }
-      bifStrat={approach:'two_stent',technique:tech,rationale:techRat,
-        steps:['Wire both branches; pre-dilate MV and SB ostium',
-          'Deploy SB stent → crush → first kissing balloon → deploy MV stent → re-wire SB → FKBI',
-          'Apply POT before SB treatment and rePOT after any SB balloon inflation',
-          'Post-stent intravascular imaging to confirm SB ostial coverage',
-          'FKBI mandatory']};
-    } else {
-      bifStrat={approach:'provisional',technique:'Provisional T-stenting with POT–rePOT',
-        rationale:'Provisional strategy is the default for most bifurcation lesions per EBC/ESC consensus.',
-        steps:['Wire MV and SB (jailed wire technique)',
-          'Deploy MV stent; apply POT immediately',
-          'Re-wire SB through proximal cell; confirm with contrast',
-          'KBI only if: SB TIMI <3, residual stenosis >75%, or significant dissection',
-          'Apply rePOT after KBI; proceed to SB stenting only if provisional result unsatisfactory']};
-    }
+      return html;
+    }).join('');
+
+    const isLast = section === DOMAIN_SECTIONS[DOMAIN_SECTIONS.length - 1] ||
+      !DOMAIN_SECTIONS.slice(DOMAIN_SECTIONS.indexOf(section) + 1).some(s => ruleGroups[s.key] && ruleGroups[s.key].length);
+
+    sectionsHtml += '<div' + (isLast ? '' : ' style="border-bottom:1px solid #f0ece7;"') + '>'
+      + '<div style="padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a8a49f;background:#fafaf9;">' + h(section.label) + '</div>'
+      + '<div style="padding:10px 16px;display:flex;flex-direction:column;gap:10px;">' + rowsHtml + '</div>'
+      + '</div>';
   }
-  return {
-    accAhaClass: sev||long||bif||v==='LM'?(bif&&v==='LM'?'C':'B2'):'B1',
-    accAhaRationale: v+' lesion '+S.lesionLength+'mm, '+(calc==='none'?'no':calc)+' calcification'+(bif?', bifurcation Medina '+S.medina.join(','):'')+(v==='LM'?' — left main involvement.':''),
-    estimatedSuccess: sev?'~60–70%':bif?'~70–80%':long?'~75–85%':'>85%',
-    complexityLevel: (v==='LM'||(bif&&sbLg))?'very_high':(sev||bif||(S.lvef==='severe'&&S.singleVessel))?'high':'moderate',
-    bifurcationInvolvement:!!bif,
-    medinaClass:bif?S.medina.join(','):null,
-    medinaDescription:bif?'Medina '+S.medina.join(',')+(S.medina[0]?' — proximal MV':'')+(S.medina[1]?', distal MV':'')+(S.medina[2]?', SB ostium':''):null,
-    sideBranchMm:bif?(sbMap[S.sbSize]||'not specified'):null,
-    bifurcationStrategy:bifStrat,
-    lesionPrep:{
-      strategy: sevCalc?'Calcium modification required':'Pre-dilatation required',
-      balloonSpec: sevCalc?'Non-compliant balloon post-atherectomy/IVL':'Semi-compliant balloon, sized to RVD',
-      calciumModification: sevCalc?'Rotational atherectomy or intravascular lithotripsy':modCalc?'Scoring or cutting balloon':null,
-      calciumModificationRationale: sevCalc?'Severe calcium requires modification before stenting':modCalc?'Moderate calcium may respond to scoring balloon; escalate to IVL if waist persists':null,
-    },
-    imaging:{
-      modality: 'IVUS',
-      rationale: lms?'Mandatory for LM — stent sizing, ostial coverage, and MSA optimisation':sevCalc?'Confirm adequate calcium modification and stent expansion':long?'Avoid geographic miss and confirm expansion throughout stented length':bif?'Guide POT sizing and confirm SB ostial coverage':'Confirm stent apposition and expansion',
-    },
-    equipment:{
-      guideType:isGraft?'JR4 or MP for right-sided grafts; AL1 or Hockey Stick for left-sided grafts. Prioritise coaxial alignment over backup force.':isR?'Judkins Right first choice; Amplatz Left for additional backup or tortuous anatomy':lms?'Large-lumen guide (7–8Fr); EBU or XB preferred':'EBU or XB-type for left system',
-      guidewireType:bif?'Soft workhorse wire (MV) + second workhorse wire (SB jailing)':sev?'Atherectomy-compatible wire; extra-support wire for device delivery':'Soft-tipped workhorse wire',
-      guidewireRationale:bif?'Second wire protects SB and facilitates re-access if SB flow is compromised':sev?'Compatible with atherectomy; extra-support improves deliverability through resistant calcium':'Standard workhorse appropriate',
-      balloonType:sev?'Scoring or cutting balloon for calcium modification; NC balloon post-dilatation':'Semi-compliant for pre-dilation; NC balloon for post-dilatation',
-      stentType:'Thin-strut drug-eluting stent (DES)'+(bif?' — ultra-thin strut preferred':'')+(long?'; overlapping DES if >28mm coverage required':''),
-      extraEquipment:[...(sev?['Rotational atherectomy system or IVL system']:[]),(calc!=='none'?'Intravascular imaging catheter (IVUS or OCT)':null),...(bif?['Y-connector for dual wire access','Inflation device for simultaneous kissing balloons']:[]),...((S.singleVessel||S.lvef==='severe')?['Mechanical circulatory support device']:[])].filter(Boolean),
-    },
-    haemodynamicSupport:(()=>{
-      const lrv=S.singleVessel; const lvef=S.lvef; const haem=S.haemStatus;
-      const lmv=S.vessel==='LM'; const proxLAD=S.vessel==='LAD';
-      const sevEF=lvef==='severe'; const redEF=lvef==='moderate'||lvef==='severe'; const compromised=haem==='compromised';
-      if(lrv&&sevEF) return 'Last remaining vessel + EF <30%: prophylactic MCS strongly recommended. Microaxial pump preferred over IABP.';
-      if(lrv) return 'Last remaining vessel: prophylactic MCS strongly recommended before wiring.';
-      if(sevEF&&(lmv||proxLAD)) return (lmv?'Unprotected LM':'Proximal LAD')+' PCI with severely impaired EF: prophylactic MCS should be strongly considered.';
-      if(sevEF||compromised) return 'High-risk features: prophylactic MCS should be considered. IABP minimum; microaxial pump if EF <35%.';
-      return null;
-    })(),
-    keyConsiderations:[
-      long?'Long lesion ('+S.lesionLength+'mm) — ensure adequate stent length; intravascular imaging strongly recommended':null,
-      S.timi<3?'TIMI '+S.timi+' flow at baseline — restore antegrade flow early':null,
-      S.thrombus?'Thrombus present — consider staged procedure or aspiration to reduce no-reflow risk':null,
-      'Radial access preferred to minimise access-site complications',
-    ].filter(Boolean),
-  };
+
+  if (!sectionsHtml) return '';
+  return '<div style="border:1px solid #e2ddd8;border-radius:12px;overflow:hidden;">'
+    + '<div style="background:#f0ece7;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#706b66;border-bottom:1px solid #e2ddd8;">Recommendations</div>'
+    + sectionsHtml
+    + '</div>';
 }
+
+// ── Render results ─────────────────────────────────
+function renderResults(caseInput) {
+  if (!ALL_RULES.length) {
+    document.getElementById('results').innerHTML = '<div style="padding:20px;color:#a8a49f;font-size:13px;">Rules failed to load — check browser console.</div>';
+    return;
+  }
+  const classification = PciClassifier.classify(caseInput);
+  const result = PciEngine.evaluate(caseInput, ALL_RULES);
+  const ruleGroups = PciEngine.groupByDomain(result);
+  document.getElementById('results').innerHTML =
+    buildClassificationHtml(classification) + buildRecommendationsHtml(ruleGroups);
+}
+
+
+
 
 // ── Utils ──────────────────────────────────────────
 const cap  = s  => s ? s.charAt(0).toUpperCase()+s.slice(1) : '—';
