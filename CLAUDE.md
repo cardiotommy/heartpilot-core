@@ -10,7 +10,7 @@ HeartPilot Core is a **deterministic clinical decision-support engine** for Perc
 
 - **Domain:** Interventional cardiology (PCI strategy)
 - **Architecture:** Pure rule engine + embedded single-page web UI
-- **Language:** JavaScript (ES5-compatible; runs in Node.js and browsers without transpilation)
+- **Language:** JavaScript (ES6+; runs in Node.js and modern browsers without transpilation)
 - **Dependencies:** Zero external dependencies
 - **License:** MIT (Copyright 2026 Dr Thomas A Meredith MD PhD)
 

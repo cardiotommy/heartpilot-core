@@ -602,16 +602,7 @@ test('Feature order: Vessel < Bifurcation < TIMI Flow < LVEF < Haemodynamics', (
 console.log('\n── PciClassifier — evidence sort ───────────────────');
 
 test('evidenceSortKey: I·A < IIa·B < Consensus < III·B', () => {
-  function evidenceSortKey(rule) {
-    const cls = rule.evidence && rule.evidence.class;
-    const lvl = rule.evidence && rule.evidence.level;
-    if (cls === 'III') return 100;
-    if (!cls || !lvl) return 50;
-    const co = { 'I': 0, 'IIa': 10, 'IIb': 20 }[cls];
-    const lo = { 'A': 0, 'B': 1, 'C': 2 }[lvl];
-    if (co === undefined || lo === undefined) return 50;
-    return co + lo;
-  }
+  const { evidenceSortKey } = PciClassifier;
   const rules = [
     { id: 'r3', evidence: { class: null, level: null, source: 'Expert' } },
     { id: 'r1', evidence: { class: 'I', level: 'A', source: 'ESC', year: 2024 } },
@@ -623,6 +614,17 @@ test('evidenceSortKey: I·A < IIa·B < Consensus < III·B', () => {
   assert.strictEqual(sorted[1].id, 'r2', 'IIa·B second');
   assert.strictEqual(sorted[2].id, 'r3', 'Consensus third');
   assert.strictEqual(sorted[3].id, 'r4', 'III·B last');
+});
+
+test('evidenceSortKey: III·C always last (with I·A and Consensus)', () => {
+  const { evidenceSortKey } = PciClassifier;
+  const rules = [
+    { id: 'consensus', evidence: { class: null, level: null } },
+    { id: 'harm',      evidence: { class: 'III', level: 'C' } },
+    { id: 'ia',        evidence: { class: 'I', level: 'A' } },
+  ];
+  const sorted = rules.slice().sort((a, b) => evidenceSortKey(a) - evidenceSortKey(b));
+  assert.strictEqual(sorted[2].id, 'harm', 'III·C must be last');
 });
 
 // ── Summary ──────────────────────────────────────────

@@ -231,7 +231,39 @@ function classify(caseInput) {
   };
 }
 
-var PciClassifier = { classify: classify };
+// ── Evidence sort ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns a numeric sort key for a rule based on its evidence class and level.
+ * Lower = stronger evidence. Class III (harm) always sorts last (100).
+ * Consensus (null class or level) sorts second-to-last (50).
+ */
+function evidenceSortKey(rule) {
+  var cls = rule.evidence && rule.evidence.class;
+  var lvl = rule.evidence && rule.evidence.level;
+  if (cls === 'III') return 100;
+  if (!cls || !lvl) return 50;
+  var co = { 'I': 0, 'IIa': 10, 'IIb': 20 }[cls];
+  var lo = { 'A': 0, 'B': 1, 'C': 2 }[lvl];
+  if (co === undefined || lo === undefined) return 50;
+  return co + lo;
+}
+
+/**
+ * Returns a new array of rules sorted by evidence strength (ascending),
+ * then priority descending, then id ascending.
+ */
+function sortRulesByEvidence(rules) {
+  return rules.slice().sort(function(a, b) {
+    var ka = evidenceSortKey(a), kb = evidenceSortKey(b);
+    if (ka !== kb) return ka - kb;
+    var pd = (b.priority || 1) - (a.priority || 1);
+    if (pd !== 0) return pd;
+    return (a.id || '').localeCompare(b.id || '');
+  });
+}
+
+var PciClassifier = { classify: classify, evidenceSortKey: evidenceSortKey, sortRulesByEvidence: sortRulesByEvidence };
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = PciClassifier;

@@ -690,6 +690,7 @@ body.analysis-done { overflow-y: auto; }
 <script src="engine/loader.js"></script>
 <script src="engine/classifier.js"></script>
 <script>
+'use strict';
 // ── State ──────────────────────────────────────────
 const S = {
   vessel: null, bifurcation: null, medina: [0,0,0], sbSize: null, sbAngle: null,
@@ -997,27 +998,9 @@ function runAnalysis() {
   });
 }
 
-// ── Evidence sort helpers ──────────────────────────
-function evidenceSortKey(rule) {
-  const cls = rule.evidence && rule.evidence.class;
-  const lvl = rule.evidence && rule.evidence.level;
-  if (cls === 'III') return 100;
-  if (!cls || !lvl) return 50;
-  const co = { 'I': 0, 'IIa': 10, 'IIb': 20 }[cls];
-  const lo = { 'A': 0, 'B': 1, 'C': 2 }[lvl];
-  if (co === undefined || lo === undefined) return 50;
-  return co + lo;
-}
-
-function sortRulesByEvidence(rules) {
-  return rules.slice().sort((a, b) => {
-    const ka = evidenceSortKey(a), kb = evidenceSortKey(b);
-    if (ka !== kb) return ka - kb;
-    const pd = (b.priority || 1) - (a.priority || 1);
-    if (pd !== 0) return pd;
-    return (a.id || '').localeCompare(b.id || '');
-  });
-}
+// Evidence sort helpers delegated to PciClassifier (classifier.js)
+const evidenceSortKey = PciClassifier.evidenceSortKey;
+const sortRulesByEvidence = PciClassifier.sortRulesByEvidence;
 
 // ── Classification rendering ───────────────────────
 function axisCard(title, tier) {
