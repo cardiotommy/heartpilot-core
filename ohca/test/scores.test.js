@@ -103,6 +103,51 @@ test('MIRACLE2: epi 0mg = 0 pts, any epi = +2 pts', function() {
   assert.strictEqual(s1 - s0, 2);
 });
 
+// ── CASPRI ────────────────────────────────────────────────────────────────────
+console.log('\nCASPRI Score');
+
+test('CASPRI: high-risk case (asystole, elderly, long downtime, comorbidities)', function() {
+  var r = OhcaScores.caspri({
+    age: 80, witnessed: false, initialRhythm: 'non_shockable',
+    initialRhythmSubtype: 'asystole', prearrestCPC: 'cpc2',
+    lowFlowTime: 30, comorbidities: ['renal_failure']
+  });
+  assert.strictEqual(r.tier, 'high');
+  // age>=80=4, unwitnessed asystole=7, cpc2=2, lowFlow>=30=8, monitored=3, renal=2 → 26
+  assert.strictEqual(r.score, 26);
+});
+
+test('CASPRI: low-risk case (witnessed VF, young, short downtime)', function() {
+  var r = OhcaScores.caspri({
+    age: 50, witnessed: true, initialRhythm: 'shockable',
+    initialRhythmSubtype: null, prearrestCPC: 'cpc1',
+    lowFlowTime: 3, comorbidities: []
+  });
+  assert.strictEqual(r.tier, 'low');
+  // age<60=0, witnessed VF=0, cpc1=0, lowFlow<5=0, monitored=3 → 3
+  assert.strictEqual(r.score, 3);
+});
+
+test('CASPRI: comorbidity scoring uses highest category only', function() {
+  var base = { age: 60, witnessed: true, initialRhythm: 'shockable',
+               initialRhythmSubtype: null, prearrestCPC: 'cpc1',
+               lowFlowTime: 3 };
+  var r1 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['renal_failure'] }));
+  var r2 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['hepatic_failure'] }));
+  var r3 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['renal_failure', 'hepatic_failure'] }));
+  assert.strictEqual(r1.score - r2.score, -2); // renal=2, hepatic=4
+  assert.strictEqual(r3.score, r2.score);       // both present → use highest (4)
+});
+
+test('CASPRI: result has caveat field', function() {
+  var r = OhcaScores.caspri({
+    age: 60, witnessed: true, initialRhythm: 'shockable',
+    initialRhythmSubtype: null, prearrestCPC: 'cpc1',
+    lowFlowTime: 5, comorbidities: []
+  });
+  assert.ok(typeof r.caveat === 'string' && r.caveat.length > 0);
+});
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 if (fail > 0) process.exit(1);
