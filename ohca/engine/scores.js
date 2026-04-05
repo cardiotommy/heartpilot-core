@@ -227,7 +227,7 @@ var OhcaScores = (function () {
       interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) after OHCA.',
       thresholds: { low: '\u22649 (low risk)', intermediate: '10\u201316 (intermediate risk)', high: '\u226517 (high risk)' },
       reference: { authors: 'Martinell et al.', journal: 'Critical Care', year: 2017 },
-      predicts: 'neurological', horizon: 'hospital discharge',
+      predicts: 'neurological', horizon: '180 days',
       incomplete: false, incompleteReason: null
     };
   }
