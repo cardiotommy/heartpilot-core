@@ -476,6 +476,296 @@ body.results-done{overflow:auto;height:auto;}
 <script src="engine/scores.js"></script>
 <script>
 'use strict';
+
+// ── State ──────────────────────────────────────────────────────────────────
+var S = {
+  age: 60,
+  initialRhythm: null,
+  initialRhythmSubtype: null,
+  refractoryVF: false,
+  witnessed: null,
+  location: null,
+  bystanderCPR: null,
+  prearrestCPC: null,
+  comorbidities: [],
+  noFlowTime: 0,
+  lowFlowTime: 0,
+  epinephrineDose: 0,
+  changingRhythms: null,
+  haemStatus: null,
+  gcsMotor: null,
+  pupilsReactive: null,
+  stemiEcg: null,
+  lvef: 'unknown',
+  ph: null,
+  lactate: null,
+  glucose: null,
+  creatinine: null,
+  paco2: null,
+};
+
+var STEPS = [
+  { label: 'Arrest',   required: function() {
+    return S.initialRhythm !== null && S.witnessed !== null &&
+           S.location !== null && S.bystanderCPR !== null &&
+           S.prearrestCPC !== null &&
+           (S.initialRhythm === 'shockable' || S.initialRhythmSubtype !== null);
+  }},
+  { label: 'Resus',    required: function() {
+    return S.changingRhythms !== null;
+  }},
+  { label: 'Arrival',  required: function() {
+    return S.haemStatus !== null && S.gcsMotor !== null &&
+           S.pupilsReactive !== null && S.stemiEcg !== null;
+  }},
+  { label: 'Labs',     required: function() {
+    return S.ph !== null && S.lactate !== null && S.glucose !== null;
+  }},
+];
+
+var currentStep = 0;
+
+// ── Progress bar ───────────────────────────────────────────────────────────
+function buildPbar() {
+  var pbar = document.getElementById('pbar');
+  pbar.innerHTML = '';
+  STEPS.forEach(function(step, i) {
+    if (i > 0) {
+      var sep = document.createElement('div');
+      sep.className = 'ssep';
+      pbar.appendChild(sep);
+    }
+    var node = document.createElement('div');
+    node.className = 'snode' + (i === currentStep ? ' active' : i < currentStep ? ' done' : '');
+    node.id = 'snode-' + i;
+    node.innerHTML = '<div class="snode-num">' + (i < currentStep ? '✓' : (i+1)) + '</div>' + step.label;
+    pbar.appendChild(node);
+  });
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('step-' + n).classList.add('active');
+  currentStep = n;
+  buildPbar();
+  updNextBtn();
+  document.getElementById('back-btn').style.display = n > 0 ? '' : 'none';
+  var nextBtn = document.getElementById('next-btn');
+  if (n === STEPS.length - 1) {
+    nextBtn.innerHTML = 'Calculate Scores';
+  } else {
+    nextBtn.innerHTML = 'Next <span id="next-arrow">\u2192</span>';
+  }
+}
+
+function updNextBtn() {
+  document.getElementById('next-btn').disabled = !STEPS[currentStep].required();
+}
+
+function nextStep() {
+  if (currentStep < STEPS.length - 1) {
+    showStep(currentStep + 1);
+  } else {
+    runAnalysis();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) showStep(currentStep - 1);
+}
+
+// ── Input setters — Step 0 ─────────────────────────────────────────────────
+function setAge(v) {
+  S.age = v;
+  document.getElementById('age-val').textContent = v;
+  document.getElementById('age-input').value = v;
+  var pct = ((v - 18) / (100 - 18) * 100).toFixed(1);
+  document.querySelector('#step-0 .inp-slider').style.background =
+    'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+}
+
+function setRhythm(v) {
+  S.initialRhythm = v;
+  S.initialRhythmSubtype = null;
+  ['shock','nonshock'].forEach(function(k) {
+    document.getElementById('rhy-' + k).className = 'ocard' + (k === (v === 'shockable' ? 'shock' : 'nonshock') ? ' sel' : '');
+  });
+  document.getElementById('cond-refractory').className = 'inp-group cond' + (v === 'shockable' ? ' show' : '');
+  document.getElementById('cond-nonshock-sub').className = 'inp-group cond' + (v === 'non_shockable' ? ' show' : '');
+  ['pea','asystole'].forEach(function(k) { document.getElementById('sub-' + k).className = 'ocard'; });
+  updNextBtn();
+}
+
+function setRhythmSubtype(v) {
+  S.initialRhythmSubtype = v;
+  ['pea','asystole'].forEach(function(k) {
+    document.getElementById('sub-' + k).className = 'ocard' + (k === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function setRefractoryVF(v) {
+  S.refractoryVF = v;
+  document.getElementById('ref-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('ref-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
+function setWitnessed(v) {
+  S.witnessed = v;
+  document.getElementById('wit-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('wit-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
+function setLocation(v) {
+  S.location = v;
+  ['public','home','other'].forEach(function(k) {
+    document.getElementById('loc-' + k).className = 'ocard' + (k === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function setBystanderCPR(v) {
+  S.bystanderCPR = v;
+  document.getElementById('byst-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('byst-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
+function setPrearrestCPC(v) {
+  S.prearrestCPC = v;
+  ['1','2','34'].forEach(function(k) {
+    var id = 'cpc-' + k;
+    var val = k === '34' ? 'cpc3_4' : 'cpc' + k;
+    document.getElementById(id).className = 'ocard' + (val === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function toggleComorbidity(key) {
+  if (key === 'none') {
+    S.comorbidities = [];
+    ['renal','sepsis','hepatic','malignancy'].forEach(function(k) {
+      document.getElementById('chk-' + k).className = 'chk-item';
+    });
+    document.getElementById('chk-none').className = 'chk-item selected';
+    return;
+  }
+  document.getElementById('chk-none').className = 'chk-item';
+  var idx = S.comorbidities.indexOf(key);
+  var elKey = key.replace('_failure','').replace('_','-');
+  if (idx >= 0) {
+    S.comorbidities.splice(idx, 1);
+    document.getElementById('chk-' + elKey).className = 'chk-item';
+  } else {
+    S.comorbidities.push(key);
+    document.getElementById('chk-' + elKey).className = 'chk-item selected';
+  }
+}
+
+// ── Input setters — Step 1 ─────────────────────────────────────────────────
+function setNoFlow(v) {
+  S.noFlowTime = v;
+  document.getElementById('nf-val').textContent = v;
+  document.getElementById('nf-input').value = v;
+  var pct = (v / 30 * 100).toFixed(1);
+  document.querySelector('#step-1 .inp-slider').style.background =
+    'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+}
+
+function setLowFlow(v) {
+  S.lowFlowTime = v;
+  document.getElementById('lf-val').textContent = v;
+  document.getElementById('lf-input').value = v;
+  var pct = (v / 90 * 100).toFixed(1);
+  var sliders = document.querySelectorAll('#step-1 .inp-slider');
+  if (sliders[1]) sliders[1].style.background =
+    'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+}
+
+function setEpi(v) {
+  S.epinephrineDose = v;
+  document.getElementById('epi-val').textContent = v;
+  document.getElementById('epi-input').value = v;
+  var pct = (v / 20 * 100).toFixed(1);
+  var sliders = document.querySelectorAll('#step-1 .inp-slider');
+  if (sliders[2]) sliders[2].style.background =
+    'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
+}
+
+function setChangingRhythms(v) {
+  S.changingRhythms = v;
+  document.getElementById('chgr-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('chgr-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
+// ── Input setters — Step 2 ─────────────────────────────────────────────────
+function setHaem(v) {
+  S.haemStatus = v;
+  ['stable','shock'].forEach(function(k) {
+    document.getElementById('haem-' + k).className = 'ocard' + (k === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function setGCSMotor(v) {
+  S.gcsMotor = v;
+  [1,2,3,4,5,6].forEach(function(k) {
+    document.getElementById('gcs-' + k).className = 'ocard' + (k === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function setPupils(v) {
+  S.pupilsReactive = v;
+  document.getElementById('pup-react').className = 'ocard' + (v ? ' sel' : '');
+  document.getElementById('pup-fixed').className = 'ocard' + (!v ? ' sel' : '');
+  updNextBtn();
+}
+
+function setECG(v) {
+  S.stemiEcg = v;
+  ['stemi','lbbb','none'].forEach(function(k) {
+    document.getElementById('ecg-' + k).className = 'ocard' + (k === v ? ' sel' : '');
+  });
+  updNextBtn();
+}
+
+function setLVEF(v) {
+  S.lvef = v;
+  ['gt30','lte30','unk'].forEach(function(k) {
+    var val = k === 'unk' ? 'unknown' : k;
+    document.getElementById('ef-' + k).className = 'ocard' + (val === v ? ' sel' : '');
+  });
+}
+
+// ── Input setters — Step 3 ─────────────────────────────────────────────────
+function setPH(v) {
+  S.ph = (v >= 6.8 && v <= 7.6) ? v : null;
+  updNextBtn();
+}
+function setLactate(v) {
+  S.lactate = (v >= 0 && v <= 25) ? v : null;
+  updNextBtn();
+}
+function setGlucose(v) {
+  S.glucose = (v >= 2 && v <= 30) ? v : null;
+  updNextBtn();
+}
+function setCreatinine(v) {
+  S.creatinine = (v > 0) ? v : null;
+}
+function setPaCO2(v) {
+  S.paco2 = (v > 0) ? v : null;
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+buildPbar();
+showStep(0);
+setAge(60);
 </script>
 </body>
 </html>
