@@ -22,11 +22,11 @@ var OhcaScores = (function () {
     var nf     = inputs.noFlowTime;       // minutes
     var lf     = inputs.lowFlowTime;      // minutes
     var ph     = inputs.ph;
-    var epi    = inputs.epinephrineDose;  // mg
+    var epi    = inputs.epinephrineDose || 0;  // mg (default 0 if not provided)
 
     var score = 0;
     score += 1.1 * (age - 10);
-    score += (loc !== 'public') ? 24 : 0;
+    score += (loc !== 'public') ? 24 : 0;  // home/other = non-public arrest
     score += (rhythm === 'non_shockable') ? 27 : 0;
     score += 2.8 * nf;
     score += 0.8 * lf;
