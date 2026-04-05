@@ -49,10 +49,42 @@ var OhcaScores = (function () {
     };
   }
 
+  // ── MIRACLE2 ────────────────────────────────────────────────────────────────
+  // Pareek et al., Eur Heart J 2020. doi:10.1093/eurheartj/ehaa594
+  // Predicts poor neurological outcome (CPC 3–5) at 6 months.
+  // Tiers: ≤2 low · 3–4 intermediate · ≥5 high
+
+  function miracle2(inputs) {
+    var score = 0;
+
+    if (!inputs.witnessed)                         score += 1;  // unwitnessed
+    if (inputs.initialRhythm === 'non_shockable')  score += 1;
+    if (inputs.changingRhythms)                    score += 1;
+    if ((inputs.epinephrineDose || 0) > 0)         score += 2;
+    if (!inputs.pupilsReactive)                    score += 1;
+    if (inputs.ph < 7.20)                          score += 1;
+    if (inputs.age > 80)      score += 2;
+    else if (inputs.age > 60) score += 1;
+
+    var tier  = score <= 2 ? 'low' : score <= 4 ? 'intermediate' : 'high';
+    var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
+
+    return {
+      id: 'miracle2', name: 'MIRACLE2',
+      score: score, tier: tier, label: label,
+      interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) at 6 months after OHCA.',
+      thresholds: { low: '\u22642 (5.6% poor outcome)', intermediate: '3\u20134 (55.4%)', high: '\u22655 (92.3%)' },
+      reference: { authors: 'Pareek et al.', journal: 'Eur Heart J', year: 2020 },
+      predicts: 'neurological', horizon: '6 months',
+      incomplete: false, incompleteReason: null
+    };
+  }
+
   // ── Public API ──────────────────────────────────────────────────────────────
 
   return {
-    cahp: cahp,
+    cahp:     cahp,
+    miracle2: miracle2,
   };
 
 }());

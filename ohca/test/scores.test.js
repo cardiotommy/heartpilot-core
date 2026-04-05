@@ -60,6 +60,49 @@ test('CAHP: result has required fields', function() {
   assert.strictEqual(r.id, 'cahp');
 });
 
+// ── MIRACLE2 ──────────────────────────────────────────────────────────────────
+console.log('\nMIRACLE2 Score');
+
+// High-risk: all adverse features
+test('MIRACLE2: high-risk reference case', function() {
+  var r = OhcaScores.miracle2({
+    witnessed: false, initialRhythm: 'non_shockable', changingRhythms: true,
+    epinephrineDose: 2, pupilsReactive: false, ph: 7.15, age: 75
+  });
+  assert.strictEqual(r.tier, 'high');
+  assert.ok(r.score >= 5, 'expected score >=5, got ' + r.score);
+});
+
+// Low-risk: favourable features, young
+test('MIRACLE2: low-risk case', function() {
+  var r = OhcaScores.miracle2({
+    witnessed: true, initialRhythm: 'shockable', changingRhythms: false,
+    epinephrineDose: 0, pupilsReactive: true, ph: 7.38, age: 50
+  });
+  assert.strictEqual(r.tier, 'low');
+  assert.ok(r.score <= 2, 'expected score <=2, got ' + r.score);
+});
+
+// Age bracket scoring
+test('MIRACLE2: age >80 adds 2 pts, 61-80 adds 1 pt, <=60 adds 0', function() {
+  var base = { witnessed: true, initialRhythm: 'shockable', changingRhythms: false,
+               epinephrineDose: 0, pupilsReactive: true, ph: 7.40 };
+  var s50 = OhcaScores.miracle2(Object.assign({}, base, { age: 50 })).score;
+  var s70 = OhcaScores.miracle2(Object.assign({}, base, { age: 70 })).score;
+  var s85 = OhcaScores.miracle2(Object.assign({}, base, { age: 85 })).score;
+  assert.strictEqual(s70 - s50, 1);
+  assert.strictEqual(s85 - s50, 2);
+});
+
+// Epinephrine 0mg = no points; any dose = +2
+test('MIRACLE2: epi 0mg = 0 pts, any epi = +2 pts', function() {
+  var base = { witnessed: true, initialRhythm: 'shockable', changingRhythms: false,
+               pupilsReactive: true, ph: 7.40, age: 50 };
+  var s0 = OhcaScores.miracle2(Object.assign({}, base, { epinephrineDose: 0 })).score;
+  var s1 = OhcaScores.miracle2(Object.assign({}, base, { epinephrineDose: 1 })).score;
+  assert.strictEqual(s1 - s0, 2);
+});
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 if (fail > 0) process.exit(1);
