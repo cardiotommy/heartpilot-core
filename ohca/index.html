@@ -13,6 +13,7 @@ html{color-scheme:light;background:#f7f5f2;}
   --bg:#f7f5f2;--s1:#ffffff;--s2:#f0ece7;--s3:#e8e3dd;
   --border:#e2ddd8;--border2:#ccc7c0;
   --red:#c0392b;--redg:rgba(192,57,43,.10);
+  --accent:#c2410c;--accentg:rgba(194,65,12,.10);
   --amber:#b45309;--amberg:rgba(180,83,9,.10);
   --green:#15803d;--greeng:rgba(21,128,61,.10);
   --blue:#1d5fa8;--blueg:rgba(29,95,168,.10);
@@ -23,22 +24,22 @@ html{color-scheme:light;background:#f7f5f2;}
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(192,57,43,.025) 0%,transparent 50%),radial-gradient(circle at 80% 100%,rgba(192,57,43,.02) 0%,transparent 50%);pointer-events:none;z-index:0;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(194,65,12,.025) 0%,transparent 50%),radial-gradient(circle at 80% 100%,rgba(194,65,12,.02) 0%,transparent 50%);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(112,107,102,.16) 1px,transparent 1px);background-size:28px 28px;opacity:.4;pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;min-height:500px;overflow:hidden;}
 header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:50px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);}
-.brand-icon{width:32px;height:32px;border:1.5px solid var(--red);border-radius:6px;display:grid;place-items:center;color:var(--red);background:var(--redg);box-shadow:0 0 0 3px rgba(192,57,43,.07);}
+.brand-icon{width:32px;height:32px;border:1.5px solid var(--accent);border-radius:6px;display:grid;place-items:center;color:var(--accent);background:var(--accentg);box-shadow:0 0 0 3px rgba(194,65,12,.07);}
 .brand-name{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:.01em;}
 .brand-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:1px;}
 .hub-link{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--s1);transition:color .15s,border-color .15s;}
-.hub-link:hover{color:var(--red);border-color:var(--red);}
+.hub-link:hover{color:var(--accent);border-color:var(--accent);}
 .disclaimer{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:3px 9px;border:1px solid var(--border2);border-radius:100px;background:var(--s1);}
 /* Progress */
 .progress-bar{display:flex;align-items:center;padding:0 24px;height:36px;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
 .progress-bar::-webkit-scrollbar{display:none;}
 .snode{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 10px;height:100%;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
-.snode.active{color:var(--text);border-bottom-color:var(--red);font-weight:600;}
+.snode.active{color:var(--text);border-bottom-color:var(--accent);font-weight:600;}
 .snode.done{color:var(--green);border-bottom-color:var(--green);}
 .snode-num{width:16px;height:16px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;font-size:8px;font-weight:600;flex-shrink:0;}
 .snode.done .snode-num{background:var(--green);border-color:var(--green);color:#fff;font-size:7px;}
@@ -59,7 +60,7 @@ body.results-done{overflow:auto;height:auto;}
 .step-sub{font-size:13px;color:var(--dim);line-height:1.6;margin-top:-8px;}
 /* Wizard footer */
 .wizard-foot{display:flex;align-items:center;justify-content:flex-end;padding:12px 24px;border-top:1px solid var(--border);background:var(--s1);flex-shrink:0;gap:12px;}
-.btn-next{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 22px;border-radius:6px;border:none;background:var(--red);color:#fff;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:7px;}
+.btn-next{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 22px;border-radius:6px;border:none;background:var(--accent);color:#fff;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:7px;}
 .btn-next:disabled{opacity:.35;cursor:not-allowed;}
 .btn-next:not(:disabled):hover{opacity:.85;}
 .btn-back{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--s1);color:var(--dim);cursor:pointer;transition:opacity .15s;}
@@ -70,12 +71,12 @@ body.results-done{overflow:auto;height:auto;}
 .inp-label span{font-weight:600;color:var(--text);}
 .inp-row{display:flex;align-items:center;gap:10px;}
 .inp-field{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:130px;transition:border-color .15s;outline:none;}
-.inp-field:focus{border-color:var(--red);}
+.inp-field:focus{border-color:var(--accent);}
 .inp-hint{font-size:12px;color:var(--muted);}
 /* Option cards */
 .ocard{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;user-select:none;transition:border-color .12s,background .12s;font-size:14px;}
 .ocard:hover{border-color:var(--border2);background:var(--s3);}
-.ocard.sel{border-color:rgba(192,57,43,.45);background:var(--redg);}
+.ocard.sel{border-color:rgba(194,65,12,.45);background:var(--accentg);}
 .ocard-row{display:flex;flex-wrap:wrap;gap:8px;}
 /* Toggle buttons */
 .tog{font-family:var(--mono);font-size:11px;padding:8px 16px;border-radius:6px;border:1.5px solid var(--border);background:var(--s1);cursor:pointer;transition:background .12s,border-color .12s,color .12s;}
@@ -86,10 +87,10 @@ body.results-done{overflow:auto;height:auto;}
 /* Check list (multi-select comorbidities) */
 .chk-list{display:flex;flex-direction:column;gap:8px;}
 .chk-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;}
-.chk-item:hover{border-color:var(--red);background:var(--redg);}
-.chk-item.selected{border-color:var(--red);background:var(--redg);}
+.chk-item:hover{border-color:var(--accent);background:var(--accentg);}
+.chk-item.selected{border-color:var(--accent);background:var(--accentg);}
 .chk-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);background:var(--s1);display:grid;place-items:center;flex-shrink:0;transition:background .15s,border-color .15s;}
-.chk-item.selected .chk-box{background:var(--red);border-color:var(--red);}
+.chk-item.selected .chk-box{background:var(--accent);border-color:var(--accent);}
 .chk-check{display:none;color:#fff;}
 .chk-item.selected .chk-check{display:block;}
 .chk-label{font-size:14px;font-weight:500;}
@@ -105,39 +106,37 @@ body.results-done{overflow:auto;height:auto;}
 .inp-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--text);border:none;box-shadow:0 0 0 1.5px var(--border2);cursor:pointer;}
 .inp-slider::-moz-range-track{height:4px;border-radius:2px;background:transparent;}
 .inp-val{border:1.5px solid var(--border);border-radius:7px;padding:9px 10px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:88px;text-align:center;transition:border-color .15s;outline:none;flex-shrink:0;}
-.inp-val:focus{border-color:var(--red);}
+.inp-val:focus{border-color:var(--accent);}
 .slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
 /* Results step */
-.step-results{max-width:680px;width:100%;margin:0 auto;}
-/* Score grid */
-.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.score-cell{background:var(--s1);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
-.score-cell.full-width{grid-column:1/-1;}
-.score-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
-.score-value{font-size:22px;font-weight:700;line-height:1;}
-.score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;margin-top:2px;}
+.step-results{max-width:680px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+/* Score badges */
+.score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;}
 .score-badge.low{background:var(--greeng);color:var(--green);}
 .score-badge.intermediate{background:var(--amberg);color:var(--amber);}
 .score-badge.high{background:var(--redg);color:var(--red);}
 .score-badge.incomplete{background:var(--s3);color:var(--muted);}
-.score-threshold{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.5;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;}
-/* Detail cards */
-.detail-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.detail-head{padding:12px 16px;color:#fff;display:flex;justify-content:space-between;align-items:flex-start;}
-.detail-head.low{background:var(--green);}
-.detail-head.intermediate{background:var(--amber);}
-.detail-head.high{background:var(--red);}
-.detail-head.incomplete{background:var(--muted);}
-.detail-score-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;opacity:.85;margin-bottom:4px;}
-.detail-score-val{font-family:var(--serif);font-size:22px;}
-.detail-body{padding:14px 16px;font-size:13px;color:var(--dim);line-height:1.7;display:flex;flex-direction:column;gap:8px;}
-.detail-row{display:flex;gap:8px;}
-.detail-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0;width:90px;padding-top:1px;}
+/* Unified result card */
+.rc{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--s1);box-shadow:var(--shadow-sm);}
+.rc-stripe{width:4px;flex-shrink:0;}
+.rc-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.rc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.rc-score-val{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1;}
+.rc-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px;}
+.rc-divider{height:1px;background:var(--border);}
+.rc-implication{font-size:13px;font-weight:600;color:var(--text);line-height:1.5;}
+.rc-tiers{display:flex;flex-direction:column;gap:2px;}
+.rc-tier{display:flex;align-items:baseline;gap:8px;padding:3px 6px;border-radius:5px;font-size:12px;}
+.rc-tier.active{background:var(--s2);}
+.rc-tier-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:72px;flex-shrink:0;}
+.rc-tier.active .rc-tier-lbl{color:var(--text);font-weight:700;}
+.rc-tier-val{color:var(--dim);line-height:1.4;}
+.rc-tier.active .rc-tier-val{color:var(--text);font-weight:500;}
+.rc-ref{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:8px;border-top:1px solid var(--border);}
 .caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;}
-/* New case */
-.new-case-wrap{text-align:center;padding-top:4px;}
-.btn-new{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:10px 24px;border-radius:6px;border:1.5px solid var(--border2);background:var(--s1);color:var(--dim);cursor:pointer;transition:color .15s,border-color .15s;}
-.btn-new:hover{color:var(--red);border-color:var(--red);}
+@media(max-width:640px){
+  .rc-score-val{font-size:28px;}
+}
 /* Conditional visibility */
 .cond{display:none;}
 .cond.show{display:flex;}
@@ -145,8 +144,6 @@ body.results-done{overflow:auto;height:auto;}
   header{padding:0 16px;height:46px;}
   .wizard-scroll{padding:18px 18px;}
   .results-panel{padding:16px 16px 32px;}
-  .score-grid{grid-template-columns:1fr;}
-  .score-cell.full-width{grid-column:1;}
 }
 </style>
 </head>
@@ -175,7 +172,7 @@ body.results-done{overflow:auto;height:auto;}
       <!-- Step 0: Arrest -->
       <div class="step active" id="step-0">
         <div class="step-title">Arrest Characteristics</div>
-        <div class="step-sub">Initial rhythm, location, and pre-arrest status</div>
+        <div class="step-sub">Initial rhythm, location, and bystander response</div>
 
         <div class="inp-group">
           <div class="inp-label">Age <span id="age-val">—</span> years</div>
@@ -249,7 +246,12 @@ body.results-done{overflow:auto;height:auto;}
           </div>
         </div>
 
-        <div class="inp-divider"></div>
+      </div>
+
+      <!-- Step 1: Pre-arrest -->
+      <div class="step" id="step-1">
+        <div class="step-title">Pre-arrest Status</div>
+        <div class="step-sub">Baseline function and pre-existing conditions</div>
 
         <div class="inp-group">
           <div class="inp-label">Pre-arrest Function (CPC)</div>
@@ -289,8 +291,8 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 1: Resuscitation -->
-      <div class="step" id="step-1">
+      <!-- Step 2: Resuscitation -->
+      <div class="step" id="step-2">
         <div class="step-title">Resuscitation</div>
         <div class="step-sub">Time intervals, epinephrine, and rhythm behaviour</div>
 
@@ -348,8 +350,8 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 2: On Arrival -->
-      <div class="step" id="step-2">
+      <!-- Step 3: On Arrival -->
+      <div class="step" id="step-3">
         <div class="step-title">On Arrival</div>
         <div class="step-sub">Haemodynamics, neurology, and initial ECG</div>
 
@@ -401,8 +403,8 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 3: Labs —— last data-entry step -->
-      <div class="step" id="step-3">
+      <!-- Step 4: Labs —— last data-entry step -->
+      <div class="step" id="step-4">
         <div class="step-title">Laboratory Values</div>
         <div class="step-sub">Arterial blood gas and biochemistry</div>
 
@@ -451,12 +453,9 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 4: Review -->
-      <div class="step" id="step-4">
-        <div class="step-results">
-          <div id="score-grid-wrap"></div>
-          <div id="detail-cards-wrap"></div>
-        </div>
+      <!-- Step 5: Review -->
+      <div class="step" id="step-5">
+        <div class="step-results" id="results-wrap"></div>
       </div>
 
     </div><!-- wizard-scroll -->
@@ -504,23 +503,25 @@ var S = {
 };
 
 var STEPS = [
-  { label: 'Arrest',   required: function() {
+  { label: 'Arrest',     required: function() {
     return S.initialRhythm !== null && S.witnessed !== null &&
            S.location !== null && S.bystanderCPR !== null &&
-           S.prearrestCPC !== null &&
            (S.initialRhythm === 'shockable' || S.initialRhythmSubtype !== null);
   }},
-  { label: 'Resus',    required: function() {
+  { label: 'Pre-arrest', required: function() {
+    return S.prearrestCPC !== null;
+  }},
+  { label: 'Resus',      required: function() {
     return S.changingRhythms !== null;
   }},
-  { label: 'Arrival',  required: function() {
+  { label: 'Arrival',    required: function() {
     return S.haemStatus !== null && S.gcsMotor !== null &&
            S.pupilsReactive !== null && S.stemiEcg !== null;
   }},
-  { label: 'Labs',     required: function() {
+  { label: 'Labs',       required: function() {
     return S.ph !== null && S.lactate !== null && S.glucose !== null;
   }},
-  { label: 'Review',   required: function() { return true; }},
+  { label: 'Review',     required: function() { return true; }},
 ];
 
 var currentStep = 0;
@@ -552,8 +553,8 @@ function showStep(n) {
   updNextBtn();
   document.getElementById('back-btn').style.display = n > 0 ? '' : 'none';
   var nextBtn = document.getElementById('next-btn');
-  var isReview  = n === STEPS.length - 1;            // step 4
-  var isPreview = n === STEPS.length - 2;            // step 3 (Labs)
+  var isReview  = n === STEPS.length - 1;            // step 5
+  var isPreview = n === STEPS.length - 2;            // step 4 (Labs)
   if (isReview) {
     nextBtn.innerHTML = 'New Case';
     nextBtn.disabled = false;
@@ -677,7 +678,7 @@ function setNoFlow(v) {
   document.getElementById('nf-val').textContent = v;
   document.getElementById('nf-input').value = v;
   var pct = (v / 30 * 100).toFixed(1);
-  document.querySelector('#step-1 .inp-slider').style.background =
+  document.querySelector('#step-2 .inp-slider').style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
 
@@ -686,7 +687,7 @@ function setLowFlow(v) {
   document.getElementById('lf-val').textContent = v;
   document.getElementById('lf-input').value = v;
   var pct = (v / 90 * 100).toFixed(1);
-  var sliders = document.querySelectorAll('#step-1 .inp-slider');
+  var sliders = document.querySelectorAll('#step-2 .inp-slider');
   if (sliders[1]) sliders[1].style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
@@ -696,7 +697,7 @@ function setEpi(v) {
   document.getElementById('epi-val').textContent = v;
   document.getElementById('epi-input').value = v;
   var pct = (v / 20 * 100).toFixed(1);
-  var sliders = document.querySelectorAll('#step-1 .inp-slider');
+  var sliders = document.querySelectorAll('#step-2 .inp-slider');
   if (sliders[2]) sliders[2].style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
@@ -783,90 +784,73 @@ var h = function(s) {
 // ── Analysis ───────────────────────────────────────────────────────────────
 function runAnalysis() {
   var results = OhcaScores.calculateAll(S);
-  renderScoreGrid(results);
-  renderDetailCards(results);
-  // Scroll review content to top
+  renderResults(results);
   var scroll = document.querySelector('.wizard-scroll');
   if (scroll) scroll.scrollTop = 0;
 }
 
-// ── Score grid ─────────────────────────────────────────────────────────────
-function renderScoreGrid(results) {
-  var cells = results.map(function(r, i) {
-    var isLast = i === results.length - 1;
+// ── Results rendering ───────────────────────────────────────────────────────────
+var TIER_COLOUR = { low: '#15803d', intermediate: '#b45309', high: '#c0392b', incomplete: '#a8a49f' };
+var TIER_ORDER  = ['low', 'intermediate', 'high'];
+
+function renderResults(results) {
+  var cards = results.map(function(r) {
+    var colour = TIER_COLOUR[r.tier] || TIER_COLOUR.incomplete;
     var scoreDisplay = r.incomplete ? '\u2014'
       : r.id === 'ohca' ? r.score + '%'
       : r.score;
-    var thresholdLine = '';
-    if (r.incomplete) {
-      thresholdLine = '<div class="score-threshold" style="color:var(--muted)">' + h(r.incompleteReason) + '</div>';
-    } else if (r.id === 'ohca') {
-      thresholdLine = '<div class="score-threshold">Predicted probability of good neurological recovery</div>';
-    } else if (r.thresholds && r.thresholds[r.tier]) {
-      thresholdLine = '<div class="score-threshold">' + h(r.thresholds[r.tier]) + '</div>';
-    }
-    return '<div class="score-cell' + (isLast ? ' full-width' : '') + '">'
-      + '<div class="score-name">' + h(r.name) + '</div>'
-      + '<div class="score-value" style="color:' + tierColour(r.tier) + '">' + h(scoreDisplay) + '</div>'
-      + '<div class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</div>'
-      + thresholdLine
-      + '</div>';
-  }).join('');
 
-  document.getElementById('score-grid-wrap').innerHTML =
-    '<div class="score-grid">' + cells + '</div>';
-}
+    var headerRight = '<div><div class="rc-name">' + h(r.name) + '</div>'
+      + '<div class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</div></div>';
 
-function tierColour(tier) {
-  return { low: '#15803d', intermediate: '#b45309', high: '#c0392b', incomplete: '#a8a49f' }[tier] || '#a8a49f';
-}
-
-// ── Detail cards ───────────────────────────────────────────────────────────
-function renderDetailCards(results) {
-  var cards = results.map(function(r) {
-    var scoreDisplay = r.incomplete ? 'Incomplete' : r.score;
-    var headContent = '<div class="detail-score-name">' + h(r.name) + '</div>'
-      + '<div class="detail-score-val">' + h(scoreDisplay) + '</div>';
-
-    var bodyContent = '';
+    var body = '<div class="rc-header">'
+      + '<div class="rc-score-val" style="color:' + colour + '">' + h(scoreDisplay) + '</div>'
+      + headerRight + '</div>';
 
     if (r.incomplete) {
-      bodyContent += '<div style="color:var(--muted);font-style:italic;">' + h(r.incompleteReason) + '</div>';
+      body += '<div class="rc-divider"></div>'
+        + '<div style="font-size:13px;color:var(--muted);font-style:italic;">' + h(r.incompleteReason) + '</div>';
     } else {
-      bodyContent += '<div class="detail-row">'
-        + '<div class="detail-lbl">Predicts</div>'
-        + '<div>' + h(r.interpretation) + '</div></div>';
+      // Implication line — threshold for current tier, or probability description
+      var implication = r.id === 'ohca'
+        ? 'Predicted probability of survival with good neurological outcome (CPC 1\u20132)'
+        : (r.thresholds && r.thresholds[r.tier] ? r.thresholds[r.tier] : r.interpretation);
+      body += '<div class="rc-divider"></div>'
+        + '<div class="rc-implication">' + h(implication) + '</div>';
 
-      var thrKeys = Object.keys(r.thresholds || {});
+      // All tiers table
+      var thrKeys = (r.thresholds && Object.keys(r.thresholds).length) ? TIER_ORDER : [];
       if (thrKeys.length) {
-        var thrText = thrKeys.map(function(k) { return k + ': ' + r.thresholds[k]; }).join(' \u00b7 ');
-        bodyContent += '<div class="detail-row">'
-          + '<div class="detail-lbl">Thresholds</div>'
-          + '<div>' + h(thrText) + '</div></div>';
+        body += '<div class="rc-tiers">';
+        thrKeys.forEach(function(k) {
+          if (!r.thresholds[k]) return;
+          var isActive = k === r.tier;
+          body += '<div class="rc-tier' + (isActive ? ' active' : '') + '">'
+            + '<div class="rc-tier-lbl">' + h(k) + '</div>'
+            + '<div class="rc-tier-val">' + h(r.thresholds[k]) + '</div>'
+            + '</div>';
+        });
+        body += '</div>';
       }
 
-      bodyContent += '<div class="detail-row">'
-        + '<div class="detail-lbl">Source</div>'
-        + '<div>' + h(r.reference.authors + ', ' + r.reference.journal + ' ' + r.reference.year) + '</div></div>';
-
+      body += '<div class="rc-ref">' + h(r.reference.authors + ' \u00b7 ' + r.reference.journal + ' ' + r.reference.year) + '</div>';
       if (r.caveat) {
-        bodyContent += '<div class="caveat-box">' + h(r.caveat) + '</div>';
+        body += '<div class="caveat-box">' + h(r.caveat) + '</div>';
       }
     }
 
-    return '<div class="detail-card">'
-      + '<div class="detail-head ' + h(r.tier) + '">' + headContent + '</div>'
-      + '<div class="detail-body">' + bodyContent + '</div>'
+    return '<div class="rc">'
+      + '<div class="rc-stripe" style="background:' + colour + '"></div>'
+      + '<div class="rc-body">' + body + '</div>'
       + '</div>';
   }).join('');
 
-  document.getElementById('detail-cards-wrap').innerHTML = cards;
+  document.getElementById('results-wrap').innerHTML = cards;
 }
 
 // ── New case ────────────────────────────────────────────────────────────────
 function newCase() {
-  document.getElementById('score-grid-wrap').innerHTML = '';
-  document.getElementById('detail-cards-wrap').innerHTML = '';
+  document.getElementById('results-wrap').innerHTML = '';
   Object.assign(S, {
     initialRhythm: null, initialRhythmSubtype: null, refractoryVF: false,
     witnessed: null, location: null, bystanderCPR: null, prearrestCPC: null,
