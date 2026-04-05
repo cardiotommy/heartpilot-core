@@ -215,6 +215,66 @@ test('calculateAll: returns array of 5 results', function() {
   assert.ok(ids.indexOf('ohca') >= 0);
 });
 
+// ── Edge cases ────────────────────────────────────────────────────────────
+console.log('\nEdge cases');
+
+test('CAHP: zero no-flow and low-flow (immediate witnessed ROSC)', function() {
+  var r = OhcaScores.cahp({
+    age: 40, location: 'public', initialRhythm: 'shockable',
+    noFlowTime: 0, lowFlowTime: 0, ph: 7.40, epinephrineDose: 0
+  });
+  assert.ok(r.score < 100);
+  assert.strictEqual(r.tier, 'low');
+});
+
+test('CAHP: extreme low pH', function() {
+  var r = OhcaScores.cahp({
+    age: 60, location: 'home', initialRhythm: 'non_shockable',
+    noFlowTime: 10, lowFlowTime: 30, ph: 6.90, epinephrineDose: 5
+  });
+  assert.ok(r.score > 200);
+  assert.strictEqual(r.tier, 'high');
+});
+
+test('MIRACLE2: refractory VF (shockable + all-favourable) = low', function() {
+  var r = OhcaScores.miracle2({
+    witnessed: true, initialRhythm: 'shockable', changingRhythms: false,
+    epinephrineDose: 0, pupilsReactive: true, ph: 7.35, age: 45
+  });
+  assert.strictEqual(r.score, 0);
+  assert.strictEqual(r.tier, 'low');
+});
+
+test('CASPRI: CPC3-4 adds 9 points', function() {
+  var base = { age: 50, witnessed: true, initialRhythm: 'shockable',
+               initialRhythmSubtype: null, lowFlowTime: 3, comorbidities: [] };
+  var r1 = OhcaScores.caspri(Object.assign({}, base, { prearrestCPC: 'cpc1' }));
+  var r2 = OhcaScores.caspri(Object.assign({}, base, { prearrestCPC: 'cpc3_4' }));
+  assert.strictEqual(r2.score - r1.score, 9);
+});
+
+test('OHCA: incomplete when creatinine null', function() {
+  var r = OhcaScores.ohca({
+    initialRhythm: 'shockable', noFlowTime: 0, lowFlowTime: 5,
+    lactate: 2.0, creatinine: null
+  });
+  assert.strictEqual(r.incomplete, true);
+});
+
+test('calculateAll: returns ScoreResult for each score id', function() {
+  var results = OhcaScores.calculateAll({
+    age: 55, location: 'public', initialRhythm: 'shockable',
+    initialRhythmSubtype: null, witnessed: true, bystanderCPR: true,
+    refractoryVF: false, changingRhythms: false, prearrestCPC: 'cpc1',
+    comorbidities: [], noFlowTime: 0, lowFlowTime: 8, epinephrineDose: 0,
+    pupilsReactive: true, gcsMotor: 5, stemiEcg: 'stemi', lvef: 'gt30',
+    haemStatus: 'stable', ph: 7.38, lactate: 2.2, glucose: 7.0,
+    creatinine: 85, paco2: 5.0
+  });
+  var ids = results.map(function(r) { return r.id; }).sort();
+  assert.deepStrictEqual(ids, ['cahp','caspri','miracle2','ohca','ttm']);
+});
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 if (fail > 0) process.exit(1);
