@@ -109,7 +109,8 @@ body.results-done{overflow:auto;height:auto;}
 .inp-val:focus{border-color:var(--accent);}
 .slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
 /* Results step */
-.step-results{max-width:680px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.step-results{max-width:720px;width:100%;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rc:last-child:nth-child(odd){grid-column:span 2;}
 /* Score badges */
 .score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;}
 .score-badge.low{background:var(--greeng);color:var(--green);}
@@ -120,10 +121,9 @@ body.results-done{overflow:auto;height:auto;}
 .rc{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--s1);box-shadow:var(--shadow-sm);}
 .rc-stripe{width:4px;flex-shrink:0;}
 .rc-body{flex:1;padding:20px 22px;display:flex;flex-direction:column;gap:0;min-width:0;}
-.rc-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
-.rc-predicts{font-size:12px;color:var(--dim);margin-top:2px;margin-bottom:14px;}
+.rc-name{font-size:13px;font-weight:700;color:var(--text);letter-spacing:.01em;margin-bottom:14px;}
 .rc-score-val{font-family:var(--mono);font-size:40px;font-weight:700;line-height:1;margin-bottom:8px;}
-.rc-risk{font-size:13px;color:var(--dim);margin-top:8px;}
+.rc-risk{font-size:13px;color:var(--dim);line-height:1.5;margin-top:8px;}
 .rc-ref{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:14px;padding-top:10px;border-top:1px solid var(--border);}
 .caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;margin-top:10px;}
 @media(max-width:640px){
@@ -786,22 +786,15 @@ var TIER_COLOUR = { low: '#15803d', intermediate: '#b45309', high: '#c0392b', in
 var TIER_ORDER  = ['low', 'intermediate', 'high'];
 
 function renderResults(results) {
-  var PREDICTS_LABEL = { neurological: 'Neurological outcome', survival: 'Survival to discharge' };
-
   var cards = results.map(function(r) {
     var colour = TIER_COLOUR[r.tier] || TIER_COLOUR.incomplete;
     var scoreDisplay = r.incomplete ? '\u2014'
       : r.id === 'ohca' ? r.score + '%'
       : r.score;
 
-    var predictsText = (PREDICTS_LABEL[r.predicts] || r.predicts) + ' \u00b7 ' + r.horizon;
-
-    var riskText = r.incomplete ? r.incompleteReason
-      : r.id === 'ohca' ? 'Predicted probability of good neurological recovery (CPC 1\u20132)'
-      : (r.thresholds && r.thresholds[r.tier] ? r.thresholds[r.tier] : '');
+    var riskText = r.incomplete ? r.incompleteReason : (r.narrative || '');
 
     var body = '<div class="rc-name">' + h(r.name) + '</div>'
-      + '<div class="rc-predicts">' + h(predictsText) + '</div>'
       + '<div class="rc-score-val" style="color:' + colour + '">' + h(scoreDisplay) + '</div>'
       + '<div><span class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</span></div>'
       + (riskText ? '<div class="rc-risk">' + h(riskText) + '</div>' : '')

@@ -38,13 +38,16 @@ var OhcaScores = (function () {
     var tier  = score < 150 ? 'low' : score <= 200 ? 'intermediate' : 'high';
     var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
 
+    var cahpNarrative = {
+      low:          '39% risk of poor neurological outcome (CPC 3\u20135) at hospital discharge',
+      intermediate: '81% risk of poor neurological outcome (CPC 3\u20135) at hospital discharge',
+      high:         '100% risk of poor neurological outcome (CPC 3\u20135) at hospital discharge'
+    };
     return {
       id: 'cahp', name: 'CAHP Score',
       score: score, tier: tier, label: label,
-      interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) at hospital discharge.',
-      thresholds: { low: '<150 (39% poor outcome)', intermediate: '150\u2013200 (81%)', high: '>200 (100%)' },
+      narrative: cahpNarrative[tier],
       reference: { authors: 'Maupain et al.', journal: 'Eur Heart J', year: 2016 },
-      predicts: 'neurological', horizon: 'hospital discharge',
       incomplete: false, incompleteReason: null
     };
   }
@@ -69,13 +72,16 @@ var OhcaScores = (function () {
     var tier  = score <= 2 ? 'low' : score <= 4 ? 'intermediate' : 'high';
     var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
 
+    var m2Narrative = {
+      low:          '5.6% risk of poor neurological outcome (CPC 3\u20135) at 6 months',
+      intermediate: '55.4% risk of poor neurological outcome (CPC 3\u20135) at 6 months',
+      high:         '92.3% risk of poor neurological outcome (CPC 3\u20135) at 6 months'
+    };
     return {
       id: 'miracle2', name: 'MIRACLE2',
       score: score, tier: tier, label: label,
-      interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) at 6 months after OHCA.',
-      thresholds: { low: '\u22642 (5.6% poor outcome)', intermediate: '3\u20134 (55.4%)', high: '\u22655 (92.3%)' },
+      narrative: m2Narrative[tier],
       reference: { authors: 'Pareek et al.', journal: 'Eur Heart J', year: 2020 },
-      predicts: 'neurological', horizon: '6 months',
       incomplete: false, incompleteReason: null
     };
   }
@@ -126,13 +132,16 @@ var OhcaScores = (function () {
     var tier  = score <= 9 ? 'low' : score <= 19 ? 'intermediate' : 'high';
     var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
 
+    var caspriNarrative = {
+      low:          '>66% probability of survival to hospital discharge',
+      intermediate: '23\u201342% probability of survival to hospital discharge',
+      high:         '<12% probability of survival to hospital discharge'
+    };
     return {
       id: 'caspri', name: 'CASPRI',
       score: score, tier: tier, label: label,
-      interpretation: 'Predicts in-hospital survival after resuscitation.',
-      thresholds: { low: '\u22649 (>66% survival)', intermediate: '10\u201319 (23\u201342%)', high: '\u226520 (<12%)' },
+      narrative: caspriNarrative[tier],
       reference: { authors: 'Chan et al.', journal: 'JACC', year: 2014 },
-      predicts: 'survival', horizon: 'hospital discharge',
       incomplete: false, incompleteReason: null,
       caveat: 'Derived from an in-hospital cardiac arrest registry (Get With The Guidelines). Applicability to OHCA patients is uncertain \u2014 interpret with caution.'
     };
@@ -153,10 +162,8 @@ var OhcaScores = (function () {
       return {
         id: 'ttm', name: 'TTM Risk Score',
         score: null, tier: 'incomplete', label: 'Incomplete',
-        interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) after OHCA.',
-        thresholds: { low: '\u22649 (low risk)', intermediate: '10\u201316 (intermediate risk)', high: '\u226517 (high risk)' },
+        narrative: null,
         reference: { authors: 'Martinell et al.', journal: 'Critical Care', year: 2017 },
-        predicts: 'neurological', horizon: 'hospital discharge',
         incomplete: true, incompleteReason: 'PaCO2 required for TTM score (enter in Labs step)'
       };
     }
@@ -221,13 +228,16 @@ var OhcaScores = (function () {
     var tier  = score <= 9 ? 'low' : score <= 16 ? 'intermediate' : 'high';
     var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
 
+    var ttmNarrative = {
+      low:          'Low risk of poor neurological outcome (CPC 3\u20135) at 180 days',
+      intermediate: 'Intermediate risk of poor neurological outcome (CPC 3\u20135) at 180 days',
+      high:         'High risk of poor neurological outcome (CPC 3\u20135) at 180 days'
+    };
     return {
       id: 'ttm', name: 'TTM Risk Score',
       score: score, tier: tier, label: label,
-      interpretation: 'Predicts poor neurological outcome (CPC 3\u20135) after OHCA.',
-      thresholds: { low: '\u22649 (low risk)', intermediate: '10\u201316 (intermediate risk)', high: '\u226517 (high risk)' },
+      narrative: ttmNarrative[tier],
       reference: { authors: 'Martinell et al.', journal: 'Critical Care', year: 2017 },
-      predicts: 'neurological', horizon: '180 days',
       incomplete: false, incompleteReason: null
     };
   }
@@ -256,10 +266,8 @@ var OhcaScores = (function () {
       return {
         id: 'ohca', name: 'OHCA Score',
         score: null, probability: null, tier: 'incomplete', label: 'Incomplete',
-        interpretation: 'Predicts survival with good neurological outcome (CPC 1\u20132) at ICU admission.',
-        thresholds: { high: '\u226550% (favourable outcome)', intermediate: '25\u201349%', low: '<25%' },
+        narrative: null,
         reference: { authors: 'Adrie et al.', journal: 'Eur Heart J', year: 2006 },
-        predicts: 'neurological', horizon: 'ICU admission',
         incomplete: true, incompleteReason: 'Creatinine required for OHCA score (enter in Labs step)'
       };
     }
@@ -300,10 +308,8 @@ var OhcaScores = (function () {
     return {
       id: 'ohca', name: 'OHCA Score',
       score: score, probability: pFavourable, tier: tier, label: label,
-      interpretation: 'Predicts survival with good neurological outcome (CPC 1\u20132) at ICU admission.',
-      thresholds: { high: '\u226550% favourable outcome', intermediate: '25\u201349%', low: '<25%' },
+      narrative: pFavourable + '% probability of good neurological recovery (CPC 1\u20132) at ICU admission',
       reference: { authors: 'Adrie et al.', journal: 'Eur Heart J', year: 2006 },
-      predicts: 'neurological', horizon: 'ICU admission',
       incomplete: false, incompleteReason: null
     };
   }

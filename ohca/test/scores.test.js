@@ -55,7 +55,7 @@ test('CAHP: result has required fields', function() {
   assert.ok(typeof r.score === 'number');
   assert.ok(['low','intermediate','high'].indexOf(r.tier) >= 0);
   assert.ok(typeof r.label === 'string');
-  assert.ok(typeof r.interpretation === 'string');
+  assert.ok(typeof r.narrative === 'string');
   assert.strictEqual(r.incomplete, false);
   assert.strictEqual(r.id, 'cahp');
 });
