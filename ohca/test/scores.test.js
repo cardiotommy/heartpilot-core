@@ -148,6 +148,73 @@ test('CASPRI: result has caveat field', function() {
   assert.ok(typeof r.caveat === 'string' && r.caveat.length > 0);
 });
 
+// ── TTM Risk Score ─────────────────────────────────────────────────────────────
+console.log('\nTTM Risk Score');
+
+test('TTM: result structure is correct', function() {
+  var r = OhcaScores.ttm({
+    age: 65, location: 'home', initialRhythm: 'non_shockable',
+    noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 3,
+    pupilsReactive: false, ph: 7.20, gcsMotor: 1, paco2: 4.0
+  });
+  assert.ok(['low','intermediate','high','incomplete'].indexOf(r.tier) >= 0);
+  assert.strictEqual(r.id, 'ttm');
+  assert.ok(typeof r.score === 'number' || r.score === null);
+});
+
+test('TTM: incomplete when paco2 absent', function() {
+  var r = OhcaScores.ttm({
+    age: 65, location: 'home', initialRhythm: 'non_shockable',
+    noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 3,
+    pupilsReactive: false, ph: 7.20, gcsMotor: 1, paco2: null
+  });
+  assert.strictEqual(r.incomplete, true);
+  assert.ok(r.incompleteReason.indexOf('PaCO2') >= 0);
+});
+
+// ── OHCA Score ────────────────────────────────────────────────────────────────
+console.log('\nOHCA Score');
+
+test('OHCA: incomplete when creatinine absent', function() {
+  var r = OhcaScores.ohca({
+    initialRhythm: 'shockable', noFlowTime: 0, lowFlowTime: 5,
+    lactate: 2.1, creatinine: null
+  });
+  assert.strictEqual(r.incomplete, true);
+  assert.ok(r.incompleteReason.indexOf('creatinine') >= 0 || r.incompleteReason.indexOf('Creatinine') >= 0);
+});
+
+test('OHCA: result structure correct', function() {
+  var r = OhcaScores.ohca({
+    initialRhythm: 'shockable', noFlowTime: 0, lowFlowTime: 5,
+    lactate: 2.1, creatinine: 90
+  });
+  assert.strictEqual(r.id, 'ohca');
+  assert.ok(['low','intermediate','high','incomplete'].indexOf(r.tier) >= 0);
+});
+
+// ── calculateAll ──────────────────────────────────────────────────────────────
+console.log('\ncalculateAll');
+
+test('calculateAll: returns array of 5 results', function() {
+  var results = OhcaScores.calculateAll({
+    age: 65, location: 'home', initialRhythm: 'non_shockable',
+    initialRhythmSubtype: 'pea', witnessed: false, bystanderCPR: false,
+    refractoryVF: false, changingRhythms: true, prearrestCPC: 'cpc1',
+    comorbidities: [], noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 2,
+    pupilsReactive: false, gcsMotor: 1, stemiEcg: 'none', lvef: 'unknown',
+    haemStatus: 'stable', ph: 7.25, lactate: 5.0, glucose: 8.0,
+    creatinine: 110, paco2: 4.2
+  });
+  assert.strictEqual(results.length, 5);
+  var ids = results.map(function(r) { return r.id; });
+  assert.ok(ids.indexOf('cahp') >= 0);
+  assert.ok(ids.indexOf('miracle2') >= 0);
+  assert.ok(ids.indexOf('caspri') >= 0);
+  assert.ok(ids.indexOf('ttm') >= 0);
+  assert.ok(ids.indexOf('ohca') >= 0);
+});
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 if (fail > 0) process.exit(1);
