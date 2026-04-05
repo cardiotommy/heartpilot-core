@@ -107,10 +107,8 @@ body.results-done{overflow:auto;height:auto;}
 .inp-val{border:1.5px solid var(--border);border-radius:7px;padding:9px 10px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:88px;text-align:center;transition:border-color .15s;outline:none;flex-shrink:0;}
 .inp-val:focus{border-color:var(--red);}
 .slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
-/* Results */
-.results-panel{display:none;padding:20px 24px 36px;flex-direction:column;gap:14px;max-width:680px;margin:0 auto;width:100%;}
-.main.results-done .results-panel{display:flex;}
-.main.results-done .wizard-panel{display:none;}
+/* Results step */
+.step-results{max-width:680px;width:100%;margin:0 auto;}
 /* Score grid */
 .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .score-cell{background:var(--s1);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
@@ -122,6 +120,7 @@ body.results-done{overflow:auto;height:auto;}
 .score-badge.intermediate{background:var(--amberg);color:var(--amber);}
 .score-badge.high{background:var(--redg);color:var(--red);}
 .score-badge.incomplete{background:var(--s3);color:var(--muted);}
+.score-threshold{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.5;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;}
 /* Detail cards */
 .detail-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
 .detail-head{padding:12px 16px;color:#fff;display:flex;justify-content:space-between;align-items:flex-start;}
@@ -402,7 +401,7 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 3: Labs -->
+      <!-- Step 3: Labs —— last data-entry step -->
       <div class="step" id="step-3">
         <div class="step-title">Laboratory Values</div>
         <div class="step-sub">Arterial blood gas and biochemistry</div>
@@ -452,6 +451,14 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
+      <!-- Step 4: Review -->
+      <div class="step" id="step-4">
+        <div class="step-results">
+          <div id="score-grid-wrap"></div>
+          <div id="detail-cards-wrap"></div>
+        </div>
+      </div>
+
     </div><!-- wizard-scroll -->
 
     <div class="wizard-foot">
@@ -461,14 +468,6 @@ body.results-done{overflow:auto;height:auto;}
       </button>
     </div>
   </div><!-- wizard-panel -->
-
-  <div class="results-panel" id="results-panel">
-    <div id="score-grid-wrap"></div>
-    <div id="detail-cards-wrap"></div>
-    <div class="new-case-wrap">
-      <button class="btn-new" onclick="newCase()">New Case</button>
-    </div>
-  </div>
 
 </div><!-- main -->
 </div><!-- app -->
@@ -521,6 +520,7 @@ var STEPS = [
   { label: 'Labs',     required: function() {
     return S.ph !== null && S.lactate !== null && S.glucose !== null;
   }},
+  { label: 'Review',   required: function() { return true; }},
 ];
 
 var currentStep = 0;
@@ -552,8 +552,14 @@ function showStep(n) {
   updNextBtn();
   document.getElementById('back-btn').style.display = n > 0 ? '' : 'none';
   var nextBtn = document.getElementById('next-btn');
-  if (n === STEPS.length - 1) {
-    nextBtn.innerHTML = 'Calculate Scores';
+  var isReview  = n === STEPS.length - 1;            // step 4
+  var isPreview = n === STEPS.length - 2;            // step 3 (Labs)
+  if (isReview) {
+    nextBtn.innerHTML = 'New Case';
+    nextBtn.disabled = false;
+    runAnalysis();
+  } else if (isPreview) {
+    nextBtn.innerHTML = 'Review \u2192';
   } else {
     nextBtn.innerHTML = 'Next <span id="next-arrow">\u2192</span>';
   }
@@ -567,7 +573,7 @@ function nextStep() {
   if (currentStep < STEPS.length - 1) {
     showStep(currentStep + 1);
   } else {
-    runAnalysis();
+    newCase();
   }
 }
 
@@ -779,25 +785,31 @@ function runAnalysis() {
   var results = OhcaScores.calculateAll(S);
   renderScoreGrid(results);
   renderDetailCards(results);
-
-  document.querySelector('.main').classList.add('results-done');
-  document.body.classList.add('results-done');
-  document.getElementById('next-btn').style.display = 'none';
-  document.getElementById('back-btn').style.display = 'none';
-  if (window.innerWidth <= 768) {
-    setTimeout(function() { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 150);
-  }
+  // Scroll review content to top
+  var scroll = document.querySelector('.wizard-scroll');
+  if (scroll) scroll.scrollTop = 0;
 }
 
 // ── Score grid ─────────────────────────────────────────────────────────────
 function renderScoreGrid(results) {
   var cells = results.map(function(r, i) {
     var isLast = i === results.length - 1;
-    var scoreDisplay = r.incomplete ? '\u2014' : r.score;
+    var scoreDisplay = r.incomplete ? '\u2014'
+      : r.id === 'ohca' ? r.score + '%'
+      : r.score;
+    var thresholdLine = '';
+    if (r.incomplete) {
+      thresholdLine = '<div class="score-threshold" style="color:var(--muted)">' + h(r.incompleteReason) + '</div>';
+    } else if (r.id === 'ohca') {
+      thresholdLine = '<div class="score-threshold">Predicted probability of good neurological recovery</div>';
+    } else if (r.thresholds && r.thresholds[r.tier]) {
+      thresholdLine = '<div class="score-threshold">' + h(r.thresholds[r.tier]) + '</div>';
+    }
     return '<div class="score-cell' + (isLast ? ' full-width' : '') + '">'
       + '<div class="score-name">' + h(r.name) + '</div>'
       + '<div class="score-value" style="color:' + tierColour(r.tier) + '">' + h(scoreDisplay) + '</div>'
       + '<div class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</div>'
+      + thresholdLine
       + '</div>';
   }).join('');
 
@@ -853,9 +865,6 @@ function renderDetailCards(results) {
 
 // ── New case ────────────────────────────────────────────────────────────────
 function newCase() {
-  document.querySelector('.main').classList.remove('results-done');
-  document.body.classList.remove('results-done');
-  document.getElementById('next-btn').style.display = '';
   document.getElementById('score-grid-wrap').innerHTML = '';
   document.getElementById('detail-cards-wrap').innerHTML = '';
   Object.assign(S, {
