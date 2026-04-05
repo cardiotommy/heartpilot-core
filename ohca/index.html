@@ -119,23 +119,15 @@ body.results-done{overflow:auto;height:auto;}
 /* Unified result card */
 .rc{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--s1);box-shadow:var(--shadow-sm);}
 .rc-stripe{width:4px;flex-shrink:0;}
-.rc-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0;}
-.rc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
-.rc-score-val{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1;}
-.rc-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px;}
-.rc-divider{height:1px;background:var(--border);}
-.rc-implication{font-size:13px;font-weight:600;color:var(--text);line-height:1.5;}
-.rc-tiers{display:flex;flex-direction:column;gap:2px;}
-.rc-tier{display:flex;align-items:baseline;gap:8px;padding:3px 6px;border-radius:5px;font-size:12px;}
-.rc-tier.active{background:var(--s2);}
-.rc-tier-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:72px;flex-shrink:0;}
-.rc-tier.active .rc-tier-lbl{color:var(--text);font-weight:700;}
-.rc-tier-val{color:var(--dim);line-height:1.4;}
-.rc-tier.active .rc-tier-val{color:var(--text);font-weight:500;}
-.rc-ref{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:8px;border-top:1px solid var(--border);}
-.caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;}
+.rc-body{flex:1;padding:20px 22px;display:flex;flex-direction:column;gap:0;min-width:0;}
+.rc-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.rc-predicts{font-size:12px;color:var(--dim);margin-top:2px;margin-bottom:14px;}
+.rc-score-val{font-family:var(--mono);font-size:40px;font-weight:700;line-height:1;margin-bottom:8px;}
+.rc-risk{font-size:13px;color:var(--dim);margin-top:8px;}
+.rc-ref{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:14px;padding-top:10px;border-top:1px solid var(--border);}
+.caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;margin-top:10px;}
 @media(max-width:640px){
-  .rc-score-val{font-size:28px;}
+  .rc-score-val{font-size:32px;}
 }
 /* Conditional visibility */
 .cond{display:none;}
@@ -794,49 +786,29 @@ var TIER_COLOUR = { low: '#15803d', intermediate: '#b45309', high: '#c0392b', in
 var TIER_ORDER  = ['low', 'intermediate', 'high'];
 
 function renderResults(results) {
+  var PREDICTS_LABEL = { neurological: 'Neurological outcome', survival: 'Survival to discharge' };
+
   var cards = results.map(function(r) {
     var colour = TIER_COLOUR[r.tier] || TIER_COLOUR.incomplete;
     var scoreDisplay = r.incomplete ? '\u2014'
       : r.id === 'ohca' ? r.score + '%'
       : r.score;
 
-    var headerRight = '<div><div class="rc-name">' + h(r.name) + '</div>'
-      + '<div class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</div></div>';
+    var predictsText = (PREDICTS_LABEL[r.predicts] || r.predicts) + ' \u00b7 ' + r.horizon;
 
-    var body = '<div class="rc-header">'
+    var riskText = r.incomplete ? r.incompleteReason
+      : r.id === 'ohca' ? 'Predicted probability of good neurological recovery (CPC 1\u20132)'
+      : (r.thresholds && r.thresholds[r.tier] ? r.thresholds[r.tier] : '');
+
+    var body = '<div class="rc-name">' + h(r.name) + '</div>'
+      + '<div class="rc-predicts">' + h(predictsText) + '</div>'
       + '<div class="rc-score-val" style="color:' + colour + '">' + h(scoreDisplay) + '</div>'
-      + headerRight + '</div>';
+      + '<div><span class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</span></div>'
+      + (riskText ? '<div class="rc-risk">' + h(riskText) + '</div>' : '')
+      + '<div class="rc-ref">' + h(r.reference.authors + ' \u00b7 ' + r.reference.journal + ' ' + r.reference.year) + '</div>';
 
-    if (r.incomplete) {
-      body += '<div class="rc-divider"></div>'
-        + '<div style="font-size:13px;color:var(--muted);font-style:italic;">' + h(r.incompleteReason) + '</div>';
-    } else {
-      // Implication line — threshold for current tier, or probability description
-      var implication = r.id === 'ohca'
-        ? 'Predicted probability of survival with good neurological outcome (CPC 1\u20132)'
-        : (r.thresholds && r.thresholds[r.tier] ? r.thresholds[r.tier] : r.interpretation);
-      body += '<div class="rc-divider"></div>'
-        + '<div class="rc-implication">' + h(implication) + '</div>';
-
-      // All tiers table
-      var thrKeys = (r.thresholds && Object.keys(r.thresholds).length) ? TIER_ORDER : [];
-      if (thrKeys.length) {
-        body += '<div class="rc-tiers">';
-        thrKeys.forEach(function(k) {
-          if (!r.thresholds[k]) return;
-          var isActive = k === r.tier;
-          body += '<div class="rc-tier' + (isActive ? ' active' : '') + '">'
-            + '<div class="rc-tier-lbl">' + h(k) + '</div>'
-            + '<div class="rc-tier-val">' + h(r.thresholds[k]) + '</div>'
-            + '</div>';
-        });
-        body += '</div>';
-      }
-
-      body += '<div class="rc-ref">' + h(r.reference.authors + ' \u00b7 ' + r.reference.journal + ' ' + r.reference.year) + '</div>';
-      if (r.caveat) {
-        body += '<div class="caveat-box">' + h(r.caveat) + '</div>';
-      }
+    if (r.caveat) {
+      body += '<div class="caveat-box">' + h(r.caveat) + '</div>';
     }
 
     return '<div class="rc">'
