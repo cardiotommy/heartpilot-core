@@ -766,6 +766,114 @@ function setPaCO2(v) {
 buildPbar();
 showStep(0);
 setAge(60);
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+var h = function(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+};
+
+// ── Analysis ───────────────────────────────────────────────────────────────
+function runAnalysis() {
+  var results = OhcaScores.calculateAll(S);
+  renderScoreGrid(results);
+  renderDetailCards(results);
+
+  document.querySelector('.main').classList.add('results-done');
+  document.body.classList.add('results-done');
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('back-btn').style.display = 'none';
+  if (window.innerWidth <= 768) {
+    setTimeout(function() { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 150);
+  }
+}
+
+// ── Score grid ─────────────────────────────────────────────────────────────
+function renderScoreGrid(results) {
+  var cells = results.map(function(r, i) {
+    var isLast = i === results.length - 1;
+    var scoreDisplay = r.incomplete ? '\u2014' : r.score;
+    return '<div class="score-cell' + (isLast ? ' full-width' : '') + '">'
+      + '<div class="score-name">' + h(r.name) + '</div>'
+      + '<div class="score-value" style="color:' + tierColour(r.tier) + '">' + h(scoreDisplay) + '</div>'
+      + '<div class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('score-grid-wrap').innerHTML =
+    '<div class="score-grid">' + cells + '</div>';
+}
+
+function tierColour(tier) {
+  return { low: '#15803d', intermediate: '#b45309', high: '#c0392b', incomplete: '#a8a49f' }[tier] || '#a8a49f';
+}
+
+// ── Detail cards ───────────────────────────────────────────────────────────
+function renderDetailCards(results) {
+  var cards = results.map(function(r) {
+    var scoreDisplay = r.incomplete ? 'Incomplete' : r.score;
+    var headContent = '<div class="detail-score-name">' + h(r.name) + '</div>'
+      + '<div class="detail-score-val">' + h(scoreDisplay) + '</div>';
+
+    var bodyContent = '';
+
+    if (r.incomplete) {
+      bodyContent += '<div style="color:var(--muted);font-style:italic;">' + h(r.incompleteReason) + '</div>';
+    } else {
+      bodyContent += '<div class="detail-row">'
+        + '<div class="detail-lbl">Predicts</div>'
+        + '<div>' + h(r.interpretation) + '</div></div>';
+
+      var thrKeys = Object.keys(r.thresholds || {});
+      if (thrKeys.length) {
+        var thrText = thrKeys.map(function(k) { return k + ': ' + r.thresholds[k]; }).join(' \u00b7 ');
+        bodyContent += '<div class="detail-row">'
+          + '<div class="detail-lbl">Thresholds</div>'
+          + '<div>' + h(thrText) + '</div></div>';
+      }
+
+      bodyContent += '<div class="detail-row">'
+        + '<div class="detail-lbl">Source</div>'
+        + '<div>' + h(r.reference.authors + ', ' + r.reference.journal + ' ' + r.reference.year) + '</div></div>';
+
+      if (r.caveat) {
+        bodyContent += '<div class="caveat-box">' + h(r.caveat) + '</div>';
+      }
+    }
+
+    return '<div class="detail-card">'
+      + '<div class="detail-head ' + h(r.tier) + '">' + headContent + '</div>'
+      + '<div class="detail-body">' + bodyContent + '</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('detail-cards-wrap').innerHTML = cards;
+}
+
+// ── New case ────────────────────────────────────────────────────────────────
+function newCase() {
+  document.querySelector('.main').classList.remove('results-done');
+  document.body.classList.remove('results-done');
+  document.getElementById('next-btn').style.display = '';
+  document.getElementById('score-grid-wrap').innerHTML = '';
+  document.getElementById('detail-cards-wrap').innerHTML = '';
+  Object.assign(S, {
+    initialRhythm: null, initialRhythmSubtype: null, refractoryVF: false,
+    witnessed: null, location: null, bystanderCPR: null, prearrestCPC: null,
+    comorbidities: [], noFlowTime: 0, lowFlowTime: 0, epinephrineDose: 0,
+    changingRhythms: null, haemStatus: null, gcsMotor: null, pupilsReactive: null,
+    stemiEcg: null, lvef: 'unknown', ph: null, lactate: null, glucose: null,
+    creatinine: null, paco2: null
+  });
+  document.querySelectorAll('.ocard').forEach(function(el) { el.className = 'ocard'; });
+  document.querySelectorAll('.tog').forEach(function(el) { el.className = 'tog'; });
+  document.querySelectorAll('.chk-item').forEach(function(el) { el.className = 'chk-item'; });
+  document.querySelectorAll('.inp-field').forEach(function(el) { el.value = ''; });
+  document.getElementById('ef-unk').className = 'ocard sel';
+  showStep(0);
+  setAge(60);
+}
 </script>
 </body>
 </html>
