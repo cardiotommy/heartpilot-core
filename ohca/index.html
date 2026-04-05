@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>HeartPilot — OHCA Risk Scores</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+html{color-scheme:light;background:#f7f5f2;}
+@media(prefers-color-scheme:dark){html,body{color-scheme:light;background:#f7f5f2!important;color:#1a1714!important;filter:none!important;}}
+:root{
+  --bg:#f7f5f2;--s1:#ffffff;--s2:#f0ece7;--s3:#e8e3dd;
+  --border:#e2ddd8;--border2:#ccc7c0;
+  --red:#c0392b;--redg:rgba(192,57,43,.10);
+  --amber:#b45309;--amberg:rgba(180,83,9,.10);
+  --green:#15803d;--greeng:rgba(21,128,61,.10);
+  --blue:#1d5fa8;--blueg:rgba(29,95,168,.10);
+  --text:#1a1714;--dim:#706b66;--muted:#a8a49f;
+  --shadow-sm:0 1px 3px rgba(26,23,20,.06),0 1px 2px rgba(26,23,20,.04);
+  --shadow-md:0 4px 16px rgba(26,23,20,.08),0 2px 6px rgba(26,23,20,.05);
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;--serif:'DM Serif Display',Georgia,serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 0%,rgba(192,57,43,.025) 0%,transparent 50%),radial-gradient(circle at 80% 100%,rgba(192,57,43,.02) 0%,transparent 50%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(112,107,102,.16) 1px,transparent 1px);background-size:28px 28px;opacity:.4;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;min-height:500px;overflow:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:50px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);}
+.brand-icon{width:32px;height:32px;border:1.5px solid var(--red);border-radius:6px;display:grid;place-items:center;color:var(--red);background:var(--redg);box-shadow:0 0 0 3px rgba(192,57,43,.07);}
+.brand-name{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:.01em;}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:1px;}
+.hub-link{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--s1);transition:color .15s,border-color .15s;}
+.hub-link:hover{color:var(--red);border-color:var(--red);}
+.disclaimer{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:3px 9px;border:1px solid var(--border2);border-radius:100px;background:var(--s1);}
+/* Progress */
+.progress-bar{display:flex;align-items:center;padding:0 24px;height:36px;background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+.progress-bar::-webkit-scrollbar{display:none;}
+.snode{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 10px;height:100%;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
+.snode.active{color:var(--text);border-bottom-color:var(--red);font-weight:600;}
+.snode.done{color:var(--green);border-bottom-color:var(--green);}
+.snode-num{width:16px;height:16px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;font-size:8px;font-weight:600;flex-shrink:0;}
+.snode.done .snode-num{background:var(--green);border-color:var(--green);color:#fff;font-size:7px;}
+.ssep{width:14px;height:1px;background:var(--border2);flex-shrink:0;}
+/* Main */
+.main{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.main.results-done{flex:none;height:auto;overflow:visible;}
+body.results-done{overflow:auto;height:auto;}
+/* Wizard panel */
+.wizard-panel{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.wizard-scroll{flex:1;overflow-y:auto;padding:24px 28px;min-height:200px;}
+.wizard-scroll::-webkit-scrollbar{width:3px;}
+.wizard-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.step{display:none;flex-direction:column;gap:16px;}
+.step.active{display:flex;animation:fadeUp .15s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.step-title{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);line-height:1.25;}
+.step-sub{font-size:13px;color:var(--dim);line-height:1.6;margin-top:-8px;}
+/* Wizard footer */
+.wizard-foot{display:flex;align-items:center;justify-content:flex-end;padding:12px 24px;border-top:1px solid var(--border);background:var(--s1);flex-shrink:0;gap:12px;}
+.btn-next{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 22px;border-radius:6px;border:none;background:var(--red);color:#fff;cursor:pointer;transition:opacity .15s;display:flex;align-items:center;gap:7px;}
+.btn-next:disabled{opacity:.35;cursor:not-allowed;}
+.btn-next:not(:disabled):hover{opacity:.85;}
+.btn-back{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:9px 16px;border-radius:6px;border:1px solid var(--border2);background:var(--s1);color:var(--dim);cursor:pointer;transition:opacity .15s;}
+.btn-back:hover{opacity:.75;}
+/* Input groups */
+.inp-group{display:flex;flex-direction:column;gap:6px;}
+.inp-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
+.inp-label span{font-weight:600;color:var(--text);}
+.inp-row{display:flex;align-items:center;gap:10px;}
+.inp-field{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:130px;transition:border-color .15s;outline:none;}
+.inp-field:focus{border-color:var(--red);}
+.inp-hint{font-size:12px;color:var(--muted);}
+/* Option cards */
+.ocard{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;user-select:none;transition:border-color .12s,background .12s;font-size:14px;}
+.ocard:hover{border-color:var(--border2);background:var(--s3);}
+.ocard.sel{border-color:rgba(192,57,43,.45);background:var(--redg);}
+.ocard-row{display:flex;flex-wrap:wrap;gap:8px;}
+/* Toggle buttons */
+.tog{font-family:var(--mono);font-size:11px;padding:8px 16px;border-radius:6px;border:1.5px solid var(--border);background:var(--s1);cursor:pointer;transition:background .12s,border-color .12s,color .12s;}
+.tog:hover{background:var(--s3);}
+.tog.sy{background:var(--greeng);border-color:var(--green);color:var(--green);font-weight:600;}
+.tog.sn{background:var(--redg);border-color:var(--red);color:var(--red);font-weight:600;}
+.tog-row{display:flex;gap:8px;}
+/* Check list (multi-select comorbidities) */
+.chk-list{display:flex;flex-direction:column;gap:8px;}
+.chk-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s;user-select:none;}
+.chk-item:hover{border-color:var(--red);background:var(--redg);}
+.chk-item.selected{border-color:var(--red);background:var(--redg);}
+.chk-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);background:var(--s1);display:grid;place-items:center;flex-shrink:0;transition:background .15s,border-color .15s;}
+.chk-item.selected .chk-box{background:var(--red);border-color:var(--red);}
+.chk-check{display:none;color:#fff;}
+.chk-item.selected .chk-check{display:block;}
+.chk-label{font-size:14px;font-weight:500;}
+.chk-sub{font-size:12px;color:var(--dim);margin-top:1px;}
+/* Divider */
+.inp-divider{height:1px;background:var(--border);margin:4px 0;}
+/* Slider */
+.slider-row{display:flex;align-items:center;gap:12px;}
+.slider-wrap{flex:1;position:relative;padding-top:4px;}
+.inp-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;border:none;padding:0;display:block;}
+.inp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--text);border:2.5px solid var(--s1);box-shadow:0 0 0 1.5px var(--border2);cursor:pointer;margin-top:-7px;}
+.inp-slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;}
+.inp-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--text);border:none;box-shadow:0 0 0 1.5px var(--border2);cursor:pointer;}
+.inp-slider::-moz-range-track{height:4px;border-radius:2px;background:transparent;}
+.inp-val{border:1.5px solid var(--border);border-radius:7px;padding:9px 10px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:88px;text-align:center;transition:border-color .15s;outline:none;flex-shrink:0;}
+.inp-val:focus{border-color:var(--red);}
+.slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
+/* Results */
+.results-panel{display:none;padding:20px 24px 36px;flex-direction:column;gap:14px;max-width:680px;margin:0 auto;width:100%;}
+.main.results-done .results-panel{display:flex;}
+.main.results-done .wizard-panel{display:none;}
+/* Score grid */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.score-cell{background:var(--s1);padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+.score-cell.full-width{grid-column:1/-1;}
+.score-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+.score-value{font-size:22px;font-weight:700;line-height:1;}
+.score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;margin-top:2px;}
+.score-badge.low{background:var(--greeng);color:var(--green);}
+.score-badge.intermediate{background:var(--amberg);color:var(--amber);}
+.score-badge.high{background:var(--redg);color:var(--red);}
+.score-badge.incomplete{background:var(--s3);color:var(--muted);}
+/* Detail cards */
+.detail-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.detail-head{padding:12px 16px;color:#fff;display:flex;justify-content:space-between;align-items:flex-start;}
+.detail-head.low{background:var(--green);}
+.detail-head.intermediate{background:var(--amber);}
+.detail-head.high{background:var(--red);}
+.detail-head.incomplete{background:var(--muted);}
+.detail-score-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;opacity:.85;margin-bottom:4px;}
+.detail-score-val{font-family:var(--serif);font-size:22px;}
+.detail-body{padding:14px 16px;font-size:13px;color:var(--dim);line-height:1.7;display:flex;flex-direction:column;gap:8px;}
+.detail-row{display:flex;gap:8px;}
+.detail-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0;width:90px;padding-top:1px;}
+.caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;}
+/* New case */
+.new-case-wrap{text-align:center;padding-top:4px;}
+.btn-new{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:10px 24px;border-radius:6px;border:1.5px solid var(--border2);background:var(--s1);color:var(--dim);cursor:pointer;transition:color .15s,border-color .15s;}
+.btn-new:hover{color:var(--red);border-color:var(--red);}
+/* Conditional visibility */
+.cond{display:none;}
+.cond.show{display:flex;}
+@media(max-width:640px){
+  header{padding:0 16px;height:46px;}
+  .wizard-scroll{padding:18px 18px;}
+  .results-panel{padding:16px 16px 32px;}
+  .score-grid{grid-template-columns:1fr;}
+  .score-cell.full-width{grid-column:1;}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<header>
+  <a class="brand" href="../index.html">
+    <div class="brand-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">HeartPilot</div>
+      <div class="brand-sub">OHCA · Post-ROSC</div>
+    </div>
+  </a>
+  <div class="disclaimer">Research use only — not for clinical decisions</div>
+</header>
+
+<div class="progress-bar" id="pbar"></div>
+
+<div class="main" id="main">
+  <div class="wizard-panel">
+    <div class="wizard-scroll">
+
+      <!-- Step 0: Arrest -->
+      <div class="step active" id="step-0">
+        <div class="step-title">Arrest Characteristics</div>
+        <div class="step-sub">Initial rhythm, location, and pre-arrest status</div>
+
+        <div class="inp-group">
+          <div class="inp-label">Age <span id="age-val">—</span> years</div>
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" type="range" min="18" max="100" value="60"
+                oninput="setAge(+this.value)"
+                style="background:linear-gradient(to right,var(--text) 0%,var(--text) calc((60-18)/(100-18)*100%),var(--border) calc((60-18)/(100-18)*100%),var(--border) 100%)">
+            </div>
+            <input class="inp-val" type="number" min="18" max="100" value="60"
+              oninput="setAge(+this.value)" id="age-input">
+          </div>
+          <div class="slider-hint"><span>18</span><span>100</span></div>
+        </div>
+
+        <div class="inp-divider"></div>
+
+        <div class="inp-group">
+          <div class="inp-label">Initial Rhythm</div>
+          <div class="ocard-row">
+            <button class="ocard" id="rhy-shock" onclick="setRhythm('shockable')">
+              <span>⚡</span><span>Shockable (VF / pVT)</span>
+            </button>
+            <button class="ocard" id="rhy-nonshock" onclick="setRhythm('non_shockable')">
+              <span>—</span><span>Non-shockable (PEA / Asystole)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Conditional: Shockable subtype -->
+        <div class="inp-group cond" id="cond-refractory">
+          <div class="inp-label">Refractory VF?</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Three or more shocks required</div>
+          <div class="tog-row">
+            <button class="tog" id="ref-y" onclick="setRefractoryVF(true)">Yes</button>
+            <button class="tog" id="ref-n" onclick="setRefractoryVF(false)">No</button>
+          </div>
+        </div>
+
+        <!-- Conditional: Non-shockable subtype -->
+        <div class="inp-group cond" id="cond-nonshock-sub">
+          <div class="inp-label">Non-shockable Subtype</div>
+          <div class="ocard-row">
+            <button class="ocard" id="sub-pea" onclick="setRhythmSubtype('pea')">PEA</button>
+            <button class="ocard" id="sub-asystole" onclick="setRhythmSubtype('asystole')">Asystole</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Witnessed Collapse</div>
+          <div class="tog-row">
+            <button class="tog" id="wit-y" onclick="setWitnessed(true)">Yes</button>
+            <button class="tog" id="wit-n" onclick="setWitnessed(false)">No</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Location of Arrest</div>
+          <div class="ocard-row">
+            <button class="ocard" id="loc-public" onclick="setLocation('public')">Public place</button>
+            <button class="ocard" id="loc-home" onclick="setLocation('home')">Home</button>
+            <button class="ocard" id="loc-other" onclick="setLocation('other')">Other</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Bystander CPR</div>
+          <div class="tog-row">
+            <button class="tog" id="byst-y" onclick="setBystanderCPR(true)">Yes</button>
+            <button class="tog" id="byst-n" onclick="setBystanderCPR(false)">No</button>
+          </div>
+        </div>
+
+        <div class="inp-divider"></div>
+
+        <div class="inp-group">
+          <div class="inp-label">Pre-arrest Function (CPC)</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Baseline cerebral performance before this arrest</div>
+          <div class="ocard-row">
+            <button class="ocard" id="cpc-1" onclick="setPrearrestCPC('cpc1')">CPC 1 — Normal / mild disability</button>
+            <button class="ocard" id="cpc-2" onclick="setPrearrestCPC('cpc2')">CPC 2 — Moderate disability</button>
+            <button class="ocard" id="cpc-34" onclick="setPrearrestCPC('cpc3_4')">CPC 3–4 — Severe disability</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Pre-existing Comorbidities</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Select all that apply (for CASPRI score)</div>
+          <div class="chk-list">
+            <div class="chk-item" id="chk-none" onclick="toggleComorbidity('none')">
+              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
+              <div><div class="chk-label">None</div></div>
+            </div>
+            <div class="chk-item" id="chk-renal" onclick="toggleComorbidity('renal_failure')">
+              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
+              <div><div class="chk-label">Renal failure</div></div>
+            </div>
+            <div class="chk-item" id="chk-sepsis" onclick="toggleComorbidity('sepsis')">
+              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
+              <div><div class="chk-label">Sepsis / hypotension</div></div>
+            </div>
+            <div class="chk-item" id="chk-hepatic" onclick="toggleComorbidity('hepatic_failure')">
+              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
+              <div><div class="chk-label">Hepatic failure</div></div>
+            </div>
+            <div class="chk-item" id="chk-malignancy" onclick="toggleComorbidity('malignancy')">
+              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
+              <div><div class="chk-label">Active malignancy</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1: Resuscitation -->
+      <div class="step" id="step-1">
+        <div class="step-title">Resuscitation</div>
+        <div class="step-sub">Time intervals, epinephrine, and rhythm behaviour</div>
+
+        <div class="inp-group">
+          <div class="inp-label">No-flow Time — <span id="nf-val">0</span> min</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Collapse to first CPR (0 if witnessed + immediate)</div>
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" type="range" min="0" max="30" value="0"
+                oninput="setNoFlow(+this.value)"
+                style="background:linear-gradient(to right,var(--text) 0%,var(--text) 0%,var(--border) 0%,var(--border) 100%)">
+            </div>
+            <input class="inp-val" type="number" min="0" max="30" value="0"
+              oninput="setNoFlow(+this.value)" id="nf-input">
+          </div>
+          <div class="slider-hint"><span>0 min</span><span>30 min</span></div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Low-flow Time — <span id="lf-val">0</span> min</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">CPR start to ROSC</div>
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" type="range" min="0" max="90" value="0"
+                oninput="setLowFlow(+this.value)"
+                style="background:linear-gradient(to right,var(--text) 0%,var(--text) 0%,var(--border) 0%,var(--border) 100%)">
+            </div>
+            <input class="inp-val" type="number" min="0" max="90" value="0"
+              oninput="setLowFlow(+this.value)" id="lf-input">
+          </div>
+          <div class="slider-hint"><span>0 min</span><span>90 min</span></div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Total Epinephrine — <span id="epi-val">0</span> mg</div>
+          <div class="slider-row">
+            <div class="slider-wrap">
+              <input class="inp-slider" type="range" min="0" max="20" step="1" value="0"
+                oninput="setEpi(+this.value)"
+                style="background:linear-gradient(to right,var(--text) 0%,var(--text) 0%,var(--border) 0%,var(--border) 100%)">
+            </div>
+            <input class="inp-val" type="number" min="0" max="20" value="0"
+              oninput="setEpi(+this.value)" id="epi-input">
+          </div>
+          <div class="slider-hint"><span>0 mg</span><span>20 mg</span></div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Changing Rhythms During Resuscitation</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Two or more of VF / PEA / asystole observed</div>
+          <div class="tog-row">
+            <button class="tog" id="chgr-y" onclick="setChangingRhythms(true)">Yes</button>
+            <button class="tog" id="chgr-n" onclick="setChangingRhythms(false)">No</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: On Arrival -->
+      <div class="step" id="step-2">
+        <div class="step-title">On Arrival</div>
+        <div class="step-sub">Haemodynamics, neurology, and initial ECG</div>
+
+        <div class="inp-group">
+          <div class="inp-label">Haemodynamic Status</div>
+          <div class="ocard-row">
+            <button class="ocard" id="haem-stable" onclick="setHaem('stable')">Stable</button>
+            <button class="ocard" id="haem-shock" onclick="setHaem('shock')">Cardiogenic shock</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">GCS Motor Score at Arrival</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">M1=no response · M2=extension · M3=flexion · M4=withdrawal · M5=localises · M6=obeys</div>
+          <div class="ocard-row">
+            <button class="ocard" id="gcs-1" onclick="setGCSMotor(1)">M1</button>
+            <button class="ocard" id="gcs-2" onclick="setGCSMotor(2)">M2</button>
+            <button class="ocard" id="gcs-3" onclick="setGCSMotor(3)">M3</button>
+            <button class="ocard" id="gcs-4" onclick="setGCSMotor(4)">M4</button>
+            <button class="ocard" id="gcs-5" onclick="setGCSMotor(5)">M5</button>
+            <button class="ocard" id="gcs-6" onclick="setGCSMotor(6)">M6</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Pupil Reactivity at ROSC</div>
+          <div class="ocard-row">
+            <button class="ocard" id="pup-react" onclick="setPupils(true)">Reactive (bilateral)</button>
+            <button class="ocard" id="pup-fixed" onclick="setPupils(false)">Fixed / unreactive</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">First Post-ROSC ECG</div>
+          <div class="ocard-row">
+            <button class="ocard" id="ecg-stemi" onclick="setECG('stemi')">STEMI</button>
+            <button class="ocard" id="ecg-lbbb" onclick="setECG('lbbb')">New LBBB</button>
+            <button class="ocard" id="ecg-none" onclick="setECG('none')">No ST changes</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">LVEF (if bedside echo available)</div>
+          <div class="ocard-row">
+            <button class="ocard" id="ef-gt30" onclick="setLVEF('gt30')">&gt;30%</button>
+            <button class="ocard" id="ef-lte30" onclick="setLVEF('lte30')">&le;30%</button>
+            <button class="ocard sel" id="ef-unk" onclick="setLVEF('unknown')">Not assessed</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Labs -->
+      <div class="step" id="step-3">
+        <div class="step-title">Laboratory Values</div>
+        <div class="step-sub">Arterial blood gas and biochemistry</div>
+
+        <div class="inp-group">
+          <div class="inp-label">Arterial pH</div>
+          <div class="inp-row">
+            <input class="inp-field" id="ph-input" type="number" min="6.8" max="7.6" step="0.01"
+              placeholder="7.35" oninput="setPH(+this.value)">
+            <div class="inp-hint">Normal: 7.35–7.45</div>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Lactate (mmol/L)</div>
+          <div class="inp-row">
+            <input class="inp-field" id="lac-input" type="number" min="0" max="25" step="0.1"
+              placeholder="2.0" oninput="setLactate(+this.value)">
+            <div class="inp-hint">Normal: &lt;2.0</div>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Glucose (mmol/L)</div>
+          <div class="inp-row">
+            <input class="inp-field" id="gluc-input" type="number" min="2" max="30" step="0.1"
+              placeholder="6.0" oninput="setGlucose(+this.value)">
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Creatinine (µmol/L) <span style="color:var(--muted);font-weight:400;">optional</span></div>
+          <div class="inp-row">
+            <input class="inp-field" id="creat-input" type="number" min="0" max="2000" step="1"
+              placeholder="—" oninput="setCreatinine(+this.value || null)">
+            <div class="inp-hint">Needed for OHCA score</div>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">PaCO&#x2082; (kPa) <span style="color:var(--muted);font-weight:400;">optional</span></div>
+          <div class="inp-row">
+            <input class="inp-field" id="paco2-input" type="number" min="1" max="15" step="0.1"
+              placeholder="—" oninput="setPaCO2(+this.value || null)">
+            <div class="inp-hint">Needed for TTM score</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- wizard-scroll -->
+
+    <div class="wizard-foot">
+      <button class="btn-back" id="back-btn" style="display:none" onclick="prevStep()">← Back</button>
+      <button class="btn-next" id="next-btn" disabled onclick="nextStep()">
+        Next <span id="next-arrow">→</span>
+      </button>
+    </div>
+  </div><!-- wizard-panel -->
+
+  <div class="results-panel" id="results-panel">
+    <div id="score-grid-wrap"></div>
+    <div id="detail-cards-wrap"></div>
+    <div class="new-case-wrap">
+      <button class="btn-new" onclick="newCase()">New Case</button>
+    </div>
+  </div>
+
+</div><!-- main -->
+</div><!-- app -->
+
+<script src="engine/scores.js"></script>
+<script>
+'use strict';
+</script>
+</body>
+</html>
