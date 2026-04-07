@@ -86,67 +86,6 @@ var OhcaScores = (function () {
     };
   }
 
-  // ── CASPRI ──────────────────────────────────────────────────────────────────
-  // Chan et al., JACC 2014. Originally derived from in-hospital cardiac arrest.
-  // Predicts in-hospital survival. OHCA applicability is limited.
-  // Tiers (by survival): ≤9 high survival · 10–19 intermediate · ≥20 low survival
-
-  function caspri(inputs) {
-    var score = 0;
-
-    // Age
-    if      (inputs.age >= 80) score += 4;
-    else if (inputs.age >= 70) score += 2;
-    else if (inputs.age >= 60) score += 1;
-
-    // Rhythm (CASPRI distinguishes witnessed/unwitnessed VF and PEA vs asystole)
-    if (inputs.initialRhythm === 'non_shockable') {
-      score += (inputs.initialRhythmSubtype === 'asystole') ? 7 : 6; // asystole vs PEA
-    } else {
-      score += inputs.witnessed ? 0 : 3; // witnessed VF=0, unwitnessed VF=3
-    }
-
-    // Pre-arrest CPC
-    if      (inputs.prearrestCPC === 'cpc3_4') score += 9;
-    else if (inputs.prearrestCPC === 'cpc2')   score += 2;
-
-    // Time to ROSC (low-flow time)
-    var lf = inputs.lowFlowTime;
-    if      (lf >= 30) score += 8;
-    else if (lf >= 15) score += 6;
-    else if (lf >= 10) score += 5;
-    else if (lf >= 5)  score += 3;
-
-    // Monitored: OHCA patients are always "unmonitored" (+3)
-    score += 3;
-
-    // Comorbidities: highest category only
-    var c = inputs.comorbidities || [];
-    var hasHigh = c.indexOf('hepatic_failure') >= 0 || c.indexOf('malignancy') >= 0;
-    var hasMid  = c.indexOf('sepsis') >= 0 || c.indexOf('hypotension') >= 0;
-    var hasLow  = c.indexOf('renal_failure') >= 0;
-    if      (hasHigh) score += 4;
-    else if (hasMid)  score += 3;
-    else if (hasLow)  score += 2;
-
-    var tier  = score <= 9 ? 'low' : score <= 19 ? 'intermediate' : 'high';
-    var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
-
-    var caspriNarrative = {
-      low:          '>66% probability of survival to hospital discharge',
-      intermediate: '23\u201342% probability of survival to hospital discharge',
-      high:         '<12% probability of survival to hospital discharge'
-    };
-    return {
-      id: 'caspri', name: 'CASPRI',
-      score: score, tier: tier, label: label,
-      narrative: caspriNarrative[tier],
-      reference: { authors: 'Chan et al.', journal: 'JACC', year: 2014 },
-      incomplete: false, incompleteReason: null,
-      caveat: 'Derived from an in-hospital cardiac arrest registry (Get With The Guidelines). Applicability to OHCA patients is uncertain \u2014 interpret with caution.'
-    };
-  }
-
   // ── TTM Risk Score ──────────────────────────────────────────────────────────
   // Martinell et al., Critical Care 2017. doi:10.1186/s13054-017-1677-2
   // Predicts poor neurological outcome (CPC 3–5) at hospital discharge.
@@ -322,7 +261,6 @@ var OhcaScores = (function () {
       miracle2(inputs),
       ttm(inputs),
       ohca(inputs),
-      caspri(inputs),
     ];
   }
 
@@ -331,7 +269,6 @@ var OhcaScores = (function () {
   return {
     cahp:         cahp,
     miracle2:     miracle2,
-    caspri:       caspri,
     ttm:          ttm,
     ohca:         ohca,
     calculateAll: calculateAll,

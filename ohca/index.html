@@ -206,15 +206,6 @@ body.results-done{overflow:auto;height:auto;}
           </div>
         </div>
 
-        <!-- Conditional: Non-shockable subtype -->
-        <div class="inp-group cond" id="cond-nonshock-sub">
-          <div class="inp-label">Non-shockable Subtype</div>
-          <div class="ocard-row">
-            <button class="ocard" id="sub-pea" onclick="setRhythmSubtype('pea')">PEA</button>
-            <button class="ocard" id="sub-asystole" onclick="setRhythmSubtype('asystole')">Asystole</button>
-          </div>
-        </div>
-
         <div class="inp-group">
           <div class="inp-label">Witnessed Collapse</div>
           <div class="tog-row">
@@ -242,51 +233,8 @@ body.results-done{overflow:auto;height:auto;}
 
       </div>
 
-      <!-- Step 1: Pre-arrest -->
+      <!-- Step 1: Resuscitation -->
       <div class="step" id="step-1">
-        <div class="step-title">Pre-arrest Status</div>
-        <div class="step-sub">Baseline function and pre-existing conditions</div>
-
-        <div class="inp-group">
-          <div class="inp-label">Pre-arrest Function (CPC)</div>
-          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Baseline cerebral performance before this arrest</div>
-          <div class="ocard-row">
-            <button class="ocard" id="cpc-1" onclick="setPrearrestCPC('cpc1')">CPC 1 — Normal / mild disability</button>
-            <button class="ocard" id="cpc-2" onclick="setPrearrestCPC('cpc2')">CPC 2 — Moderate disability</button>
-            <button class="ocard" id="cpc-34" onclick="setPrearrestCPC('cpc3_4')">CPC 3–4 — Severe disability</button>
-          </div>
-        </div>
-
-        <div class="inp-group">
-          <div class="inp-label">Pre-existing Comorbidities</div>
-          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Select all that apply (for CASPRI score)</div>
-          <div class="chk-list">
-            <div class="chk-item" id="chk-none" onclick="toggleComorbidity('none')">
-              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
-              <div><div class="chk-label">None</div></div>
-            </div>
-            <div class="chk-item" id="chk-renal" onclick="toggleComorbidity('renal_failure')">
-              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
-              <div><div class="chk-label">Renal failure</div></div>
-            </div>
-            <div class="chk-item" id="chk-sepsis" onclick="toggleComorbidity('sepsis')">
-              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
-              <div><div class="chk-label">Sepsis / hypotension</div></div>
-            </div>
-            <div class="chk-item" id="chk-hepatic" onclick="toggleComorbidity('hepatic_failure')">
-              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
-              <div><div class="chk-label">Hepatic failure</div></div>
-            </div>
-            <div class="chk-item" id="chk-malignancy" onclick="toggleComorbidity('malignancy')">
-              <div class="chk-box"><svg class="chk-check" width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" fill="none"/></svg></div>
-              <div><div class="chk-label">Active malignancy</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: Resuscitation -->
-      <div class="step" id="step-2">
         <div class="step-title">Resuscitation</div>
         <div class="step-sub">Time intervals, epinephrine, and rhythm behaviour</div>
 
@@ -344,8 +292,8 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 3: On Arrival -->
-      <div class="step" id="step-3">
+      <!-- Step 2: On Arrival -->
+      <div class="step" id="step-2">
         <div class="step-title">On Arrival</div>
         <div class="step-sub">Haemodynamics, neurology, and initial ECG</div>
 
@@ -398,7 +346,7 @@ body.results-done{overflow:auto;height:auto;}
       </div>
 
       <!-- Step 4: Labs —— last data-entry step -->
-      <div class="step" id="step-4">
+      <div class="step" id="step-3">
         <div class="step-title">Laboratory Values</div>
         <div class="step-sub">Arterial blood gas and biochemistry</div>
 
@@ -443,8 +391,8 @@ body.results-done{overflow:auto;height:auto;}
         </div>
       </div>
 
-      <!-- Step 5: Review -->
-      <div class="step" id="step-5">
+      <!-- Step 4: Review -->
+      <div class="step" id="step-4">
         <div class="step-results" id="results-wrap"></div>
       </div>
 
@@ -469,13 +417,10 @@ body.results-done{overflow:auto;height:auto;}
 var S = {
   age: 60,
   initialRhythm: null,
-  initialRhythmSubtype: null,
   refractoryVF: false,
   witnessed: null,
   location: null,
   bystanderCPR: null,
-  prearrestCPC: null,
-  comorbidities: [],
   noFlowTime: 0,
   lowFlowTime: 0,
   epinephrineDose: 0,
@@ -494,11 +439,7 @@ var S = {
 var STEPS = [
   { label: 'Arrest',     required: function() {
     return S.initialRhythm !== null && S.witnessed !== null &&
-           S.location !== null && S.bystanderCPR !== null &&
-           (S.initialRhythm === 'shockable' || S.initialRhythmSubtype !== null);
-  }},
-  { label: 'Pre-arrest', required: function() {
-    return S.prearrestCPC !== null;
+           S.location !== null && S.bystanderCPR !== null;
   }},
   { label: 'Resus',      required: function() {
     return S.changingRhythms !== null;
@@ -583,21 +524,10 @@ function setAge(v) {
 
 function setRhythm(v) {
   S.initialRhythm = v;
-  S.initialRhythmSubtype = null;
   ['shock','nonshock'].forEach(function(k) {
     document.getElementById('rhy-' + k).className = 'ocard' + (k === (v === 'shockable' ? 'shock' : 'nonshock') ? ' sel' : '');
   });
   document.getElementById('cond-refractory').className = 'inp-group cond' + (v === 'shockable' ? ' show' : '');
-  document.getElementById('cond-nonshock-sub').className = 'inp-group cond' + (v === 'non_shockable' ? ' show' : '');
-  ['pea','asystole'].forEach(function(k) { document.getElementById('sub-' + k).className = 'ocard'; });
-  updNextBtn();
-}
-
-function setRhythmSubtype(v) {
-  S.initialRhythmSubtype = v;
-  ['pea','asystole'].forEach(function(k) {
-    document.getElementById('sub-' + k).className = 'ocard' + (k === v ? ' sel' : '');
-  });
   updNextBtn();
 }
 
@@ -630,44 +560,13 @@ function setBystanderCPR(v) {
   updNextBtn();
 }
 
-function setPrearrestCPC(v) {
-  S.prearrestCPC = v;
-  ['1','2','34'].forEach(function(k) {
-    var id = 'cpc-' + k;
-    var val = k === '34' ? 'cpc3_4' : 'cpc' + k;
-    document.getElementById(id).className = 'ocard' + (val === v ? ' sel' : '');
-  });
-  updNextBtn();
-}
-
-function toggleComorbidity(key) {
-  if (key === 'none') {
-    S.comorbidities = [];
-    ['renal','sepsis','hepatic','malignancy'].forEach(function(k) {
-      document.getElementById('chk-' + k).className = 'chk-item';
-    });
-    document.getElementById('chk-none').className = 'chk-item selected';
-    return;
-  }
-  document.getElementById('chk-none').className = 'chk-item';
-  var idx = S.comorbidities.indexOf(key);
-  var elKey = key.replace('_failure','').replace('_','-');
-  if (idx >= 0) {
-    S.comorbidities.splice(idx, 1);
-    document.getElementById('chk-' + elKey).className = 'chk-item';
-  } else {
-    S.comorbidities.push(key);
-    document.getElementById('chk-' + elKey).className = 'chk-item selected';
-  }
-}
-
 // ── Input setters — Step 1 ─────────────────────────────────────────────────
 function setNoFlow(v) {
   S.noFlowTime = v;
   document.getElementById('nf-val').textContent = v;
   document.getElementById('nf-input').value = v;
   var pct = (v / 30 * 100).toFixed(1);
-  document.querySelector('#step-2 .inp-slider').style.background =
+  document.querySelector('#step-1 .inp-slider').style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
 
@@ -676,7 +575,7 @@ function setLowFlow(v) {
   document.getElementById('lf-val').textContent = v;
   document.getElementById('lf-input').value = v;
   var pct = (v / 90 * 100).toFixed(1);
-  var sliders = document.querySelectorAll('#step-2 .inp-slider');
+  var sliders = document.querySelectorAll('#step-1 .inp-slider');
   if (sliders[1]) sliders[1].style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
@@ -686,7 +585,7 @@ function setEpi(v) {
   document.getElementById('epi-val').textContent = v;
   document.getElementById('epi-input').value = v;
   var pct = (v / 20 * 100).toFixed(1);
-  var sliders = document.querySelectorAll('#step-2 .inp-slider');
+  var sliders = document.querySelectorAll('#step-1 .inp-slider');
   if (sliders[2]) sliders[2].style.background =
     'linear-gradient(to right,var(--text) 0%,var(--text) ' + pct + '%,var(--border) ' + pct + '%,var(--border) 100%)';
 }
@@ -838,16 +737,15 @@ function renderResults(results) {
 function newCase() {
   document.getElementById('results-wrap').innerHTML = '';
   Object.assign(S, {
-    initialRhythm: null, initialRhythmSubtype: null, refractoryVF: false,
-    witnessed: null, location: null, bystanderCPR: null, prearrestCPC: null,
-    comorbidities: [], noFlowTime: 0, lowFlowTime: 0, epinephrineDose: 0,
+    initialRhythm: null, refractoryVF: false,
+    witnessed: null, location: null, bystanderCPR: null,
+    noFlowTime: 0, lowFlowTime: 0, epinephrineDose: 0,
     changingRhythms: null, haemStatus: null, gcsMotor: null, pupilsReactive: null,
     stemiEcg: null, lvef: 'unknown', ph: null, lactate: null,
     creatinine: null, paco2: null
   });
   document.querySelectorAll('.ocard').forEach(function(el) { el.className = 'ocard'; });
   document.querySelectorAll('.tog').forEach(function(el) { el.className = 'tog'; });
-  document.querySelectorAll('.chk-item').forEach(function(el) { el.className = 'chk-item'; });
   document.querySelectorAll('.inp-field').forEach(function(el) { el.value = ''; });
   document.getElementById('ef-unk').className = 'ocard sel';
   showStep(0);

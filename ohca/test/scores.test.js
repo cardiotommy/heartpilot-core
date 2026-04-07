@@ -103,51 +103,6 @@ test('MIRACLE2: epi 0mg = 0 pts, any epi = +2 pts', function() {
   assert.strictEqual(s1 - s0, 2);
 });
 
-// ── CASPRI ────────────────────────────────────────────────────────────────────
-console.log('\nCASPRI Score');
-
-test('CASPRI: high-risk case (asystole, elderly, long downtime, comorbidities)', function() {
-  var r = OhcaScores.caspri({
-    age: 80, witnessed: false, initialRhythm: 'non_shockable',
-    initialRhythmSubtype: 'asystole', prearrestCPC: 'cpc2',
-    lowFlowTime: 30, comorbidities: ['renal_failure']
-  });
-  assert.strictEqual(r.tier, 'high');
-  // age>=80=4, unwitnessed asystole=7, cpc2=2, lowFlow>=30=8, monitored=3, renal=2 → 26
-  assert.strictEqual(r.score, 26);
-});
-
-test('CASPRI: low-risk case (witnessed VF, young, short downtime)', function() {
-  var r = OhcaScores.caspri({
-    age: 50, witnessed: true, initialRhythm: 'shockable',
-    initialRhythmSubtype: null, prearrestCPC: 'cpc1',
-    lowFlowTime: 3, comorbidities: []
-  });
-  assert.strictEqual(r.tier, 'low');
-  // age<60=0, witnessed VF=0, cpc1=0, lowFlow<5=0, monitored=3 → 3
-  assert.strictEqual(r.score, 3);
-});
-
-test('CASPRI: comorbidity scoring uses highest category only', function() {
-  var base = { age: 60, witnessed: true, initialRhythm: 'shockable',
-               initialRhythmSubtype: null, prearrestCPC: 'cpc1',
-               lowFlowTime: 3 };
-  var r1 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['renal_failure'] }));
-  var r2 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['hepatic_failure'] }));
-  var r3 = OhcaScores.caspri(Object.assign({}, base, { comorbidities: ['renal_failure', 'hepatic_failure'] }));
-  assert.strictEqual(r1.score - r2.score, -2); // renal=2, hepatic=4
-  assert.strictEqual(r3.score, r2.score);       // both present → use highest (4)
-});
-
-test('CASPRI: result has caveat field', function() {
-  var r = OhcaScores.caspri({
-    age: 60, witnessed: true, initialRhythm: 'shockable',
-    initialRhythmSubtype: null, prearrestCPC: 'cpc1',
-    lowFlowTime: 5, comorbidities: []
-  });
-  assert.ok(typeof r.caveat === 'string' && r.caveat.length > 0);
-});
-
 // ── TTM Risk Score ─────────────────────────────────────────────────────────────
 console.log('\nTTM Risk Score');
 
@@ -196,21 +151,20 @@ test('OHCA: result structure correct', function() {
 // ── calculateAll ──────────────────────────────────────────────────────────────
 console.log('\ncalculateAll');
 
-test('calculateAll: returns array of 5 results', function() {
+test('calculateAll: returns array of 4 results', function() {
   var results = OhcaScores.calculateAll({
     age: 65, location: 'home', initialRhythm: 'non_shockable',
-    initialRhythmSubtype: 'pea', witnessed: false, bystanderCPR: false,
-    refractoryVF: false, changingRhythms: true, prearrestCPC: 'cpc1',
-    comorbidities: [], noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 2,
+    witnessed: false, bystanderCPR: false,
+    refractoryVF: false, changingRhythms: true,
+    noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 2,
     pupilsReactive: false, gcsMotor: 1, stemiEcg: 'none', lvef: 'unknown',
-    haemStatus: 'stable', ph: 7.25, lactate: 5.0, glucose: 8.0,
+    haemStatus: 'stable', ph: 7.25, lactate: 5.0,
     creatinine: 110, paco2: 4.2
   });
-  assert.strictEqual(results.length, 5);
+  assert.strictEqual(results.length, 4);
   var ids = results.map(function(r) { return r.id; });
   assert.ok(ids.indexOf('cahp') >= 0);
   assert.ok(ids.indexOf('miracle2') >= 0);
-  assert.ok(ids.indexOf('caspri') >= 0);
   assert.ok(ids.indexOf('ttm') >= 0);
   assert.ok(ids.indexOf('ohca') >= 0);
 });
@@ -245,14 +199,6 @@ test('MIRACLE2: refractory VF (shockable + all-favourable) = low', function() {
   assert.strictEqual(r.tier, 'low');
 });
 
-test('CASPRI: CPC3-4 adds 9 points', function() {
-  var base = { age: 50, witnessed: true, initialRhythm: 'shockable',
-               initialRhythmSubtype: null, lowFlowTime: 3, comorbidities: [] };
-  var r1 = OhcaScores.caspri(Object.assign({}, base, { prearrestCPC: 'cpc1' }));
-  var r2 = OhcaScores.caspri(Object.assign({}, base, { prearrestCPC: 'cpc3_4' }));
-  assert.strictEqual(r2.score - r1.score, 9);
-});
-
 test('OHCA: incomplete when creatinine null', function() {
   var r = OhcaScores.ohca({
     initialRhythm: 'shockable', noFlowTime: 0, lowFlowTime: 5,
@@ -264,15 +210,15 @@ test('OHCA: incomplete when creatinine null', function() {
 test('calculateAll: returns ScoreResult for each score id', function() {
   var results = OhcaScores.calculateAll({
     age: 55, location: 'public', initialRhythm: 'shockable',
-    initialRhythmSubtype: null, witnessed: true, bystanderCPR: true,
-    refractoryVF: false, changingRhythms: false, prearrestCPC: 'cpc1',
-    comorbidities: [], noFlowTime: 0, lowFlowTime: 8, epinephrineDose: 0,
+    witnessed: true, bystanderCPR: true,
+    refractoryVF: false, changingRhythms: false,
+    noFlowTime: 0, lowFlowTime: 8, epinephrineDose: 0,
     pupilsReactive: true, gcsMotor: 5, stemiEcg: 'stemi', lvef: 'gt30',
-    haemStatus: 'stable', ph: 7.38, lactate: 2.2, glucose: 7.0,
+    haemStatus: 'stable', ph: 7.38, lactate: 2.2,
     creatinine: 85, paco2: 5.0
   });
   var ids = results.map(function(r) { return r.id; }).sort();
-  assert.deepStrictEqual(ids, ['cahp','caspri','miracle2','ohca','ttm']);
+  assert.deepStrictEqual(ids, ['cahp','miracle2','ohca','ttm']);
 });
 
 // ── Summary ───────────────────────────────────────────────────────────────────
