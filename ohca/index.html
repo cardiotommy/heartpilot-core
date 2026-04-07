@@ -73,6 +73,8 @@ body.results-done{overflow:auto;height:auto;}
 .inp-field{border:1.5px solid var(--border);border-radius:7px;padding:9px 13px;font-family:var(--mono);font-size:15px;font-weight:500;background:var(--s1);color:var(--text);width:130px;transition:border-color .15s;outline:none;}
 .inp-field:focus{border-color:var(--accent);}
 .inp-hint{font-size:12px;color:var(--muted);}
+.unit-tog{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);background:var(--s1);color:var(--dim);cursor:pointer;transition:background .12s,color .12s;}
+.unit-tog:hover{background:var(--s3);color:var(--text);}
 /* Option cards */
 .ocard{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;user-select:none;transition:border-color .12s,background .12s;font-size:14px;}
 .ocard:hover{border-color:var(--border2);background:var(--s3);}
@@ -419,15 +421,11 @@ body.results-done{overflow:auto;height:auto;}
         </div>
 
         <div class="inp-group">
-          <div class="inp-label">Glucose (mmol/L)</div>
-          <div class="inp-row">
-            <input class="inp-field" id="gluc-input" type="number" min="2" max="30" step="0.1"
-              placeholder="6.0" oninput="setGlucose(+this.value)">
+          <div class="inp-label" style="display:flex;align-items:center;gap:8px;">
+            Creatinine (<span id="creat-unit-lbl">µmol/L</span>)
+            <button class="unit-tog" id="creat-unit-btn" onclick="toggleCreatUnit()">switch to mg/dL</button>
+            <span style="color:var(--muted);font-weight:400;">optional</span>
           </div>
-        </div>
-
-        <div class="inp-group">
-          <div class="inp-label">Creatinine (µmol/L) <span style="color:var(--muted);font-weight:400;">optional</span></div>
           <div class="inp-row">
             <input class="inp-field" id="creat-input" type="number" min="0" max="2000" step="1"
               placeholder="—" oninput="setCreatinine(+this.value || null)">
@@ -489,7 +487,6 @@ var S = {
   lvef: 'unknown',
   ph: null,
   lactate: null,
-  glucose: null,
   creatinine: null,
   paco2: null,
 };
@@ -511,7 +508,7 @@ var STEPS = [
            S.pupilsReactive !== null && S.stemiEcg !== null;
   }},
   { label: 'Labs',       required: function() {
-    return S.ph !== null && S.lactate !== null && S.glucose !== null;
+    return S.ph !== null && S.lactate !== null;
   }},
   { label: 'Review',     required: function() { return true; }},
 ];
@@ -750,12 +747,36 @@ function setLactate(v) {
   S.lactate = (v >= 0 && v <= 25) ? v : null;
   updNextBtn();
 }
-function setGlucose(v) {
-  S.glucose = (v >= 2 && v <= 30) ? v : null;
-  updNextBtn();
-}
+var creatinineUnit = 'umol'; // 'umol' (µmol/L) | 'mgdl' (mg/dL)
+var CREAT_FACTOR = 88.4;    // 1 mg/dL = 88.4 µmol/L
+
 function setCreatinine(v) {
-  S.creatinine = (v > 0) ? v : null;
+  if (!v || v <= 0) { S.creatinine = null; return; }
+  S.creatinine = creatinineUnit === 'mgdl' ? Math.round(v * CREAT_FACTOR) : v;
+}
+
+function toggleCreatUnit() {
+  var input = document.getElementById('creat-input');
+  var lbl   = document.getElementById('creat-unit-lbl');
+  var btn   = document.getElementById('creat-unit-btn');
+  var cur   = parseFloat(input.value);
+
+  if (creatinineUnit === 'umol') {
+    creatinineUnit = 'mgdl';
+    lbl.textContent = 'mg/dL';
+    btn.textContent = 'switch to \u00b5mol/L';
+    input.setAttribute('max', '22.6');
+    input.setAttribute('step', '0.01');
+    if (cur > 0) input.value = Math.round(cur / CREAT_FACTOR * 100) / 100;
+  } else {
+    creatinineUnit = 'umol';
+    lbl.textContent = '\u00b5mol/L';
+    btn.textContent = 'switch to mg/dL';
+    input.setAttribute('max', '2000');
+    input.setAttribute('step', '1');
+    if (cur > 0) input.value = Math.round(cur * CREAT_FACTOR);
+  }
+  setCreatinine(parseFloat(input.value) || null);
 }
 function setPaCO2(v) {
   S.paco2 = (v > 0) ? v : null;
@@ -821,7 +842,7 @@ function newCase() {
     witnessed: null, location: null, bystanderCPR: null, prearrestCPC: null,
     comorbidities: [], noFlowTime: 0, lowFlowTime: 0, epinephrineDose: 0,
     changingRhythms: null, haemStatus: null, gcsMotor: null, pupilsReactive: null,
-    stemiEcg: null, lvef: 'unknown', ph: null, lactate: null, glucose: null,
+    stemiEcg: null, lvef: 'unknown', ph: null, lactate: null,
     creatinine: null, paco2: null
   });
   document.querySelectorAll('.ocard').forEach(function(el) { el.className = 'ocard'; });
