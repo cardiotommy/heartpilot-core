@@ -847,7 +847,7 @@ function renderResults(results) {
       : r.tier;
     var colour = TIER_COLOUR[visualTier] || TIER_COLOUR.incomplete;
     var scoreDisplay = r.incomplete ? '\u2014'
-      : r.id === 'ohca' ? r.score + '%'
+      : r.id === 'ohca' ? r.probability + '%'
       : r.score;
 
     var riskText = r.incomplete ? r.incompleteReason : (r.narrative || '');

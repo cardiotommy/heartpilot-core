@@ -230,12 +230,12 @@ var OhcaScores = (function () {
 
     score = Math.round(score * 10) / 10;
 
-    // Convert to probability of poor prognosis (%)
-    var pPoorPct = 104.2578 / (1 + 3.363926 * Math.exp(-0.067359 * score));
-    // Clamp to [0, 100]
-    pPoorPct = Math.max(0, Math.min(100, pPoorPct));
+    // Convert to probability of poor prognosis using Adrie 2006 logit equation
+    // Logit = −0.739 + (0.0936 × score); p_poor = e^Logit / (1 + e^Logit)
+    var logit = -0.739 + (0.0936 * score);
+    var pPoor = Math.exp(logit) / (1 + Math.exp(logit));
 
-    var pFavourable = Math.round((1 - pPoorPct / 100) * 100);  // % favourable outcome
+    var pFavourable = Math.round((1 - pPoor) * 100);  // % favourable outcome
 
     var tier;
     if (pFavourable >= 50)      tier = 'high';
