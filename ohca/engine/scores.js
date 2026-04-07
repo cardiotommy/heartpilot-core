@@ -253,6 +253,49 @@ var OhcaScores = (function () {
     };
   }
 
+  // ── NULL-PLEASE ──────────────────────────────────────────────────────────────
+  // Ahmad et al., Resuscitation 2016;106:e83. doi:10.1016/j.resuscitation.2016.07.201
+  // Validated externally by Lumley et al. (N=700, C-stat 0.88).
+  // Futility score predicting in-hospital mortality after OHCA.
+  // 2 pts each: non-shockable rhythm, unwitnessed, low-flow >30 min, no bystander CPR.
+  // 1 pt each:  pH <7.2, lactate >7.0, ESRD on dialysis, age ≥85, still resuscitating, extracardiac cause.
+  // Tiers: ≤2 low · 3–4 intermediate · ≥5 high.
+
+  function nullplease(inputs) {
+    var score = 0;
+
+    // 2-point criteria
+    if (inputs.initialRhythm === 'non_shockable') score += 2;  // N: non-shockable
+    if (inputs.witnessed === false)               score += 2;  // U: unwitnessed
+    if ((inputs.lowFlowTime || 0) > 30)           score += 2;  // L: CPR duration >30 min
+    if (inputs.bystanderCPR === false)            score += 2;  // L: no bystander CPR (no-flow)
+
+    // 1-point criteria
+    if (inputs.ph     !== null && inputs.ph     < 7.2) score += 1;  // P: pH <7.2
+    if (inputs.lactate !== null && inputs.lactate > 7.0) score += 1; // L: lactate >7.0
+    if (inputs.esrd)               score += 1;  // E: end-stage renal failure on dialysis
+    if (inputs.age >= 85)          score += 1;  // A: age ≥85
+    if (inputs.stillResuscitation) score += 1;  // S: still resuscitating on arrival
+    if (inputs.extracardiacCause)  score += 1;  // E: extracardiac cause
+
+    var tier  = score <= 2 ? 'low' : score <= 4 ? 'intermediate' : 'high';
+    var label = tier === 'low' ? 'Low Risk' : tier === 'intermediate' ? 'Intermediate Risk' : 'High Risk';
+
+    var npNarrative = {
+      low:          'Score \u22642 \u2014 70.9% probability of survival to hospital discharge',
+      intermediate: 'Score 3\u20134 \u2014 90.6\u201393% predicted in-hospital mortality',
+      high:         'Score \u22655 \u2014 >94% predicted in-hospital mortality'
+    };
+
+    return {
+      id: 'nullplease', name: 'NULL-PLEASE',
+      score: score, tier: tier, label: label,
+      narrative: npNarrative[tier],
+      reference: { authors: 'Ahmad et al.', journal: 'Resuscitation', year: 2016 },
+      incomplete: false, incompleteReason: null
+    };
+  }
+
   // ── calculateAll ─────────────────────────────────────────────────────────────
 
   function calculateAll(inputs) {
@@ -261,6 +304,7 @@ var OhcaScores = (function () {
       miracle2(inputs),
       ttm(inputs),
       ohca(inputs),
+      nullplease(inputs),
     ];
   }
 
@@ -271,6 +315,7 @@ var OhcaScores = (function () {
     miracle2:     miracle2,
     ttm:          ttm,
     ohca:         ohca,
+    nullplease:   nullplease,
     calculateAll: calculateAll,
   };
 

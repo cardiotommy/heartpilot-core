@@ -151,17 +151,17 @@ test('OHCA: result structure correct', function() {
 // ── calculateAll ──────────────────────────────────────────────────────────────
 console.log('\ncalculateAll');
 
-test('calculateAll: returns array of 4 results', function() {
+test('calculateAll: returns array of 5 results', function() {
   var results = OhcaScores.calculateAll({
     age: 65, location: 'home', initialRhythm: 'non_shockable',
-    witnessed: false, bystanderCPR: false,
+    witnessed: false, bystanderCPR: false, extracardiacCause: false,
     refractoryVF: false, changingRhythms: true,
     noFlowTime: 5, lowFlowTime: 20, epinephrineDose: 2,
     pupilsReactive: false, gcsMotor: 1, stemiEcg: 'none', lvef: 'unknown',
-    haemStatus: 'stable', ph: 7.25, lactate: 5.0,
-    creatinine: 110, paco2: 4.2
+    haemStatus: 'stable', stillResuscitation: false, esrd: false,
+    ph: 7.25, lactate: 5.0, creatinine: 110, paco2: 4.2
   });
-  assert.strictEqual(results.length, 4);
+  assert.strictEqual(results.length, 5);
   var ids = results.map(function(r) { return r.id; });
   assert.ok(ids.indexOf('cahp') >= 0);
   assert.ok(ids.indexOf('miracle2') >= 0);
@@ -210,15 +210,66 @@ test('OHCA: incomplete when creatinine null', function() {
 test('calculateAll: returns ScoreResult for each score id', function() {
   var results = OhcaScores.calculateAll({
     age: 55, location: 'public', initialRhythm: 'shockable',
-    witnessed: true, bystanderCPR: true,
+    witnessed: true, bystanderCPR: true, extracardiacCause: false,
     refractoryVF: false, changingRhythms: false,
     noFlowTime: 0, lowFlowTime: 8, epinephrineDose: 0,
     pupilsReactive: true, gcsMotor: 5, stemiEcg: 'stemi', lvef: 'gt30',
-    haemStatus: 'stable', ph: 7.38, lactate: 2.2,
-    creatinine: 85, paco2: 5.0
+    haemStatus: 'stable', stillResuscitation: false, esrd: false,
+    ph: 7.38, lactate: 2.2, creatinine: 85, paco2: 5.0
   });
   var ids = results.map(function(r) { return r.id; }).sort();
-  assert.deepStrictEqual(ids, ['cahp','miracle2','ohca','ttm']);
+  assert.deepStrictEqual(ids, ['cahp','miracle2','nullplease','ohca','ttm']);
+});
+
+// ── NULL-PLEASE ───────────────────────────────────────────────────────────────
+console.log('\nNULL-PLEASE Score');
+
+test('NULL-PLEASE: high-risk case scores correctly', function() {
+  // Non-shockable(2) + unwitnessed(2) + low-flow>30(2) + no bystander CPR(2)
+  // + pH<7.2(1) + lactate>7(1) + age>=85(1) + still resus(1) + extracardiac(1) = 13
+  var r = OhcaScores.nullplease({
+    initialRhythm: 'non_shockable', witnessed: false, bystanderCPR: false,
+    lowFlowTime: 35, ph: 7.10, lactate: 8.0, esrd: false,
+    age: 87, stillResuscitation: true, extracardiacCause: true
+  });
+  assert.strictEqual(r.score, 13);
+  assert.strictEqual(r.tier, 'high');
+});
+
+test('NULL-PLEASE: low-risk case scores correctly', function() {
+  // Shockable(0) + witnessed(0) + low-flow<=30(0) + bystander CPR(0)
+  // + pH>=7.2(0) + lactate<=7(0) + age<85(0) + no still resus(0) + no extracardiac(0) = 0
+  var r = OhcaScores.nullplease({
+    initialRhythm: 'shockable', witnessed: true, bystanderCPR: true,
+    lowFlowTime: 15, ph: 7.38, lactate: 3.0, esrd: false,
+    age: 60, stillResuscitation: false, extracardiacCause: false
+  });
+  assert.strictEqual(r.score, 0);
+  assert.strictEqual(r.tier, 'low');
+});
+
+test('NULL-PLEASE: threshold case score 3 is intermediate', function() {
+  // Non-shockable(2) + unwitnessed(2) = 4 → but let's do score=3
+  // Non-shockable(2) + no bystander CPR(2)... that's 4
+  // Let me do: unwitnessed(2) + pH<7.2(1) = 3
+  var r = OhcaScores.nullplease({
+    initialRhythm: 'shockable', witnessed: false, bystanderCPR: true,
+    lowFlowTime: 10, ph: 7.15, lactate: 2.0, esrd: false,
+    age: 60, stillResuscitation: false, extracardiacCause: false
+  });
+  assert.strictEqual(r.score, 3);
+  assert.strictEqual(r.tier, 'intermediate');
+});
+
+test('NULL-PLEASE: ESRD adds 1 point', function() {
+  var base = {
+    initialRhythm: 'shockable', witnessed: true, bystanderCPR: true,
+    lowFlowTime: 10, ph: 7.38, lactate: 2.0, age: 60,
+    stillResuscitation: false, extracardiacCause: false
+  };
+  var r1 = OhcaScores.nullplease(Object.assign({}, base, { esrd: false }));
+  var r2 = OhcaScores.nullplease(Object.assign({}, base, { esrd: true }));
+  assert.strictEqual(r2.score - r1.score, 1);
 });
 
 // ── Summary ───────────────────────────────────────────────────────────────────

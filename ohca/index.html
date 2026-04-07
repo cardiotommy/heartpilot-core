@@ -247,6 +247,15 @@ body.results-done{overflow:auto;height:auto;}
           </div>
         </div>
 
+        <div class="inp-group">
+          <div class="inp-label">Extracardiac Cause</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Non-cardiac cause identified (e.g. trauma, pulmonary embolism, cerebrovascular)</div>
+          <div class="tog-row">
+            <button class="tog" id="extra-y" onclick="setExtracardiacCause(true)">Yes</button>
+            <button class="tog" id="extra-n" onclick="setExtracardiacCause(false)">No / Unknown</button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Step 1: Resuscitation -->
@@ -359,6 +368,23 @@ body.results-done{overflow:auto;height:auto;}
             <button class="ocard sel" id="ef-unk" onclick="setLVEF('unknown')">Not assessed</button>
           </div>
         </div>
+
+        <div class="inp-group">
+          <div class="inp-label">Still Resuscitating on Arrival</div>
+          <div class="inp-hint" style="font-size:12px;margin-top:-4px;">Ongoing CPR on arrival to ED or catheterisation laboratory</div>
+          <div class="tog-row">
+            <button class="tog" id="stilr-y" onclick="setStillResuscitation(true)">Yes</button>
+            <button class="tog" id="stilr-n" onclick="setStillResuscitation(false)">No — ROSC achieved prior to arrival</button>
+          </div>
+        </div>
+
+        <div class="inp-group">
+          <div class="inp-label">End-stage Renal Disease on Dialysis</div>
+          <div class="tog-row">
+            <button class="tog" id="esrd-y" onclick="setESRD(true)">Yes</button>
+            <button class="tog" id="esrd-n" onclick="setESRD(false)">No</button>
+          </div>
+        </div>
       </div>
 
       <!-- Step 4: Labs —— last data-entry step -->
@@ -440,6 +466,7 @@ var S = {
   witnessed: null,
   location: null,
   bystanderCPR: null,
+  extracardiacCause: null,
   noFlowTime: 0,
   lowFlowTime: 0,
   epinephrineDose: 0,
@@ -449,6 +476,8 @@ var S = {
   pupilsReactive: null,
   stemiEcg: null,
   lvef: 'unknown',
+  stillResuscitation: null,
+  esrd: null,
   ph: null,
   lactate: null,
   creatinine: null,
@@ -458,14 +487,16 @@ var S = {
 var STEPS = [
   { label: 'Arrest',     required: function() {
     return S.initialRhythm !== null && S.witnessed !== null &&
-           S.location !== null && S.bystanderCPR !== null;
+           S.location !== null && S.bystanderCPR !== null &&
+           S.extracardiacCause !== null;
   }},
   { label: 'Resus',      required: function() {
     return S.changingRhythms !== null;
   }},
   { label: 'Arrival',    required: function() {
     return S.haemStatus !== null && S.gcsMotor !== null &&
-           S.pupilsReactive !== null && S.stemiEcg !== null;
+           S.pupilsReactive !== null && S.stemiEcg !== null &&
+           S.stillResuscitation !== null && S.esrd !== null;
   }},
   { label: 'Labs',       required: function() {
     return S.ph !== null && S.lactate !== null;
@@ -579,6 +610,13 @@ function setBystanderCPR(v) {
   updNextBtn();
 }
 
+function setExtracardiacCause(v) {
+  S.extracardiacCause = v;
+  document.getElementById('extra-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('extra-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
 // ── Input setters — Step 1 ─────────────────────────────────────────────────
 function setNoFlow(v) {
   S.noFlowTime = v;
@@ -654,6 +692,20 @@ function setLVEF(v) {
     var val = k === 'unk' ? 'unknown' : k;
     document.getElementById('ef-' + k).className = 'ocard' + (val === v ? ' sel' : '');
   });
+}
+
+function setStillResuscitation(v) {
+  S.stillResuscitation = v;
+  document.getElementById('stilr-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('stilr-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
+}
+
+function setESRD(v) {
+  S.esrd = v;
+  document.getElementById('esrd-y').className = 'tog' + (v ? ' sy' : '');
+  document.getElementById('esrd-n').className = 'tog' + (!v ? ' sn' : '');
+  updNextBtn();
 }
 
 // ── Input setters — Step 3 ─────────────────────────────────────────────────
@@ -825,11 +877,11 @@ function newCase() {
   document.getElementById('results-wrap').innerHTML = '';
   Object.assign(S, {
     initialRhythm: null, refractoryVF: false,
-    witnessed: null, location: null, bystanderCPR: null,
+    witnessed: null, location: null, bystanderCPR: null, extracardiacCause: null,
     noFlowTime: 0, lowFlowTime: 0, epinephrineDose: 0,
     changingRhythms: null, haemStatus: null, gcsMotor: null, pupilsReactive: null,
-    stemiEcg: null, lvef: 'unknown', ph: null, lactate: null,
-    creatinine: null, paco2: null
+    stemiEcg: null, lvef: 'unknown', stillResuscitation: null, esrd: null,
+    ph: null, lactate: null, creatinine: null, paco2: null
   });
   document.querySelectorAll('.ocard').forEach(function(el) { el.className = 'ocard'; });
   document.querySelectorAll('.tog').forEach(function(el) { el.className = 'tog'; });
