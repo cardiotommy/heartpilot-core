@@ -111,8 +111,24 @@ body.results-done{overflow:auto;height:auto;}
 .inp-val:focus{border-color:var(--accent);}
 .slider-hint{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;}
 /* Results step */
-.step-results{max-width:720px;width:100%;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.review-wrap{max-width:720px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+.step-results{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .rc:last-child:nth-child(odd){grid-column:span 2;}
+/* Summary card */
+.summary-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-sm);}
+.sum-header{display:flex;align-items:center;justify-content:space-between;}
+.sum-title{font-size:13px;font-weight:700;color:var(--text);}
+.sum-subtitle{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.sum-tally-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.sum-tally-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.sum-chip{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:10px;}
+.sum-chip.high{background:var(--redg);color:var(--red);}
+.sum-chip.intermediate{background:var(--amberg);color:var(--amber);}
+.sum-chip.low{background:var(--greeng);color:var(--green);}
+.sum-chip.incomplete{background:var(--s3);color:var(--muted);}
+.sum-body{font-size:13px;color:var(--dim);line-height:1.7;padding:12px 14px;background:var(--s2);border-radius:8px;}
+.sum-body strong{color:var(--text);font-weight:600;}
+.sum-ref{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:10px;border-top:1px solid var(--border);}
 /* Score badges */
 .score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;}
 .score-badge.low{background:var(--greeng);color:var(--green);}
@@ -393,7 +409,10 @@ body.results-done{overflow:auto;height:auto;}
 
       <!-- Step 4: Review -->
       <div class="step" id="step-4">
-        <div class="step-results" id="results-wrap"></div>
+        <div class="review-wrap">
+          <div id="summary-wrap"></div>
+          <div class="step-results" id="results-wrap"></div>
+        </div>
       </div>
 
     </div><!-- wizard-scroll -->
@@ -696,9 +715,72 @@ var h = function(s) {
 // ── Analysis ───────────────────────────────────────────────────────────────
 function runAnalysis() {
   var results = OhcaScores.calculateAll(S);
+  renderSummary(results);
   renderResults(results);
   var scroll = document.querySelector('.wizard-scroll');
   if (scroll) scroll.scrollTop = 0;
+}
+
+// ── Summary card ────────────────────────────────────────────────────────────
+function renderSummary(results) {
+  var complete = results.filter(function(r) { return !r.incomplete; });
+
+  // Normalise all scores to consistent neurological risk direction:
+  // OHCA tier is inverted (high=favourable=low risk; low=unfavourable=high risk)
+  var tally = { high: 0, intermediate: 0, low: 0 };
+  complete.forEach(function(r) {
+    var risk = r.id === 'ohca'
+      ? (r.tier === 'high' ? 'low' : r.tier === 'low' ? 'high' : 'intermediate')
+      : r.tier;
+    tally[risk]++;
+  });
+
+  // Tally chips
+  var chips = '';
+  if (tally.high)         chips += '<span class="sum-chip high">' + tally.high + ' High Risk</span>';
+  if (tally.intermediate) chips += '<span class="sum-chip intermediate">' + tally.intermediate + ' Intermediate</span>';
+  if (tally.low)          chips += '<span class="sum-chip low">' + tally.low + ' Low Risk</span>';
+  var incomplete = results.length - complete.length;
+  if (incomplete) chips += '<span class="sum-chip incomplete">' + incomplete + ' Incomplete</span>';
+
+  // Angiography consideration — conditional on post-ROSC ECG
+  var angio = '';
+  if (S.stemiEcg === 'stemi') {
+    angio = '<strong>STEMI on post-ROSC ECG.</strong> Current evidence supports early coronary angiography '
+      + 'in patients with OHCA and STEMI who achieve ROSC. The neurological risk profile above should inform '
+      + 'goals-of-care discussions and the intensity of intervention, particularly where prognosis is uncertain. '
+      + 'Final decisions should integrate haemodynamic stability, clinical trajectory, and multidisciplinary judgement.';
+  } else if (S.stemiEcg === 'lbbb') {
+    angio = '<strong>New LBBB on post-ROSC ECG.</strong> New LBBB may represent an equivalent indication to STEMI '
+      + 'in the context of OHCA; early angiography is reasonable. Neurological prognosis and haemodynamic status '
+      + 'should be considered alongside ECG findings in determining procedural timing.';
+  } else if (S.stemiEcg === 'none') {
+    angio = '<strong>No STEMI on post-ROSC ECG.</strong> Immediate coronary angiography has not demonstrated a '
+      + 'mortality benefit in OHCA without ST-elevation (COACT 2019, TOMAHAWK 2021). Timing of angiography should '
+      + 'be individualised, informed by clinical stability and neurological prognosis.';
+  }
+
+  var considerationHtml = angio
+    ? '<div class="sum-body">' + angio + '<br><br>'
+      + 'These prognostic scores reflect early neurological outcome probability and should inform — not determine — '
+      + 'goals-of-care and treatment intensity decisions. They are not validated as sole criteria for withdrawal of care.'
+      + '</div>'
+    : '<div class="sum-body">'
+      + 'These prognostic scores reflect early neurological outcome probability and should inform — not determine — '
+      + 'goals-of-care and treatment intensity decisions. They are not validated as sole criteria for withdrawal of care.'
+      + '</div>';
+
+  var html = '<div class="summary-card">'
+    + '<div class="sum-header">'
+    + '<div class="sum-title">Summary</div>'
+    + '<div class="sum-subtitle">' + complete.length + '\u2009/\u2009' + results.length + ' scores complete</div>'
+    + '</div>'
+    + '<div class="sum-tally-row"><span class="sum-tally-lbl">Risk profile</span>' + chips + '</div>'
+    + considerationHtml
+    + '<div class="sum-ref">AHA Scientific Statement \u00b7 Circulation 2024;149:e274\u2013e295 \u00b7 DOI 10.1161/CIR.0000000000001199</div>'
+    + '</div>';
+
+  document.getElementById('summary-wrap').innerHTML = html;
 }
 
 // ── Results rendering ───────────────────────────────────────────────────────────
@@ -735,6 +817,7 @@ function renderResults(results) {
 
 // ── New case ────────────────────────────────────────────────────────────────
 function newCase() {
+  document.getElementById('summary-wrap').innerHTML = '';
   document.getElementById('results-wrap').innerHTML = '';
   Object.assign(S, {
     initialRhythm: null, refractoryVF: false,
