@@ -789,7 +789,11 @@ var TIER_ORDER  = ['low', 'intermediate', 'high'];
 
 function renderResults(results) {
   var cards = results.map(function(r) {
-    var colour = TIER_COLOUR[r.tier] || TIER_COLOUR.incomplete;
+    // OHCA tier is inverted (high=favourable=low risk; low=unfavourable=high risk)
+    var visualTier = (r.id === 'ohca' && !r.incomplete)
+      ? (r.tier === 'high' ? 'low' : r.tier === 'low' ? 'high' : 'intermediate')
+      : r.tier;
+    var colour = TIER_COLOUR[visualTier] || TIER_COLOUR.incomplete;
     var scoreDisplay = r.incomplete ? '\u2014'
       : r.id === 'ohca' ? r.score + '%'
       : r.score;
@@ -798,7 +802,7 @@ function renderResults(results) {
 
     var body = '<div class="rc-name">' + h(r.name) + '</div>'
       + '<div class="rc-score-val" style="color:' + colour + '">' + h(scoreDisplay) + '</div>'
-      + '<div><span class="score-badge ' + h(r.tier) + '">' + h(r.label) + '</span></div>'
+      + '<div><span class="score-badge ' + h(visualTier) + '">' + h(r.label) + '</span></div>'
       + (riskText ? '<div class="rc-risk">' + h(riskText) + '</div>' : '')
       + '<div class="rc-ref">' + h(r.reference.authors + ' \u00b7 ' + r.reference.journal + ' ' + r.reference.year) + '</div>';
 
