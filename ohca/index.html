@@ -136,14 +136,23 @@ body.results-done{overflow:auto;height:auto;}
 .score-badge.high{background:var(--redg);color:var(--red);}
 .score-badge.incomplete{background:var(--s3);color:var(--muted);}
 /* Unified result card */
-.rc{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--s1);box-shadow:var(--shadow-sm);}
-.rc-stripe{width:4px;flex-shrink:0;}
+.rc{display:flex;border:1px solid var(--border);border-radius:12px;background:var(--s1);box-shadow:var(--shadow-sm);}
+.rc-stripe{width:4px;flex-shrink:0;border-radius:12px 0 0 12px;}
 .rc-body{flex:1;padding:20px 22px;display:flex;flex-direction:column;gap:0;min-width:0;}
 .rc-name{font-size:13px;font-weight:700;color:var(--text);letter-spacing:.01em;margin-bottom:14px;}
 .rc-score-val{font-family:var(--mono);font-size:40px;font-weight:700;line-height:1;margin-bottom:8px;}
 .rc-risk{font-size:13px;color:var(--dim);line-height:1.5;margin-top:8px;}
 .rc-ref{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:14px;padding-top:10px;border-top:1px solid var(--border);}
 .caveat-box{background:var(--amberg);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:9px 12px;font-size:12px;color:#92400e;line-height:1.6;margin-top:10px;}
+/* Score card tooltip */
+.rc{position:relative;}
+.rc-info-btn{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--s3);border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);cursor:default;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
+.rc-tooltip{position:absolute;top:36px;right:8px;width:280px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 16px;font-size:12px;line-height:1.6;color:var(--text);z-index:100;opacity:0;pointer-events:none;transition:opacity .15s ease;}
+.rc-tooltip-title{font-weight:700;font-size:12px;margin-bottom:6px;color:var(--text);}
+.rc-tooltip-body{color:var(--dim);}
+.rc-tooltip-val{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;background:var(--s3);color:var(--muted);}
+.rc:hover .rc-tooltip{opacity:1;}
+@media(max-width:640px){.rc-tooltip{width:230px;right:4px;}}
 @media(max-width:640px){
   .rc-score-val{font-size:32px;}
 }
@@ -839,6 +848,34 @@ function renderSummary(results) {
 var TIER_COLOUR = { low: '#15803d', intermediate: '#b45309', high: '#c0392b', incomplete: '#a8a49f' };
 var TIER_ORDER  = ['low', 'intermediate', 'high'];
 
+var SCORE_INFO = {
+  cahp: {
+    title: 'CAHP Score',
+    body: 'Predicts poor neurological outcome (CPC 3\u20135) at hospital discharge following OHCA. Derived from 819 patients in the Paris Sudden Death Expertise Center registry using seven admission variables. Derivation AUC 0.93; externally validated across multiple independent European cohorts (AUC 0.82\u20130.91).',
+    validation: 'Externally validated'
+  },
+  miracle2: {
+    title: 'MIRACLE\u00b2 Score',
+    body: 'Predicts poor neurological outcome (CPC 3\u20135) at 6 months post-arrest. Derived from 373 patients in the King\u2019s Out of Hospital Cardiac Arrest Registry (KOCAR), London. AUC 0.90 at derivation; validated in two independent cohorts (AUC 0.84\u20130.91) and confirmed in non-specialist centre settings.',
+    validation: 'Externally validated'
+  },
+  ttm: {
+    title: 'TTM Risk Score',
+    body: 'Predicts poor neurological outcome (CPC 3\u20135) at 6 months. Derived from the 939-patient Target Temperature Management (TTM) Trial across 36 ICUs. Incorporates 10 admission variables including PaCO\u2082. Internal AUC 0.84; externally validated in a Swiss single-centre cohort (AUC 0.81).',
+    validation: 'Limited external validation'
+  },
+  ohca: {
+    title: 'OHCA Score',
+    body: 'Predicts survival with good neurological recovery (CPC 1\u20132) at ICU admission. Derived from 130 patients in a single French ICU and prospectively validated in a 4-centre cohort (AUC 0.88). A 2022 systematic review of 16 cohorts reported a pooled C-statistic of \u22480.83. Older and generally considered less discriminating than CAHP or MIRACLE\u00b2.',
+    validation: 'Extensively validated'
+  },
+  nullplease: {
+    title: 'NULL-PLEASE',
+    body: 'A futility score predicting in-hospital mortality following OHCA. Composed of 10 binary adverse features. First described as a conference abstract; validated externally in a UK multicentre cohort of 700 patients (C-stat 0.874, 95% CI 0.848\u20130.899). Intended to support but not substitute multidisciplinary decision-making about treatment futility.',
+    validation: 'Externally validated'
+  }
+};
+
 function renderResults(results) {
   var cards = results.map(function(r) {
     // OHCA tier is inverted (high=favourable=low risk; low=unfavourable=high risk)
@@ -862,9 +899,20 @@ function renderResults(results) {
       body += '<div class="caveat-box">' + h(r.caveat) + '</div>';
     }
 
+    var info = SCORE_INFO[r.id];
+    var tooltip = info
+      ? '<div class="rc-tooltip">'
+        + '<div class="rc-tooltip-title">' + h(info.title) + '</div>'
+        + '<div class="rc-tooltip-body">' + h(info.body) + '</div>'
+        + '<span class="rc-tooltip-val">' + h(info.validation) + '</span>'
+        + '</div>'
+        + '<div class="rc-info-btn">i</div>'
+      : '';
+
     return '<div class="rc">'
       + '<div class="rc-stripe" style="background:' + colour + '"></div>'
       + '<div class="rc-body">' + body + '</div>'
+      + tooltip
       + '</div>';
   }).join('');
 
