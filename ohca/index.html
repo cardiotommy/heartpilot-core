@@ -119,7 +119,7 @@ body.results-done{overflow:auto;height:auto;}
 .sum-header{display:flex;align-items:center;justify-content:space-between;}
 .sum-title{font-size:13px;font-weight:700;color:var(--text);}
 .sum-subtitle{font-family:var(--mono);font-size:10px;color:var(--muted);}
-.sum-prose{font-size:13px;color:var(--dim);line-height:1.7;}
+.sum-prose{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .sum-chip{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:10px;}
 .sum-chip.high{background:var(--redg);color:var(--red);}
 .sum-chip.intermediate{background:var(--amberg);color:var(--amber);}
@@ -801,25 +801,15 @@ function renderSummary(results) {
 
   // Build prose summary — single sentence, no duplicate chip row
   var incomplete = results.length - complete.length;
-  var chip = {
-    high:         '<span class="sum-chip high">High Risk</span>',
-    intermediate: '<span class="sum-chip intermediate">Intermediate</span>',
-    low:          '<span class="sum-chip low">Low Risk</span>'
-  };
-  var proseParts = [];
-  if (tally.high)         proseParts.push(tally.high + '\u00a0' + chip.high);
-  if (tally.intermediate) proseParts.push(tally.intermediate + '\u00a0' + chip.intermediate);
-  if (tally.low)          proseParts.push(tally.low + '\u00a0' + chip.low);
-  var prose = complete.length + ' of ' + results.length + ' scores complete \u2014 ';
-  if (proseParts.length === 1) {
-    prose += 'all indicate ' + proseParts[0];
-  } else if (proseParts.length === 2) {
-    prose += proseParts[0] + ', ' + proseParts[1];
-  } else {
-    prose += proseParts.join(', ');
+  function tallyChip(tier, label, n) {
+    return '<span class="sum-chip ' + tier + '">' + label + '\u2002\u00d7' + n + '</span>';
   }
-  prose += '.';
-  if (incomplete) prose += ' <span class="sum-chip incomplete">' + incomplete + ' incomplete</span>.';
+  var proseParts = [];
+  if (tally.high)         proseParts.push(tallyChip('high', 'High Risk', tally.high));
+  if (tally.intermediate) proseParts.push(tallyChip('intermediate', 'Intermediate', tally.intermediate));
+  if (tally.low)          proseParts.push(tallyChip('low', 'Low Risk', tally.low));
+  if (incomplete)         proseParts.push(tallyChip('incomplete', 'Incomplete', incomplete));
+  var prose = proseParts.join(' ');
 
   // Angiography consideration — conditional on post-ROSC ECG
   var angioLabel = '', angioText = '', angioStyle = '';
