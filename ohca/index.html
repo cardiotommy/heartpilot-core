@@ -119,9 +119,7 @@ body.results-done{overflow:auto;height:auto;}
 .sum-header{display:flex;align-items:center;justify-content:space-between;}
 .sum-title{font-size:13px;font-weight:700;color:var(--text);}
 .sum-subtitle{font-family:var(--mono);font-size:10px;color:var(--muted);}
-.sum-tally-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-.sum-tally-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
-.sum-prose{font-size:13px;color:var(--dim);line-height:1.7;margin-top:10px;}
+.sum-prose{font-size:13px;color:var(--dim);line-height:1.7;}
 .sum-chip{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:10px;}
 .sum-chip.high{background:var(--redg);color:var(--red);}
 .sum-chip.intermediate{background:var(--amberg);color:var(--amber);}
@@ -801,29 +799,26 @@ function renderSummary(results) {
     tally[risk]++;
   });
 
-  // Tally chips and prose
-  var chips = '';
-  if (tally.high)         chips += '<span class="sum-chip high">' + tally.high + ' High Risk</span>';
-  if (tally.intermediate) chips += '<span class="sum-chip intermediate">' + tally.intermediate + ' Intermediate</span>';
-  if (tally.low)          chips += '<span class="sum-chip low">' + tally.low + ' Low Risk</span>';
+  // Build prose summary — single sentence, no duplicate chip row
   var incomplete = results.length - complete.length;
-  if (incomplete) chips += '<span class="sum-chip incomplete">' + incomplete + ' Incomplete</span>';
-
-  // Build prose sentence
+  var chip = {
+    high:         '<span class="sum-chip high">High Risk</span>',
+    intermediate: '<span class="sum-chip intermediate">Intermediate</span>',
+    low:          '<span class="sum-chip low">Low Risk</span>'
+  };
   var proseParts = [];
-  function sysWord(n) { return n === 1 ? '1 system' : n + ' systems'; }
-  if (tally.high)         proseParts.push('<span class="sum-chip high">' + sysWord(tally.high) + ' high risk</span>');
-  if (tally.intermediate) proseParts.push('<span class="sum-chip intermediate">' + sysWord(tally.intermediate) + ' intermediate risk</span>');
-  if (tally.low)          proseParts.push('<span class="sum-chip low">' + sysWord(tally.low) + ' low risk</span>');
-  var prose = 'Stratified as ';
+  if (tally.high)         proseParts.push(tally.high + '\u00a0' + chip.high);
+  if (tally.intermediate) proseParts.push(tally.intermediate + '\u00a0' + chip.intermediate);
+  if (tally.low)          proseParts.push(tally.low + '\u00a0' + chip.low);
+  var prose = complete.length + ' of ' + results.length + ' scores complete \u2014 ';
   if (proseParts.length === 1) {
-    prose += proseParts[0];
+    prose += 'all indicate ' + proseParts[0];
   } else if (proseParts.length === 2) {
-    prose += proseParts[0] + ' and ' + proseParts[1];
+    prose += proseParts[0] + ', ' + proseParts[1];
   } else {
-    prose += proseParts.slice(0, -1).join(', ') + ', and ' + proseParts[proseParts.length - 1];
+    prose += proseParts.join(', ');
   }
-  prose += ' across ' + complete.length + ' completed scoring ' + (complete.length === 1 ? 'system' : 'systems') + '.';
+  prose += '.';
   if (incomplete) prose += ' <span class="sum-chip incomplete">' + incomplete + ' incomplete</span>.';
 
   // Angiography consideration — conditional on post-ROSC ECG
@@ -866,7 +861,6 @@ function renderSummary(results) {
     + '<div class="sum-title">Summary</div>'
     + '<div class="sum-subtitle">' + complete.length + '\u2009/\u2009' + results.length + ' scores complete</div>'
     + '</div>'
-    + '<div class="sum-tally-row"><span class="sum-tally-lbl">Risk profile</span>' + chips + '</div>'
     + '<div class="sum-prose">' + prose + '</div>'
     + considerationHtml
     + disclaimerHtml
