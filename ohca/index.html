@@ -127,8 +127,11 @@ body.results-done{overflow:auto;height:auto;}
 .sum-chip.intermediate{background:var(--amberg);color:var(--amber);}
 .sum-chip.low{background:var(--greeng);color:var(--green);}
 .sum-chip.incomplete{background:var(--s3);color:var(--muted);}
-.sum-body{font-size:13px;color:var(--dim);line-height:1.7;padding:12px 14px;background:var(--s2);border-radius:8px;}
-.sum-body strong{color:var(--text);font-weight:600;}
+.sum-angio{border-left:3px solid var(--angio-color,var(--border2));background:var(--angio-bg,var(--s2));border-radius:0 8px 8px 0;padding:12px 16px;display:flex;flex-direction:column;gap:7px;}
+.sum-angio-label{font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--angio-color,var(--muted));}
+.sum-angio-text{font-size:13px;color:var(--dim);line-height:1.7;}
+.sum-angio-text strong{color:var(--text);font-weight:600;}
+.sum-disclaimer{font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;border-top:1px solid var(--border);padding-top:10px;margin-top:2px;}
 .sum-ref{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:10px;border-top:1px solid var(--border);}
 /* Score badges */
 .score-badge{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:10px;align-self:flex-start;}
@@ -824,31 +827,39 @@ function renderSummary(results) {
   if (incomplete) prose += ' <span class="sum-chip incomplete">' + incomplete + ' incomplete</span>.';
 
   // Angiography consideration — conditional on post-ROSC ECG
-  var angio = '';
+  var angioLabel = '', angioText = '', angioStyle = '';
   if (S.stemiEcg === 'stemi') {
-    angio = '<strong>STEMI on post-ROSC ECG.</strong> Current evidence supports early coronary angiography '
+    angioLabel = 'STEMI \u00b7 Angiography Consideration';
+    angioText  = '<strong>STEMI on post-ROSC ECG.</strong> Current evidence supports early coronary angiography '
       + 'in patients with OHCA and STEMI who achieve ROSC. The neurological risk profile above should inform '
       + 'goals-of-care discussions and the intensity of intervention, particularly where prognosis is uncertain. '
       + 'Final decisions should integrate haemodynamic stability, clinical trajectory, and multidisciplinary judgement.';
+    angioStyle = 'style="--angio-color:var(--accent);--angio-bg:var(--accentg);"';
   } else if (S.stemiEcg === 'lbbb') {
-    angio = '<strong>New LBBB on post-ROSC ECG.</strong> New LBBB may represent an equivalent indication to STEMI '
+    angioLabel = 'New LBBB \u00b7 Angiography Consideration';
+    angioText  = '<strong>New LBBB on post-ROSC ECG.</strong> New LBBB may represent an equivalent indication to STEMI '
       + 'in the context of OHCA; early angiography is reasonable. Neurological prognosis and haemodynamic status '
       + 'should be considered alongside ECG findings in determining procedural timing.';
+    angioStyle = 'style="--angio-color:var(--amber);--angio-bg:var(--amberg);"';
   } else if (S.stemiEcg === 'none') {
-    angio = '<strong>No STEMI on post-ROSC ECG.</strong> Immediate coronary angiography has not demonstrated a '
+    angioLabel = 'No STEMI \u00b7 Angiography Consideration';
+    angioText  = '<strong>No STEMI on post-ROSC ECG.</strong> Immediate coronary angiography has not demonstrated a '
       + 'mortality benefit in OHCA without ST-elevation (COACT 2019, TOMAHAWK 2021). Timing of angiography should '
       + 'be individualised, informed by clinical stability and neurological prognosis.';
+    angioStyle = '';
   }
 
-  var considerationHtml = angio
-    ? '<div class="sum-body">' + angio + '<br><br>'
-      + 'These prognostic scores reflect early neurological outcome probability and should inform — not determine — '
-      + 'goals-of-care and treatment intensity decisions. They are not validated as sole criteria for withdrawal of care.'
+  var considerationHtml = angioText
+    ? '<div class="sum-angio" ' + angioStyle + '>'
+      + '<div class="sum-angio-label">' + angioLabel + '</div>'
+      + '<div class="sum-angio-text">' + angioText + '</div>'
       + '</div>'
-    : '<div class="sum-body">'
-      + 'These prognostic scores reflect early neurological outcome probability and should inform — not determine — '
-      + 'goals-of-care and treatment intensity decisions. They are not validated as sole criteria for withdrawal of care.'
-      + '</div>';
+    : '';
+
+  var disclaimerHtml = '<div class="sum-disclaimer">'
+    + 'These prognostic scores reflect early neurological outcome probability and should inform \u2014 not determine \u2014 '
+    + 'goals-of-care and treatment intensity decisions. They are not validated as sole criteria for withdrawal of care.'
+    + '</div>';
 
   var html = '<div class="summary-card">'
     + '<div class="sum-header">'
@@ -858,6 +869,7 @@ function renderSummary(results) {
     + '<div class="sum-tally-row"><span class="sum-tally-lbl">Risk profile</span>' + chips + '</div>'
     + '<div class="sum-prose">' + prose + '</div>'
     + considerationHtml
+    + disclaimerHtml
     + '<div class="sum-ref">AHA Scientific Statement \u00b7 Circulation 2024;149:e274\u2013e295 \u00b7 DOI 10.1161/CIR.0000000000001199</div>'
     + '</div>';
 
